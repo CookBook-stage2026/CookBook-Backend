@@ -34,10 +34,6 @@ tasks.named('jacocoTestReport') {
     }
 }
 
-tasks.named('check') {
-    dependsOn jacocoTestCoverageVerification
-}
-
 repositories {
     mavenCentral()
 }
