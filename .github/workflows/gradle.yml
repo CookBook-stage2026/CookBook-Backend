@@ -27,9 +27,6 @@ jobs:
     - name: Change wrapper permissions
       run: chmod +x ./gradlew
 
-    - name: Build with Gradle Wrapper
-      run: ./gradlew build --no-daemon
-
     - name: Run tests with coverage
       run: ./gradlew test jacocoTestReport jacocoTestCoverageVerification --no-daemon
 
@@ -39,6 +36,13 @@ jobs:
       with:
         name: jacoco-html-report
         path: build/reports/jacoco/test/html/
+
+    - name: Upload JaCoCo XML report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: jacoco-xml-report
+        path: build/reports/jacoco/test/jacocoTestReport.xml
 
     - name: Add coverage report to PR
       if: github.event_name == 'pull_request'

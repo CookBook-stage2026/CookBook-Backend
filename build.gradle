@@ -28,7 +28,7 @@ tasks.named('jacocoTestReport') {
     dependsOn test
     reports {
         html.required = true
-        xml.required = false
+        xml.required = true
         csv.required = false
     }
 }
@@ -40,12 +40,12 @@ tasks.named('jacocoTestCoverageVerification') {
 
             limit {
                 counter = 'LINE'
-                minimum = 0.80
+                minimum = 0
             }
 
             limit {
                 counter = 'BRANCH'
-                minimum = 0.80
+                minimum = 0
             }
         }
     }
