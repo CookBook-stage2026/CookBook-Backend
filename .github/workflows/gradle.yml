@@ -55,3 +55,6 @@ jobs:
         min-coverage-changed-files: 0
         title: 'Code Coverage Report'
         update-comment: true
+
+    - name: Run checkstyle with Gradle
+      run: ./gradlew checkstyleMain checkstyleTest --no-daemon
