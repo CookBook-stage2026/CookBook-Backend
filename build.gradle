@@ -34,24 +34,6 @@ tasks.named('jacocoTestReport') {
     }
 }
 
-tasks.named('jacocoTestCoverageVerification') {
-    violationRules {
-        rule {
-            element = 'CLASS'
-
-            limit {
-                counter = 'LINE'
-                minimum = 0
-            }
-
-            limit {
-                counter = 'BRANCH'
-                minimum = 0
-            }
-        }
-    }
-}
-
 tasks.named('check') {
     dependsOn jacocoTestCoverageVerification
 }
