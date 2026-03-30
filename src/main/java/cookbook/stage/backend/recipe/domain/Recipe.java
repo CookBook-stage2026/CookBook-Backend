@@ -5,7 +5,6 @@ import org.jmolecules.ddd.annotation.AggregateRoot;
 import org.jmolecules.ddd.annotation.Identity;
 
 import java.util.List;
-import java.util.Map;
 
 @AggregateRoot
 public class Recipe {
@@ -15,10 +14,9 @@ public class Recipe {
     private String description;
     private int durationInMinutes;
     private List<String> steps;
-    private Map<String, IngredientAmount> ingredients;
+    private List<RecipeIngredient> ingredients;
 
-    public Recipe(RecipeId id, String name, String description, int durationInMinutes,
-                  List<String> steps, Map<String, IngredientAmount> ingredients) {
+    public Recipe(RecipeId id, String name, String description, int durationInMinutes, List<String> steps, List<RecipeIngredient> ingredients) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -27,24 +25,7 @@ public class Recipe {
         this.ingredients = ingredients;
     }
 
-    public static Recipe createRecipe(String name, String description, int durationInMinutes,
-                                      List<String> steps, Map<String, IngredientAmount> ingredients) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("A recipe must have a name");
-        }
-        if (description == null || description.isBlank()) {
-            throw new IllegalArgumentException("A recipe must have a description");
-        }
-        if (durationInMinutes <= 0) {
-            throw new IllegalArgumentException("Duration must be greater than 0");
-        }
-        if (steps == null || steps.isEmpty()) {
-            throw new IllegalArgumentException("A recipe must have at least one step");
-        }
-        if (ingredients == null || ingredients.isEmpty()) {
-            throw new IllegalArgumentException("A recipe must have at least one ingredient");
-        }
-
+    public static Recipe createRecipe(String name, String description, int durationInMinutes, List<String> steps, List<RecipeIngredient> ingredients){
         return new Recipe(RecipeId.create(), name, description, durationInMinutes, steps, ingredients);
     }
 
@@ -68,7 +49,7 @@ public class Recipe {
         return steps;
     }
 
-    public Map<String, IngredientAmount> getIngredients() {
+    public List<RecipeIngredient> getIngredients() {
         return ingredients;
     }
 }
