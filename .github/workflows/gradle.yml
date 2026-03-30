@@ -32,3 +32,6 @@ jobs:
 
     - name: Run tests with Gradle
       run: ./gradlew test --no-daemon
+
+    - name: Run checkstyle with Gradle
+      run: ./gradlew checkstyleMain checkstyleTest --no-daemon
