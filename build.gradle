@@ -70,7 +70,7 @@ checkstyle {
 
 sonar {
     properties {
-        property("sonar.projectKey", "cookbook-stage2026")
+        property("sonar.projectKey", "CookBook-stage2026_CookBook-Backend")
         property("sonar.organization", "CookBook-stage2026")
     }
 }
