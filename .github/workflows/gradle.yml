@@ -30,5 +30,24 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew build --no-daemon
 
-    - name: Run tests with Gradle
-      run: ./gradlew test --no-daemon
+    - name: Run tests with coverage
+      run: ./gradlew test jacocoTestReport jacocoTestCoverageVerification --no-daemon
+
+    - name: Upload JaCoCo HTML report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: jacoco-html-report
+        path: build/reports/jacoco/test/html/
+
+    - name: Add coverage report to PR
+      if: github.event_name == 'pull_request'
+      uses: madrapps/jacoco-report@v1.7.1
+      with:
+        paths: |
+          ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
+        token: ${{ secrets.GITHUB_TOKEN }}
+        min-coverage-overall: 80
+        min-coverage-changed-files: 30
+        title: 'Code Coverage Report'
+        update-comment: true
