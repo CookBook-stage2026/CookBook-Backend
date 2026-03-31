@@ -16,7 +16,8 @@ public class Recipe {
     private List<String> steps;
     private List<RecipeIngredient> ingredients;
 
-    public Recipe(RecipeId id, String name, String description, int durationInMinutes, List<String> steps, List<RecipeIngredient> ingredients) {
+    public Recipe(RecipeId id, String name, String description, int durationInMinutes, List<String> steps,
+                  List<RecipeIngredient> ingredients) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -25,8 +26,25 @@ public class Recipe {
         this.ingredients = ingredients;
     }
 
-    public static Recipe createRecipe(String name, String description, int durationInMinutes, List<String> steps, List<RecipeIngredient> ingredients){
-        return new Recipe(RecipeId.create(), name, description, durationInMinutes, steps, ingredients);
+    public static Recipe createRecipe(RecipeId id, String name, String description, int durationInMinutes,
+                                      List<String> steps, List<RecipeIngredient> ingredients) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("A recipe must have a name");
+        }
+        if (description == null || description.isBlank()) {
+            throw new IllegalArgumentException("A recipe must have a description");
+        }
+        if (durationInMinutes <= 0) {
+            throw new IllegalArgumentException("Duration must be greater than 0");
+        }
+        if (steps == null || steps.isEmpty()) {
+            throw new IllegalArgumentException("A recipe must have at least one step");
+        }
+        if (ingredients == null || ingredients.isEmpty()) {
+            throw new IllegalArgumentException("A recipe must have at least one ingredient");
+        }
+
+        return new Recipe(id, name, description, durationInMinutes, steps, ingredients);
     }
 
     public RecipeId getId() {
