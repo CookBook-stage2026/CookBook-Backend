@@ -47,11 +47,11 @@ public class IngredientController {
      */
     @PostMapping
     public ResponseEntity<IngredientDto> newIngredient(@Valid @RequestBody IngredientDto ingredientDto) {
-        assert Objects.requireNonNull(ingredientDto.unit()).isPresent();
-        var ingredient = ingredientService.newIngredientWithUnit(
+        var ingredient = ingredientService.createIngredient(
                 ingredientDto.name(),
                 ingredientDto.description(),
-                ingredientDto.unit());
+                ingredientDto.unit()
+        );
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ingredient);

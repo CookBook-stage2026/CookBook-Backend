@@ -22,13 +22,16 @@ public class IngredientService implements IngredientsApi {
         this.ingredientRepository = ingredientRepository;
     }
 
-    public IngredientDto newIngredientWithUnit(String name, String description, Optional<Unit> unit) {
-        return IngredientDto.fromDomain(
-                this.ingredientRepository.save(Ingredient.createIngredient(name, description, unit)));
-    }
+    public IngredientDto createIngredient(String name, String description, Unit unit) {
+        Ingredient newIngredient;
 
-    public IngredientDto newIngredientWithoutUnit(String name, String description) {
-        return IngredientDto.fromDomain(this.ingredientRepository.save(Ingredient.createIngredient(name, description)));
+        if (unit != null) {
+            newIngredient = Ingredient.createIngredient(name, description, unit);
+        } else {
+            newIngredient = Ingredient.createIngredient(name, description);
+        }
+
+        return IngredientDto.fromDomain(this.ingredientRepository.save(newIngredient));
     }
 
     public List<IngredientDto> findAll(Pageable pageable) {
