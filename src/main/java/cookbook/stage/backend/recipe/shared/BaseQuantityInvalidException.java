@@ -1,4 +1,4 @@
-package cookbook.stage.backend.recipe.domain;
+package cookbook.stage.backend.recipe.shared;
 
 public class BaseQuantityInvalidException extends RuntimeException {
     public BaseQuantityInvalidException(String message) {

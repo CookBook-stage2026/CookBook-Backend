@@ -19,5 +19,4 @@ public record IngredientId(UUID id) {
     public static IngredientId create() {
         return new IngredientId(UUID.randomUUID());
     }
-
 }

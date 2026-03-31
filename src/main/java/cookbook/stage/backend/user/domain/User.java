@@ -1,5 +1,6 @@
 package cookbook.stage.backend.user.domain;
 
+import cookbook.stage.backend.user.shared.UserId;
 import org.jmolecules.ddd.annotation.AggregateRoot;
 import org.jmolecules.ddd.annotation.Identity;
 
