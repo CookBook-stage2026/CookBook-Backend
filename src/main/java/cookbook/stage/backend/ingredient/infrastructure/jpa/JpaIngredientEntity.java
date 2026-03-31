@@ -27,6 +27,7 @@ public class JpaIngredientEntity {
     private String description;
 
     @Enumerated(EnumType.STRING)
+    @Column
     private Unit unit;
 
     public JpaIngredientEntity(UUID id, String name, String description, Unit unit) {
@@ -49,6 +50,6 @@ public class JpaIngredientEntity {
     }
 
     public Ingredient toDomain() {
-        return new Ingredient(new IngredientId(id), name, description, Optional.of(unit));
+        return new Ingredient(new IngredientId(id), name, description, Optional.ofNullable(unit));
     }
 }
