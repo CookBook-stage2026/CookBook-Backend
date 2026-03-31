@@ -1,7 +1,7 @@
 package cookbook.stage.backend.shared.api;
 
 import cookbook.stage.backend.recipe.shared.BaseQuantityInvalidException;
-import cookbook.stage.backend.shared.domain.NotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,8 +24,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ApiError>  handleNotFoundException(NotFoundException e) {
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ApiError>  handleEntityNotFoundException(EntityNotFoundException e) {
         ApiError body = new ApiError(
                 HttpStatus.NOT_FOUND.value(),
                 "Not Found",

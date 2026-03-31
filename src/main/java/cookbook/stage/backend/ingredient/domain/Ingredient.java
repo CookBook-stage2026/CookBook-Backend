@@ -7,7 +7,12 @@ import org.jmolecules.ddd.annotation.Identity;
 import java.util.Optional;
 
 @AggregateRoot
-public record Ingredient(@Identity IngredientId id, String name, String description, Optional<Unit> unit) {
+public record Ingredient(
+        @Identity IngredientId id,
+        String name,
+        String description,
+        Optional<Unit> unit
+) {
     public Ingredient {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Ingredient name cannot be null or blank!");

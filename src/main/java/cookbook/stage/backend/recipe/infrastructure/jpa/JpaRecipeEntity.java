@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -42,7 +43,7 @@ public class JpaRecipeEntity {
     private List<String> steps;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<JpaRecipeIngredientEntity> ingredients;
+    private List<JpaRecipeIngredientEntity> ingredients = new ArrayList<>();
 
     public JpaRecipeEntity(UUID id, String name, String description, int durationInMinutes, List<String> steps) {
         this.id = id;
@@ -84,6 +85,17 @@ public class JpaRecipeEntity {
                 durationInMinutes,
                 steps,
                 domainIngredients
+        );
+    }
+
+    public Recipe toDomainWithoutIngredients() {
+        return new Recipe(
+                new RecipeId(id),
+                name,
+                description,
+                durationInMinutes,
+                steps,
+                java.util.Collections.emptyList()
         );
     }
 }

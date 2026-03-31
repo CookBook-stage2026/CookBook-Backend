@@ -4,10 +4,10 @@ import cookbook.stage.backend.recipe.domain.Recipe;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
 import cookbook.stage.backend.recipe.infrastructure.jpa.JpaRecipeEntity;
 import cookbook.stage.backend.recipe.infrastructure.jpa.JpaRecipeRepository;
-import cookbook.stage.backend.recipe.shared.RecipeId;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.List;
 
 @Repository
 public class RecipeRepositoryImpl implements RecipeRepository {
@@ -24,7 +24,14 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public Optional<Recipe> findById(RecipeId id) {
-        return jpaRecipeRepository.findById(id.id()).map(JpaRecipeEntity::toDomain);
+    public List<Recipe> findAll(Pageable pageable) {
+        return jpaRecipeRepository.findAll(pageable).stream()
+                .map(JpaRecipeEntity::toDomainWithoutIngredients)
+                .toList();
+    }
+
+    @Override
+    public void deleteAll() {
+        jpaRecipeRepository.deleteAll();
     }
 }

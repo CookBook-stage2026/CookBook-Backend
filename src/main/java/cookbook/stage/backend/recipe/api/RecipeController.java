@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
+
 @RestController
 @RequestMapping("/api/v1/recipes")
 public class RecipeController {
@@ -40,6 +42,6 @@ public class RecipeController {
 
         RecipeDto recipeDto = RecipeDto.fromDomain(recipe);
 
-        return ResponseEntity.ok(recipeDto);
+        return ResponseEntity.created(URI.create("/api/v1/recipes/" + recipeDto.id())).body(recipeDto);
     }
 }

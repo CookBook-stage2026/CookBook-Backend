@@ -33,8 +33,10 @@ public class IngredientController {
      * @return List of ingredients
      */
     @GetMapping
-    public ResponseEntity<List<IngredientDto>> getAllIngredients(@RequestParam(defaultValue = "0") int page,
-                                                                 @RequestParam(defaultValue = "20") int size) {
+    public ResponseEntity<List<IngredientDto>> getAllIngredients(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(ingredientService.findAll(pageable));
     }
@@ -46,7 +48,9 @@ public class IngredientController {
      * @return whether the ingredient was successfully added
      */
     @PostMapping
-    public ResponseEntity<IngredientDto> newIngredient(@Valid @RequestBody IngredientDto ingredientDto) {
+    public ResponseEntity<IngredientDto> createIngredient(
+            @Valid @RequestBody IngredientDto ingredientDto
+    ) {
         var ingredient = ingredientService.createIngredient(
                 ingredientDto.name(),
                 ingredientDto.description(),

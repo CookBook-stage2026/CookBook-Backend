@@ -4,18 +4,15 @@ import cookbook.stage.backend.ingredient.api.dto.IngredientDto;
 import cookbook.stage.backend.ingredient.domain.Ingredient;
 import cookbook.stage.backend.ingredient.domain.IngredientRepository;
 import cookbook.stage.backend.ingredient.domain.Unit;
-import cookbook.stage.backend.ingredient.shared.IngredientId;
-import cookbook.stage.backend.ingredient.shared.IngredientsApi;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
-public class IngredientService implements IngredientsApi {
+public class IngredientService {
     private final IngredientRepository ingredientRepository;
 
     public IngredientService(IngredientRepository ingredientRepository) {
@@ -36,9 +33,5 @@ public class IngredientService implements IngredientsApi {
 
     public List<IngredientDto> findAll(Pageable pageable) {
         return this.ingredientRepository.findAll(pageable).stream().map(IngredientDto::fromDomain).toList();
-    }
-
-    public List<Ingredient> findAllById(List<IngredientId> ids) {
-        return this.ingredientRepository.findAllByIds(ids);
     }
 }
