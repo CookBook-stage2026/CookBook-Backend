@@ -16,11 +16,4 @@ public record RecipeIngredient(RecipeId recipeId, IngredientId ingredientId, boo
             throw new BaseQuantityInvalidException("Base quantity must be greater than 0!");
         }
     }
-
-    public double calculateQuantity(double multiplier) {
-        if (!isScalable) {
-            return baseQuantity;
-        }
-        return (multiplier / baseQuantity) * baseQuantity;
-    }
 }
