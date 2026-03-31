@@ -9,13 +9,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public record IngredientDto(
-        @Nullable Optional<UUID> id,
+        @Nullable UUID id,
         @NotBlank String name,
         @NotBlank String description,
-        @Nullable Optional<Unit> unit
+        @Nullable Unit unit
 ) {
     public static IngredientDto fromDomain(Ingredient ingredient) {
-        return new IngredientDto(Optional.ofNullable(ingredient.id().id()),
-                ingredient.name(), ingredient.description(), ingredient.unit());
+        return new IngredientDto(ingredient.id().id(),
+                ingredient.name(), ingredient.description(), ingredient.unit().orElse(null));
     }
 }
