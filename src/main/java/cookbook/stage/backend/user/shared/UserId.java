@@ -1,4 +1,4 @@
-package cookbook.stage.backend.user.domain;
+package cookbook.stage.backend.user.shared;
 
 import cookbook.stage.backend.shared.domain.NotFoundException;
 

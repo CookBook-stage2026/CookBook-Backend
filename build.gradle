@@ -49,6 +49,8 @@ dependencies {
     implementation 'org.springframework.modulith:spring-modulith-starter-jpa'
     implementation 'org.jmolecules.integrations:jmolecules-starter-ddd:0.33.0'
     implementation 'org.xerial:sqlite-jdbc:3.51.3.0'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.hibernate.orm:hibernate-community-dialects'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.modulith:spring-modulith-starter-test'

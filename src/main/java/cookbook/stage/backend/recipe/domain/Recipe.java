@@ -25,7 +25,7 @@ public class Recipe {
         this.ingredients = ingredients;
     }
 
-    public static Recipe createRecipe(String name, String description, int durationInMinutes, List<String> steps, List<RecipeIngredient> ingredients){
+    public static Recipe createRecipe(String name, String description, int durationInMinutes, List<String> steps, List<RecipeIngredient> ingredients) {
         return new Recipe(RecipeId.create(), name, description, durationInMinutes, steps, ingredients);
     }
 

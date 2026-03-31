@@ -3,8 +3,14 @@ package cookbook.stage.backend.ingredient.infrastructure.jpa;
 import cookbook.stage.backend.ingredient.domain.Ingredient;
 import cookbook.stage.backend.ingredient.domain.Unit;
 import cookbook.stage.backend.ingredient.shared.IngredientId;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity
@@ -31,13 +37,18 @@ public class JpaIngredientEntity {
     }
 
     protected JpaIngredientEntity() {
-    } // for JPA
+    }
 
     public static JpaIngredientEntity fromDomain(Ingredient ingredient) {
-        return new JpaIngredientEntity(ingredient.id().id(), ingredient.name(), ingredient.description(), ingredient.unit());
+        return new JpaIngredientEntity(
+                ingredient.id().id(),
+                ingredient.name(),
+                ingredient.description(),
+                ingredient.unit().orElse(null)
+        );
     }
 
     public Ingredient toDomain() {
-        return new Ingredient(new IngredientId(id), name, description, unit);
+        return new Ingredient(new IngredientId(id), name, description, Optional.of(unit));
     }
 }
