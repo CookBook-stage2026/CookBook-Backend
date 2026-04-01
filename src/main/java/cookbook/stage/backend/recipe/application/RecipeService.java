@@ -1,6 +1,5 @@
 package cookbook.stage.backend.recipe.application;
 
-import cookbook.stage.backend.recipe.api.dto.IngredientDto;
 import cookbook.stage.backend.recipe.domain.Ingredient;
 import cookbook.stage.backend.recipe.domain.Recipe;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
@@ -17,12 +16,8 @@ public class RecipeService {
     }
 
     public Recipe createRecipe(String name, String description, int durationInMinutes,
-                               List<String> steps, List<IngredientDto> ingredients) {
-        List<Ingredient> domainIngredients = ingredients.stream()
-                .map(i -> new Ingredient(i.name(), i.quantity(), i.unit()))
-                .toList();
-
-        Recipe recipe = Recipe.createRecipe(name, description, durationInMinutes, steps, domainIngredients);
+                               List<String> steps, List<Ingredient> ingredients) {
+        Recipe recipe = new Recipe(name, description, durationInMinutes, steps, ingredients);
 
         return recipeRepository.save(recipe);
     }

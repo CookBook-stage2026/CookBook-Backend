@@ -22,8 +22,8 @@ public class Recipe {
         this.ingredients = ingredients;
     }
 
-    public static Recipe createRecipe(String name, String description, int durationInMinutes,
-                                      List<String> steps, List<Ingredient> ingredients) {
+    public Recipe(String name, String description, int durationInMinutes,
+                  List<String> steps, List<Ingredient> ingredients) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("A recipe must have a name");
         }
@@ -40,7 +40,12 @@ public class Recipe {
             throw new IllegalArgumentException("A recipe must have at least one ingredient");
         }
 
-        return new Recipe(RecipeId.create(), name, description, durationInMinutes, steps, ingredients);
+        this.id = RecipeId.create();
+        this.name = name;
+        this.description = description;
+        this.durationInMinutes = durationInMinutes;
+        this.steps = steps;
+        this.ingredients = ingredients;
     }
 
     public RecipeId getId() {

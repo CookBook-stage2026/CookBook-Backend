@@ -3,15 +3,17 @@ package cookbook.stage.backend.recipe.api;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeDto;
 import cookbook.stage.backend.recipe.api.dto.RecipeDto;
 import cookbook.stage.backend.recipe.application.RecipeService;
+import cookbook.stage.backend.recipe.domain.Ingredient;
 import cookbook.stage.backend.recipe.domain.Recipe;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/recipes")
@@ -29,19 +31,22 @@ public class RecipeController {
      * @return The created recipe with its generated id
      */
     @PostMapping
-    public ResponseEntity<RecipeDto> createRecipe(
+    @ResponseStatus(HttpStatus.CREATED)
+    public RecipeDto createRecipe(
             @Valid @RequestBody CreateRecipeDto createRecipeDto
     ) {
+        List<Ingredient> ingredients = createRecipeDto.ingredients().stream()
+                .map(i -> new Ingredient(i.name(), i.quantity(), i.unit()))
+                .toList();
+
         Recipe recipe = recipeService.createRecipe(
                 createRecipeDto.name(),
                 createRecipeDto.description(),
                 createRecipeDto.durationInMinutes(),
                 createRecipeDto.steps(),
-                createRecipeDto.ingredients()
+                ingredients
         );
 
-        RecipeDto recipeDto = RecipeDto.fromDomain(recipe);
-
-        return ResponseEntity.created(URI.create("/api/v1/recipes/" + recipeDto.id())).body(recipeDto);
+        return RecipeDto.fromDomain(recipe);
     }
 }

@@ -43,10 +43,6 @@ ext {
     set('springModulithVersion', "2.0.5")
 }
 
-configurations {
-    mockitoAgent
-}
-
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.modulith:spring-modulith-starter-core'
@@ -59,7 +55,6 @@ dependencies {
     testImplementation 'org.springframework.modulith:spring-modulith-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-webmvc-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    mockitoAgent('org.mockito:mockito-core') { transitive = false }
 }
 
 dependencyManagement {
@@ -71,7 +66,6 @@ dependencyManagement {
 tasks.named('test') {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
-    jvmArgs "-javaagent:${configurations.mockitoAgent.asPath}"
 }
 
 checkstyle {
