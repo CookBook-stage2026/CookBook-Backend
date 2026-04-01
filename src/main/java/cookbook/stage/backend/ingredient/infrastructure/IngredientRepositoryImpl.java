@@ -4,10 +4,12 @@ import cookbook.stage.backend.ingredient.domain.Ingredient;
 import cookbook.stage.backend.ingredient.domain.IngredientRepository;
 import cookbook.stage.backend.ingredient.infrastructure.jpa.JpaIngredientEntity;
 import cookbook.stage.backend.ingredient.infrastructure.jpa.JpaIngredientRepository;
+import cookbook.stage.backend.ingredient.shared.IngredientId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class IngredientRepositoryImpl implements IngredientRepository {
@@ -24,6 +26,12 @@ public class IngredientRepositoryImpl implements IngredientRepository {
     public List<Ingredient> findAll(Pageable pageable) {
         return this.jpaIngredientRepository.findAll(pageable).stream()
                 .map(JpaIngredientEntity::toDomain).toList();
+    }
+
+    @Override
+    public Optional<Ingredient> findById(IngredientId id) {
+        return jpaIngredientRepository.findById(id.id())
+                .map(JpaIngredientEntity::toDomain);
     }
 
     @Override
