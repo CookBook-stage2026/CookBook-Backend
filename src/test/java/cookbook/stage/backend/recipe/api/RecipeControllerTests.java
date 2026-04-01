@@ -1,10 +1,7 @@
 package cookbook.stage.backend.recipe.api;
 
-import cookbook.stage.backend.ingredient.domain.Ingredient;
-import cookbook.stage.backend.ingredient.domain.IngredientRepository;
-import cookbook.stage.backend.ingredient.domain.Unit;
-import cookbook.stage.backend.ingredient.shared.IngredientId;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeDto;
+import cookbook.stage.backend.recipe.api.dto.IngredientDto;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
@@ -19,11 +16,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -37,8 +32,8 @@ public class RecipeControllerTests {
     private static final String DEFAULT_RECIPE_DESCRIPTION = "Test Description";
     private static final int DEFAULT_DURATION_IN_MINUTES = 60;
     private static final List<String> DEFAULT_STEPS = List.of("This is step 1", "This is step 2");
-    private static final boolean DEFAULT_SCALABLE = true;
     private static final double DEFAULT_QUANTITY = 1.0;
+    private static final String DEFAULT_UNIT = "gram";
     private static final int PAGE_SIZE = 20;
 
     @Autowired
@@ -55,18 +50,14 @@ public class RecipeControllerTests {
         recipeRepository.deleteAll();
     }
 
-    private Ingredient createAndSaveIngredient(String name, String description, Unit unit) {
-        Ingredient ingredient = new Ingredient(
-                IngredientId.create(),
-                name,
-                description,
-                Optional.of(unit)
+    private Map<String, IngredientDto> defaultIngredients() {
+        return Map.of(
+                "Flour", new IngredientDto("Flour", DEFAULT_QUANTITY, DEFAULT_UNIT),
+                "Eggs", new IngredientDto("Eggs", 2.0, null)
         );
-        ingredientRepository.save(ingredient);
-        return ingredient;
     }
 
-    private CreateRecipeDto buildCreateRecipeDto(List<RecipeIngredientDto> ingredients) {
+    private CreateRecipeDto buildCreateRecipeDto(Map<String, IngredientDto> ingredients) {
         return new CreateRecipeDto(
                 DEFAULT_RECIPE_NAME,
                 DEFAULT_RECIPE_DESCRIPTION,
@@ -76,14 +67,10 @@ public class RecipeControllerTests {
         );
     }
 
-    private RecipeIngredientDto ingredientDto(UUID ingredientId) {
-        return new RecipeIngredientDto(ingredientId, DEFAULT_SCALABLE, DEFAULT_QUANTITY);
-    }
-
     private ResultActions performCreateRecipe(CreateRecipeDto dto) throws Exception {
         return mockMvc.perform(post("/api/v1/recipes")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)));
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)));
     }
 
     @Nested
@@ -91,11 +78,10 @@ public class RecipeControllerTests {
 
         @Test
         void createRecipe_shouldReturnRecipe_whenRequestIsValid() throws Exception {
-            CreateRecipeDto dto = buildCreateRecipeDto(List.of(
-                    ingredientDto(ingredient1.id().id()),
-                    ingredientDto(ingredient2.id().id())
-            ));
+            // Arrange
+            CreateRecipeDto dto = buildCreateRecipeDto(defaultIngredients());
 
+            // Act & Assert
             performCreateRecipe(dto)
                     .andExpect(status().isCreated())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -103,30 +89,28 @@ public class RecipeControllerTests {
                     .andExpect(jsonPath("$.name").value(DEFAULT_RECIPE_NAME))
                     .andExpect(jsonPath("$.description").value(DEFAULT_RECIPE_DESCRIPTION))
                     .andExpect(jsonPath("$.durationInMinutes").value(DEFAULT_DURATION_IN_MINUTES))
-                    .andExpect(jsonPath("$.steps", hasSize(DEFAULT_STEPS.size())))
                     .andExpect(jsonPath("$.steps[0]").value(DEFAULT_STEPS.get(0)))
                     .andExpect(jsonPath("$.steps[1]").value(DEFAULT_STEPS.get(1)))
-                    .andExpect(jsonPath("$.ingredients", hasSize(2)))
-                    .andExpect(jsonPath("$.ingredients[0].ingredientId").value(ingredient1.id().id().toString()))
-                    .andExpect(jsonPath("$.ingredients[0].isScalable").value(DEFAULT_SCALABLE))
-                    .andExpect(jsonPath("$.ingredients[0].baseQuantity").value(DEFAULT_QUANTITY))
-                    .andExpect(jsonPath("$.ingredients[1].ingredientId").value(ingredient2.id().id().toString()))
-                    .andExpect(jsonPath("$.ingredients[1].isScalable").value(DEFAULT_SCALABLE))
-                    .andExpect(jsonPath("$.ingredients[1].baseQuantity").value(DEFAULT_QUANTITY));
+                    .andExpect(jsonPath("$.ingredients.Flour.quantity").value(DEFAULT_QUANTITY))
+                    .andExpect(jsonPath("$.ingredients.Flour.unit").value(DEFAULT_UNIT))
+                    .andExpect(jsonPath("$.ingredients.Eggs.quantity").value(2.0))
+                    .andExpect(jsonPath("$.ingredients.Eggs.unit").doesNotExist());
 
             assertThat(recipeRepository.findAll(PageRequest.of(0, PAGE_SIZE))).hasSize(1);
         }
 
         @Test
         void createRecipe_shouldReturn400_whenRequestInvalid() throws Exception {
+            // Arrange
             CreateRecipeDto dto = new CreateRecipeDto(
                     null,
                     DEFAULT_RECIPE_DESCRIPTION,
                     DEFAULT_DURATION_IN_MINUTES,
                     DEFAULT_STEPS,
-                    List.of()
+                    defaultIngredients()
             );
 
+            // Act & Assert
             performCreateRecipe(dto)
                     .andExpect(status().isBadRequest());
         }
