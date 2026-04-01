@@ -3,12 +3,14 @@ package cookbook.stage.backend.recipe.infrastructure.jpa;
 import cookbook.stage.backend.recipe.domain.Ingredient;
 import cookbook.stage.backend.recipe.domain.Recipe;
 import cookbook.stage.backend.recipe.shared.RecipeId;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import java.util.ArrayList;
@@ -38,11 +40,7 @@ public class JpaRecipeEntity {
     )
     private List<String> steps;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "recipe_ingredients",
-            joinColumns = @JoinColumn(name = "recipe_id")
-    )
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JpaIngredient> ingredients = new ArrayList<>();
 
     public JpaRecipeEntity(UUID id, String name, String description, int durationInMinutes,
@@ -59,18 +57,21 @@ public class JpaRecipeEntity {
     }
 
     public static JpaRecipeEntity fromDomain(Recipe recipe) {
-        var ingredients = recipe.getIngredients().stream()
-                .map(i -> new JpaIngredient(i.name(), i.quantity(), i.unit()))
-                .toList();
-
-        return new JpaRecipeEntity(
+        JpaRecipeEntity entity = new JpaRecipeEntity(
                 recipe.getId().id(),
                 recipe.getName(),
                 recipe.getDescription(),
                 recipe.getDurationInMinutes(),
                 recipe.getSteps(),
-                ingredients
+                new ArrayList<>()
         );
+
+        List<JpaIngredient> ingredients = recipe.getIngredients().stream()
+                .map(i -> new JpaIngredient(i.name(), i.quantity(), i.unit(), entity))
+                .toList();
+
+        entity.ingredients.addAll(ingredients);
+        return entity;
     }
 
     public Recipe toDomain() {

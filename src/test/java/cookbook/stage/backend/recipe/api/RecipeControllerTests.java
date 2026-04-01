@@ -50,29 +50,6 @@ class RecipeControllerTests {
         recipeRepository.deleteAll();
     }
 
-    private List<IngredientDto> defaultIngredients() {
-        return List.of(
-                new IngredientDto("Flour", DEFAULT_QUANTITY, DEFAULT_UNIT),
-                new IngredientDto("Eggs", 2.0, null)
-        );
-    }
-
-    private CreateRecipeDto buildCreateRecipeDto(List<IngredientDto> ingredients) {
-        return new CreateRecipeDto(
-                DEFAULT_RECIPE_NAME,
-                DEFAULT_RECIPE_DESCRIPTION,
-                DEFAULT_DURATION_IN_MINUTES,
-                DEFAULT_STEPS,
-                ingredients
-        );
-    }
-
-    private ResultActions performCreateRecipe(CreateRecipeDto dto) throws Exception {
-        return mockMvc.perform(post("/api/v1/recipes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)));
-    }
-
     @Nested
     class CreateRecipeTests {
 
@@ -117,5 +94,28 @@ class RecipeControllerTests {
             performCreateRecipe(dto)
                     .andExpect(status().isBadRequest());
         }
+    }
+
+    private List<IngredientDto> defaultIngredients() {
+        return List.of(
+                new IngredientDto("Flour", DEFAULT_QUANTITY, DEFAULT_UNIT),
+                new IngredientDto("Eggs", 2.0, null)
+        );
+    }
+
+    private CreateRecipeDto buildCreateRecipeDto(List<IngredientDto> ingredients) {
+        return new CreateRecipeDto(
+                DEFAULT_RECIPE_NAME,
+                DEFAULT_RECIPE_DESCRIPTION,
+                DEFAULT_DURATION_IN_MINUTES,
+                DEFAULT_STEPS,
+                ingredients
+        );
+    }
+
+    private ResultActions performCreateRecipe(CreateRecipeDto dto) throws Exception {
+        return mockMvc.perform(post("/api/v1/recipes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)));
     }
 }

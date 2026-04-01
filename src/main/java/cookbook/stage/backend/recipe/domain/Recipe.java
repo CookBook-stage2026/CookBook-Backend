@@ -1,14 +1,10 @@
 package cookbook.stage.backend.recipe.domain;
 
 import cookbook.stage.backend.recipe.shared.RecipeId;
-import org.jmolecules.ddd.annotation.AggregateRoot;
-import org.jmolecules.ddd.annotation.Identity;
 
 import java.util.List;
 
-@AggregateRoot
 public class Recipe {
-    @Identity
     private RecipeId id;
     private String name;
     private String description;
