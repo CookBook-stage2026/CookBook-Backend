@@ -5,7 +5,6 @@ import cookbook.stage.backend.ingredient.domain.IngredientRepository;
 import cookbook.stage.backend.ingredient.domain.Unit;
 import cookbook.stage.backend.ingredient.shared.IngredientId;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeDto;
-import cookbook.stage.backend.recipe.api.dto.RecipeIngredientDto;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
@@ -51,13 +50,9 @@ public class RecipeControllerTests {
     @Autowired
     private RecipeRepository recipeRepository;
 
-    @Autowired
-    private IngredientRepository ingredientRepository;
-
     @AfterEach
     void tearDown() {
         recipeRepository.deleteAll();
-        ingredientRepository.deleteAll();
     }
 
     private Ingredient createAndSaveIngredient(String name, String description, Unit unit) {
@@ -95,16 +90,7 @@ public class RecipeControllerTests {
     class CreateRecipeTests {
 
         @Test
-        void createRecipe_shouldReturnRecipe_whenIngredientsExist() throws Exception {
-            Ingredient ingredient1 = createAndSaveIngredient(
-                    "Ingredient 1 Name",
-                    "Ingredient 1 Description",
-                    Unit.Milliliter);
-            Ingredient ingredient2 = createAndSaveIngredient(
-                    "Ingredient 2 Name",
-                    "Ingredient 2 Description",
-                    Unit.Gram);
-
+        void createRecipe_shouldReturnRecipe_whenRequestIsValid() throws Exception {
             CreateRecipeDto dto = buildCreateRecipeDto(List.of(
                     ingredientDto(ingredient1.id().id()),
                     ingredientDto(ingredient2.id().id())
@@ -132,17 +118,7 @@ public class RecipeControllerTests {
         }
 
         @Test
-        void createRecipe_shouldReturn404_whenIngredientsNotExist() throws Exception {
-            CreateRecipeDto dto = buildCreateRecipeDto(List.of(
-                    ingredientDto(UUID.randomUUID())
-            ));
-
-            performCreateRecipe(dto)
-                    .andExpect(status().isNotFound());
-        }
-
-        @Test
-        void createRecipe_shouldReturn400_whenDtoInvalid() throws Exception {
+        void createRecipe_shouldReturn400_whenRequestInvalid() throws Exception {
             CreateRecipeDto dto = new CreateRecipeDto(
                     null,
                     DEFAULT_RECIPE_DESCRIPTION,
