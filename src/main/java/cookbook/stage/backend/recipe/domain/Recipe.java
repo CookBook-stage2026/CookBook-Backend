@@ -5,7 +5,6 @@ import org.jmolecules.ddd.annotation.AggregateRoot;
 import org.jmolecules.ddd.annotation.Identity;
 
 import java.util.List;
-import java.util.Map;
 
 @AggregateRoot
 public class Recipe {
@@ -15,10 +14,10 @@ public class Recipe {
     private String description;
     private int durationInMinutes;
     private List<String> steps;
-    private Map<String, IngredientAmount> ingredients;
+    private List<Ingredient> ingredients;
 
     public Recipe(RecipeId id, String name, String description, int durationInMinutes,
-                  List<String> steps, Map<String, IngredientAmount> ingredients) {
+                  List<String> steps, List<Ingredient> ingredients) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -28,7 +27,7 @@ public class Recipe {
     }
 
     public static Recipe createRecipe(String name, String description, int durationInMinutes,
-                                      List<String> steps, Map<String, IngredientAmount> ingredients) {
+                                      List<String> steps, List<Ingredient> ingredients) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("A recipe must have a name");
         }
@@ -68,7 +67,7 @@ public class Recipe {
         return steps;
     }
 
-    public Map<String, IngredientAmount> getIngredients() {
+    public List<Ingredient> getIngredients() {
         return ingredients;
     }
 }

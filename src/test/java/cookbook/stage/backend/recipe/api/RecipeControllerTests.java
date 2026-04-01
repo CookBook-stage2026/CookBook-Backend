@@ -16,9 +16,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -50,14 +50,14 @@ class RecipeControllerTests {
         recipeRepository.deleteAll();
     }
 
-    private Map<String, IngredientDto> defaultIngredients() {
-        return Map.of(
-                "Flour", new IngredientDto("Flour", DEFAULT_QUANTITY, DEFAULT_UNIT),
-                "Eggs", new IngredientDto("Eggs", 2.0, null)
+    private List<IngredientDto> defaultIngredients() {
+        return List.of(
+                new IngredientDto("Flour", DEFAULT_QUANTITY, DEFAULT_UNIT),
+                new IngredientDto("Eggs", 2.0, null)
         );
     }
 
-    private CreateRecipeDto buildCreateRecipeDto(Map<String, IngredientDto> ingredients) {
+    private CreateRecipeDto buildCreateRecipeDto(List<IngredientDto> ingredients) {
         return new CreateRecipeDto(
                 DEFAULT_RECIPE_NAME,
                 DEFAULT_RECIPE_DESCRIPTION,
@@ -91,10 +91,13 @@ class RecipeControllerTests {
                     .andExpect(jsonPath("$.durationInMinutes").value(DEFAULT_DURATION_IN_MINUTES))
                     .andExpect(jsonPath("$.steps[0]").value(DEFAULT_STEPS.get(0)))
                     .andExpect(jsonPath("$.steps[1]").value(DEFAULT_STEPS.get(1)))
-                    .andExpect(jsonPath("$.ingredients.Flour.quantity").value(DEFAULT_QUANTITY))
-                    .andExpect(jsonPath("$.ingredients.Flour.unit").value(DEFAULT_UNIT))
-                    .andExpect(jsonPath("$.ingredients.Eggs.quantity").value(2.0))
-                    .andExpect(jsonPath("$.ingredients.Eggs.unit").doesNotExist());
+                    .andExpect(jsonPath("$.ingredients", hasSize(2)))
+                    .andExpect(jsonPath("$.ingredients[0].name").value("Flour"))
+                    .andExpect(jsonPath("$.ingredients[0].quantity").value(DEFAULT_QUANTITY))
+                    .andExpect(jsonPath("$.ingredients[0].unit").value(DEFAULT_UNIT))
+                    .andExpect(jsonPath("$.ingredients[1].name").value("Eggs"))
+                    .andExpect(jsonPath("$.ingredients[1].quantity").value(2.0))
+                    .andExpect(jsonPath("$.ingredients[1].unit").doesNotExist());
 
             assertThat(recipeRepository.findAll(PageRequest.of(0, PAGE_SIZE))).hasSize(1);
         }

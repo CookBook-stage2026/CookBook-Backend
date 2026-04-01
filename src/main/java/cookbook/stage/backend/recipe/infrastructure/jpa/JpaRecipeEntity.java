@@ -1,6 +1,6 @@
 package cookbook.stage.backend.recipe.infrastructure.jpa;
 
-import cookbook.stage.backend.recipe.domain.IngredientAmount;
+import cookbook.stage.backend.recipe.domain.Ingredient;
 import cookbook.stage.backend.recipe.domain.Recipe;
 import cookbook.stage.backend.recipe.shared.RecipeId;
 import jakarta.persistence.CollectionTable;
@@ -9,14 +9,11 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.Table;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "recipes")
@@ -39,7 +36,6 @@ public class JpaRecipeEntity {
             name = "recipe_steps",
             joinColumns = @JoinColumn(name = "recipe_id")
     )
-    @Column(name = "step_description")
     private List<String> steps;
 
     @ElementCollection
@@ -47,11 +43,10 @@ public class JpaRecipeEntity {
             name = "recipe_ingredients",
             joinColumns = @JoinColumn(name = "recipe_id")
     )
-    @MapKeyColumn(name = "ingredient_name")
-    private Map<String, JpaIngredientAmount> ingredients = new HashMap<>();
+    private List<JpaIngredient> ingredients = new ArrayList<>();
 
     public JpaRecipeEntity(UUID id, String name, String description, int durationInMinutes,
-                           List<String> steps, Map<String, JpaIngredientAmount> ingredients) {
+                           List<String> steps, List<JpaIngredient> ingredients) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -64,11 +59,9 @@ public class JpaRecipeEntity {
     }
 
     public static JpaRecipeEntity fromDomain(Recipe recipe) {
-        var ingredients = recipe.getIngredients().entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        e -> new JpaIngredientAmount(e.getValue().quantity(), e.getValue().unit())
-                ));
+        var ingredients = recipe.getIngredients().stream()
+                .map(i -> new JpaIngredient(i.name(), i.quantity(), i.unit()))
+                .toList();
 
         return new JpaRecipeEntity(
                 recipe.getId().id(),
@@ -81,11 +74,9 @@ public class JpaRecipeEntity {
     }
 
     public Recipe toDomain() {
-        Map<String, IngredientAmount> domainIngredients = ingredients.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        e -> new IngredientAmount(e.getValue().quantity(), e.getValue().unit())
-                ));
+        List<Ingredient> domainIngredients = ingredients.stream()
+                .map(i -> new Ingredient(i.getName(), i.getQuantity(), i.getUnit()))
+                .toList();
 
         return new Recipe(
                 new RecipeId(id),

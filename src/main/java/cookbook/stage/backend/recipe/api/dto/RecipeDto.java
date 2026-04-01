@@ -3,9 +3,7 @@ package cookbook.stage.backend.recipe.api.dto;
 import cookbook.stage.backend.recipe.domain.Recipe;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public record RecipeDto(
         UUID id,
@@ -13,14 +11,12 @@ public record RecipeDto(
         String description,
         int durationInMinutes,
         List<String> steps,
-        Map<String, IngredientDto> ingredients
+        List<IngredientDto> ingredients
 ) {
     public static RecipeDto fromDomain(Recipe recipe) {
-        Map<String, IngredientDto> ingredientDtos = recipe.getIngredients().entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        e -> new IngredientDto(e.getKey(), e.getValue().quantity(), e.getValue().unit())
-                ));
+        List<IngredientDto> ingredientDtos = recipe.getIngredients().stream()
+                .map(i -> new IngredientDto(i.name(), i.quantity(), i.unit()))
+                .toList();
 
         return new RecipeDto(
                 recipe.getId().id(),
