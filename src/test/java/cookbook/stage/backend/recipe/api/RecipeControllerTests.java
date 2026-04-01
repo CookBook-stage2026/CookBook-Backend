@@ -16,15 +16,16 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,6 +33,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest
 public class RecipeControllerTests {
+
+    private static final String DEFAULT_RECIPE_NAME = "Test Name";
+    private static final String DEFAULT_RECIPE_DESCRIPTION = "Test Description";
+    private static final int DEFAULT_DURATION_IN_MINUTES = 60;
+    private static final List<String> DEFAULT_STEPS = List.of("This is step 1", "This is step 2");
+    private static final boolean DEFAULT_SCALABLE = true;
+    private static final double DEFAULT_QUANTITY = 1.0;
+    private static final int PAGE_SIZE = 20;
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,90 +60,99 @@ public class RecipeControllerTests {
         ingredientRepository.deleteAll();
     }
 
+    private Ingredient createAndSaveIngredient(String name, String description, Unit unit) {
+        Ingredient ingredient = new Ingredient(
+                IngredientId.create(),
+                name,
+                description,
+                Optional.of(unit)
+        );
+        ingredientRepository.save(ingredient);
+        return ingredient;
+    }
+
+    private CreateRecipeDto buildCreateRecipeDto(List<RecipeIngredientDto> ingredients) {
+        return new CreateRecipeDto(
+                DEFAULT_RECIPE_NAME,
+                DEFAULT_RECIPE_DESCRIPTION,
+                DEFAULT_DURATION_IN_MINUTES,
+                DEFAULT_STEPS,
+                ingredients
+        );
+    }
+
+    private RecipeIngredientDto ingredientDto(UUID ingredientId) {
+        return new RecipeIngredientDto(ingredientId, DEFAULT_SCALABLE, DEFAULT_QUANTITY);
+    }
+
+    private ResultActions performCreateRecipe(CreateRecipeDto dto) throws Exception {
+        return mockMvc.perform(post("/api/v1/recipes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)));
+    }
+
     @Nested
     class CreateRecipeTests {
 
         @Test
         void createRecipe_shouldReturnRecipe_whenIngredientsExist() throws Exception {
-            // Arrange
-            Ingredient ingredient1 = new Ingredient(
-                    IngredientId.create(),
+            Ingredient ingredient1 = createAndSaveIngredient(
                     "Ingredient 1 Name",
                     "Ingredient 1 Description",
-                    Optional.of(Unit.Milliliter)
-            );
-
-            Ingredient ingredient2 = new Ingredient(
-                    IngredientId.create(),
+                    Unit.Milliliter);
+            Ingredient ingredient2 = createAndSaveIngredient(
                     "Ingredient 2 Name",
                     "Ingredient 2 Description",
-                    Optional.of(Unit.Gram)
-            );
+                    Unit.Gram);
 
-            ingredientRepository.save(ingredient1);
-            ingredientRepository.save(ingredient2);
+            CreateRecipeDto dto = buildCreateRecipeDto(List.of(
+                    ingredientDto(ingredient1.id().id()),
+                    ingredientDto(ingredient2.id().id())
+            ));
 
-            boolean scalable1 = true;
-            double quantity1 = 1;
-            boolean scalable2 = true;
-            double quantity2 = 1;
-
-            String name = "Test Name";
-            String description = "Test Description";
-            int duration = 60;
-            List<String> steps = List.of("This is step 1", "This is step 2");
-            List<RecipeIngredientDto> ingredients = List.of(
-                    new RecipeIngredientDto(ingredient1.id().id(), scalable1, quantity1),
-                    new RecipeIngredientDto(ingredient2.id().id(), scalable2, quantity2));
-
-            CreateRecipeDto dto = new CreateRecipeDto(
-                    name,
-                    description,
-                    duration,
-                    steps,
-                    ingredients
-            );
-
-            // Act & Assert
-            mockMvc.perform(post("/api/v1/recipes")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(dto)))
-                    .andDo(print())
+            performCreateRecipe(dto)
                     .andExpect(status().isCreated())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-
-                    // Verify an ID was generated and returned
                     .andExpect(jsonPath("$.id").exists())
-
-                    // Verify basic recipe details
-                    .andExpect(jsonPath("$.name").value(name))
-                    .andExpect(jsonPath("$.description").value(description))
-                    .andExpect(jsonPath("$.durationInMinutes").value(duration))
-                    .andExpect(jsonPath("$.steps", hasSize(2)))
-                    .andExpect(jsonPath("$.steps[0]").value(steps.get(0)))
-                    .andExpect(jsonPath("$.steps[1]").value(steps.get(1)))
-
-                    // Verify ingredients
+                    .andExpect(jsonPath("$.name").value(DEFAULT_RECIPE_NAME))
+                    .andExpect(jsonPath("$.description").value(DEFAULT_RECIPE_DESCRIPTION))
+                    .andExpect(jsonPath("$.durationInMinutes").value(DEFAULT_DURATION_IN_MINUTES))
+                    .andExpect(jsonPath("$.steps", hasSize(DEFAULT_STEPS.size())))
+                    .andExpect(jsonPath("$.steps[0]").value(DEFAULT_STEPS.get(0)))
+                    .andExpect(jsonPath("$.steps[1]").value(DEFAULT_STEPS.get(1)))
                     .andExpect(jsonPath("$.ingredients", hasSize(2)))
                     .andExpect(jsonPath("$.ingredients[0].ingredientId").value(ingredient1.id().id().toString()))
-                    .andExpect(jsonPath("$.ingredients[0].isScalable").value(scalable1))
-                    .andExpect(jsonPath("$.ingredients[0].baseQuantity").value(quantity1))
+                    .andExpect(jsonPath("$.ingredients[0].isScalable").value(DEFAULT_SCALABLE))
+                    .andExpect(jsonPath("$.ingredients[0].baseQuantity").value(DEFAULT_QUANTITY))
                     .andExpect(jsonPath("$.ingredients[1].ingredientId").value(ingredient2.id().id().toString()))
-                    .andExpect(jsonPath("$.ingredients[1].isScalable").value(scalable2))
-                    .andExpect(jsonPath("$.ingredients[1].baseQuantity").value(quantity2))
-                    .andReturn();
+                    .andExpect(jsonPath("$.ingredients[1].isScalable").value(DEFAULT_SCALABLE))
+                    .andExpect(jsonPath("$.ingredients[1].baseQuantity").value(DEFAULT_QUANTITY));
 
-            assertThat(recipeRepository.findAll(PageRequest.of(0, 20))).hasSize(1);
+            assertThat(recipeRepository.findAll(PageRequest.of(0, PAGE_SIZE))).hasSize(1);
         }
 
         @Test
         void createRecipe_shouldReturn404_whenIngredientsNotExist() throws Exception {
+            CreateRecipeDto dto = buildCreateRecipeDto(List.of(
+                    ingredientDto(UUID.randomUUID())
+            ));
 
+            performCreateRecipe(dto)
+                    .andExpect(status().isNotFound());
         }
 
         @Test
         void createRecipe_shouldReturn400_whenDtoInvalid() throws Exception {
+            CreateRecipeDto dto = new CreateRecipeDto(
+                    null,
+                    DEFAULT_RECIPE_DESCRIPTION,
+                    DEFAULT_DURATION_IN_MINUTES,
+                    DEFAULT_STEPS,
+                    List.of()
+            );
 
+            performCreateRecipe(dto)
+                    .andExpect(status().isBadRequest());
         }
     }
 }
