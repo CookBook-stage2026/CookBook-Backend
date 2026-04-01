@@ -23,7 +23,6 @@ public class JpaIngredient {
     @Column(nullable = false)
     private double quantity;
 
-    @Column(nullable = false)
     private String unit;
 
     @ManyToOne
