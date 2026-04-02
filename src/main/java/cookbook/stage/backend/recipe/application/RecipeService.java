@@ -3,7 +3,9 @@ package cookbook.stage.backend.recipe.application;
 import cookbook.stage.backend.recipe.domain.Ingredient;
 import cookbook.stage.backend.recipe.domain.Recipe;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
+import cookbook.stage.backend.recipe.domain.RecipeSummary;
 import cookbook.stage.backend.recipe.shared.RecipeId;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,5 +23,9 @@ public class RecipeService {
         Recipe recipe = new Recipe(RecipeId.create(), name, description, durationInMinutes, steps, ingredients);
 
         return recipeRepository.save(recipe);
+    }
+
+    public List<RecipeSummary> findAllSummaries(Pageable pageable) {
+        return recipeRepository.findAllSummaries(pageable);
     }
 }

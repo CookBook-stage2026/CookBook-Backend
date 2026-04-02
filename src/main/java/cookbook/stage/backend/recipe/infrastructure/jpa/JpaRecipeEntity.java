@@ -2,6 +2,7 @@ package cookbook.stage.backend.recipe.infrastructure.jpa;
 
 import cookbook.stage.backend.recipe.domain.Ingredient;
 import cookbook.stage.backend.recipe.domain.Recipe;
+import cookbook.stage.backend.recipe.domain.RecipeSummary;
 import cookbook.stage.backend.recipe.shared.RecipeId;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -86,6 +87,15 @@ public class JpaRecipeEntity {
                 durationInMinutes,
                 steps,
                 domainIngredients
+        );
+    }
+
+    public RecipeSummary toSummary() {
+        return new RecipeSummary(
+                new RecipeId(id),
+                name,
+                description,
+                durationInMinutes
         );
     }
 }

@@ -9,5 +9,7 @@ public interface RecipeRepository {
 
     List<Recipe> findAll(Pageable pageable);
 
+    List<RecipeSummary> findAllSummaries(Pageable pageable);
+
     void deleteAll();
 }
