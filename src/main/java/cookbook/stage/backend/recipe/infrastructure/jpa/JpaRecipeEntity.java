@@ -11,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class JpaRecipeEntity {
             name = "recipe_steps",
             joinColumns = @JoinColumn(name = "recipe_id")
     )
+    @OrderColumn(name = "step_order")
     private List<String> steps;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)

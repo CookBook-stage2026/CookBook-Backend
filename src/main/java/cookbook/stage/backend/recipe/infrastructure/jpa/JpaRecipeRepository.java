@@ -9,6 +9,6 @@ import java.util.UUID;
 
 public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID> {
 
-    @Query("SELECT r FROM JpaRecipeEntity r LEFT JOIN FETCH r.ingredients")
-    List<JpaRecipeEntity> findAllWithIngredients(Pageable pageable);
+    @Query("SELECT r FROM JpaRecipeEntity r LEFT JOIN FETCH r.steps LEFT JOIN FETCH r.ingredients")
+    List<JpaRecipeEntity> findAllWithStepsAndIngredients(Pageable pageable);
 }

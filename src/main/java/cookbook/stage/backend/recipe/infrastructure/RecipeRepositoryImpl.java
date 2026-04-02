@@ -25,7 +25,7 @@ public class RecipeRepositoryImpl implements RecipeRepository {
 
     @Override
     public List<Recipe> findAll(Pageable pageable) {
-        return jpaRecipeRepository.findAllWithIngredients(pageable).stream()
+        return jpaRecipeRepository.findAllWithStepsAndIngredients(pageable).stream()
                 .map(JpaRecipeEntity::toDomain)
                 .toList();
     }
