@@ -12,7 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 
@@ -40,7 +40,7 @@ class CreateRecipeTests {
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     @Autowired
     private RecipeRepository recipeRepository;
@@ -112,7 +112,7 @@ class CreateRecipeTests {
     private ResultActions performCreateRecipe(CreateRecipeDto dto) throws Exception {
         return mockMvc.perform(post("/api/recipes")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
+                .content(jsonMapper.writeValueAsString(dto)))
                 .andDo(print());
     }
 }

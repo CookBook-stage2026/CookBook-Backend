@@ -63,14 +63,12 @@ public class JpaRecipeEntity {
                 recipe.getDescription(),
                 recipe.getDurationInMinutes(),
                 recipe.getSteps(),
-                new ArrayList<>()
+                recipe.getIngredients().stream()
+                        .map(i -> new JpaIngredient(i.name(), i.quantity(), i.unit(), null))
+                        .toList()
         );
 
-        List<JpaIngredient> ingredients = recipe.getIngredients().stream()
-                .map(i -> new JpaIngredient(i.name(), i.quantity(), i.unit(), entity))
-                .toList();
-
-        entity.ingredients.addAll(ingredients);
+        entity.ingredients.forEach(i -> i.setRecipe(entity));
         return entity;
     }
 

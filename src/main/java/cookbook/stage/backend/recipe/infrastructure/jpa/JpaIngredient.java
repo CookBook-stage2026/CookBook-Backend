@@ -50,4 +50,8 @@ public class JpaIngredient {
     public String getUnit() {
         return unit;
     }
+
+    public void setRecipe(JpaRecipeEntity recipe) {
+        this.recipe = recipe;
+    }
 }
