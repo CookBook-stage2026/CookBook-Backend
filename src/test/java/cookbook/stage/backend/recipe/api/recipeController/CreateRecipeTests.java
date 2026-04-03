@@ -1,8 +1,9 @@
 package cookbook.stage.backend.recipe.api.recipeController;
 
-import cookbook.stage.backend.ingredient.application.IngredientService;
 import cookbook.stage.backend.ingredient.domain.Ingredient;
+import cookbook.stage.backend.ingredient.domain.IngredientRepository;
 import cookbook.stage.backend.ingredient.domain.Unit;
+import cookbook.stage.backend.ingredient.shared.IngredientId;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeDto;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeIngredientDto;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -36,8 +38,6 @@ class CreateRecipeTests {
     private static final int DEFAULT_SERVINGS = 2;
     private static final List<String> DEFAULT_STEPS = List.of("This is step 1", "This is step 2");
     private static final double DEFAULT_QUANTITY = 1.0;
-    private static final int PAGE_SIZE = 20;
-    private static final String DEFAULT_UNIT = "gram";
 
     @Autowired
     private MockMvc mockMvc;
@@ -48,16 +48,21 @@ class CreateRecipeTests {
     @Autowired
     private RecipeRepository recipeRepository;
 
+    @Autowired
+    private IngredientRepository ingredientRepository;
+
     @BeforeEach
     void tearDown() {
         recipeRepository.deleteAll();
+        ingredientRepository.deleteAll();
     }
 
     @Test
     void createRecipe_shouldReturnRecipe_whenRequestIsValid() throws Exception {
         // Arrange
-        Ingredient flour = ingredientService.createIngredient( "Flour", Unit.GRAM);
-        Ingredient eggs = ingredientService.createIngredient("Eggs", Unit.PIECE);
+        Ingredient flour = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()), "Flour", Unit.GRAM));
+        Ingredient eggs = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()), "Eggs", Unit.PIECE));
+
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
                 new CreateRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY),
                 new CreateRecipeIngredientDto(eggs.id().id(), 2.0)

@@ -9,6 +9,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
 
@@ -17,6 +19,7 @@ import java.util.UUID;
 public class JpaIngredientEntity {
     @Id
     @Column(name = "ingredient_id")
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private UUID id;
 
     @Column(nullable = false)

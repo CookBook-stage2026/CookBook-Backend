@@ -14,6 +14,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.CascadeType;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,7 @@ public class JpaRecipeEntity {
 
     @Id
     @Column(name = "recipe_id")
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private UUID id;
 
     @Column(nullable = false)

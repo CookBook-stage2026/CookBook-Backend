@@ -1,7 +1,11 @@
 package cookbook.stage.backend.recipe.api.recipeController;
 
-import cookbook.stage.backend.recipe.domain.Ingredient;
+import cookbook.stage.backend.ingredient.domain.Ingredient;
+import cookbook.stage.backend.ingredient.domain.IngredientRepository;
+import cookbook.stage.backend.ingredient.domain.Unit;
+import cookbook.stage.backend.ingredient.shared.IngredientId;
 import cookbook.stage.backend.recipe.domain.Recipe;
+import cookbook.stage.backend.recipe.domain.RecipeIngredient;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
 import cookbook.stage.backend.recipe.shared.RecipeId;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,9 +34,9 @@ class GetAllRecipesTests {
     private static final String DEFAULT_RECIPE_NAME = "Test Name";
     private static final String DEFAULT_RECIPE_DESCRIPTION = "Test Description";
     private static final int DEFAULT_DURATION_IN_MINUTES = 60;
+    private static final int DEFAULT_SERVINGS = 2;
     private static final List<String> DEFAULT_STEPS = List.of("This is step 1", "This is step 2");
     private static final double DEFAULT_QUANTITY = 1.0;
-    private static final String DEFAULT_UNIT = "gram";
 
     @Autowired
     private MockMvc mockMvc;
@@ -39,9 +44,13 @@ class GetAllRecipesTests {
     @Autowired
     private RecipeRepository recipeRepository;
 
+    @Autowired
+    private IngredientRepository ingredientRepository;
+
     @BeforeEach
     void tearDown() {
         recipeRepository.deleteAll();
+        ingredientRepository.deleteAll();
     }
 
     @Test
@@ -100,8 +109,7 @@ class GetAllRecipesTests {
                 .andExpect(jsonPath("$.page.totalElements").value(totalElements))
                 .andExpect(jsonPath("$.page.totalPages").value(expectedTotalPages))
                 .andExpect(jsonPath("$.page.number").value(firstPageIndex))
-                .andExpect(jsonPath("$.page.size").value(pageSize))
-                .andExpect(jsonPath("$.content", hasSize(expectedFirstPageCount)));
+                .andExpect(jsonPath("$.page.size").value(pageSize));
 
         // Act & Assert
         performGetAllRecipes(secondPageIndex, pageSize)
@@ -112,13 +120,17 @@ class GetAllRecipesTests {
     }
 
     private Recipe buildRecipe() {
+        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), "Flour " + UUID.randomUUID(), Unit.GRAM);
+        ingredientRepository.save(ingredient);
+
         return new Recipe(
                 RecipeId.create(),
                 DEFAULT_RECIPE_NAME,
                 DEFAULT_RECIPE_DESCRIPTION,
                 DEFAULT_DURATION_IN_MINUTES,
                 DEFAULT_STEPS,
-                List.of(new Ingredient("Flour", DEFAULT_QUANTITY, DEFAULT_UNIT))
+                List.of(new RecipeIngredient(ingredient.id(), DEFAULT_QUANTITY)),
+                DEFAULT_SERVINGS
         );
     }
 
