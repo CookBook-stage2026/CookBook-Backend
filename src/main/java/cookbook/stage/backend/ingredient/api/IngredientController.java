@@ -38,4 +38,17 @@ public class IngredientController {
                 .map(IngredientDto::fromDomain)
                 .toList();
     }
+
+    @GetMapping("/search")
+    public List<IngredientDto> getIngredientByName(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return ingredientService.searchByName(query, pageable).stream()
+                .map(IngredientDto::fromDomain)
+                .toList();
+    }
 }

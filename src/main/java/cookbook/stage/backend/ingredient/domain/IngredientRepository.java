@@ -14,4 +14,6 @@ public interface IngredientRepository {
     Optional<Ingredient> findById(IngredientId id);
 
     void deleteAll();
+
+    List<Ingredient> searchByName(String name, Pageable pageable);
 }

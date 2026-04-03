@@ -32,4 +32,8 @@ public class IngredientService implements IngredientsApi {
         Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit);
         return ingredientRepository.save(ingredient);
     }
+
+    public List<Ingredient> searchByName(String name, Pageable pageable) {
+        return this.ingredientRepository.searchByName(name, pageable);
+    }
 }

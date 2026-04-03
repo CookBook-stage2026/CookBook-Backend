@@ -11,7 +11,8 @@ public record RecipeDto(
         String description,
         int durationInMinutes,
         List<String> steps,
-        List<RecipeIngredientDto> ingredients
+        List<RecipeIngredientDto> ingredients,
+        int servings
 ) {
     public static RecipeDto fromDomain(Recipe recipe) {
         List<RecipeIngredientDto> recipeIngredientDtos = recipe.getIngredients().stream()
@@ -24,7 +25,8 @@ public record RecipeDto(
                 recipe.getDescription(),
                 recipe.getDurationInMinutes(),
                 recipe.getSteps(),
-                recipeIngredientDtos
+                recipeIngredientDtos,
+                recipe.getServings()
         );
     }
 }

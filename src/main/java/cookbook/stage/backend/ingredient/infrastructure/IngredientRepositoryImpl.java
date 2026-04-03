@@ -40,4 +40,11 @@ public class IngredientRepositoryImpl implements IngredientRepository {
     public void deleteAll() {
         jpaIngredientRepository.deleteAll();
     }
+
+    @Override
+    public List<Ingredient> searchByName(String name, Pageable pageable) {
+        return this.jpaIngredientRepository.findByNameContainingIgnoreCase(name, pageable).stream()
+                .map(JpaIngredientEntity::toDomain)
+                .toList();
+    }
 }
