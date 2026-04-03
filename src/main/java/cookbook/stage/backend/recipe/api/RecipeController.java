@@ -1,10 +1,13 @@
 package cookbook.stage.backend.recipe.api;
 
+import cookbook.stage.backend.ingredient.shared.IngredientId;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeDto;
 import cookbook.stage.backend.recipe.api.dto.RecipeDto;
 import cookbook.stage.backend.recipe.api.dto.RecipeSummaryDto;
 import cookbook.stage.backend.recipe.application.RecipeService;
 import cookbook.stage.backend.recipe.domain.Recipe;
+import cookbook.stage.backend.recipe.domain.RecipeIngredient;
+import cookbook.stage.backend.recipe.shared.RecipeId;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,19 +40,21 @@ public class RecipeController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RecipeDto createRecipe(
-            @Valid @RequestBody CreateRecipeDto createRecipeDto
-    ) {
-        List<Ingredient> ingredients = createRecipeDto.ingredients().stream()
-                .map(i -> new Ingredient(i.name(), i.quantity(), i.unit()))
+    public RecipeDto createRecipe(@Valid @RequestBody CreateRecipeDto createRecipeDto) {
+        RecipeId recipeId = RecipeId.create();
+
+        List<RecipeIngredient> ingredients = createRecipeDto.ingredients().stream()
+                .map(i -> new RecipeIngredient(recipeId, new IngredientId(i.ingredientId()), i.baseQuantity()))
                 .toList();
 
         Recipe recipe = recipeService.createRecipe(
+                recipeId,
                 createRecipeDto.name(),
                 createRecipeDto.description(),
                 createRecipeDto.durationInMinutes(),
                 createRecipeDto.steps(),
-                ingredients
+                ingredients,
+                createRecipeDto.servings()
         );
 
         return RecipeDto.fromDomain(recipe);

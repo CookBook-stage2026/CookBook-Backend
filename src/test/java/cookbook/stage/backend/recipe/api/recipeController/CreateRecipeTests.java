@@ -1,7 +1,11 @@
 package cookbook.stage.backend.recipe.api.recipeController;
 
+import cookbook.stage.backend.ingredient.application.IngredientService;
+import cookbook.stage.backend.ingredient.domain.Ingredient;
+import cookbook.stage.backend.ingredient.domain.Unit;
+import cookbook.stage.backend.ingredient.shared.IngredientId;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeDto;
-import cookbook.stage.backend.recipe.api.dto.IngredientDto;
+import cookbook.stage.backend.recipe.api.dto.CreateRecipeIngredientDto;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +15,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -30,15 +34,17 @@ class CreateRecipeTests {
     private static final String DEFAULT_RECIPE_NAME = "Test Name";
     private static final String DEFAULT_RECIPE_DESCRIPTION = "Test Description";
     private static final int DEFAULT_DURATION_IN_MINUTES = 60;
+    private static final int DEFAULT_SERVINGS = 2;
     private static final List<String> DEFAULT_STEPS = List.of("This is step 1", "This is step 2");
     private static final double DEFAULT_QUANTITY = 1.0;
+    private static final int PAGE_SIZE = 20;
     private static final String DEFAULT_UNIT = "gram";
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private JsonMapper jsonMapper;
+    private ObjectMapper objectMapper;
 
     @Autowired
     private RecipeRepository recipeRepository;
@@ -51,7 +57,13 @@ class CreateRecipeTests {
     @Test
     void createRecipe_shouldReturnRecipe_whenRequestIsValid() throws Exception {
         // Arrange
-        CreateRecipeDto dto = buildCreateRecipeDto(defaultIngredients());
+        Ingredient flour = ingredientService.createIngredient(IngredientId.create(), "Flour", Unit.GRAM);
+        Ingredient eggs = ingredientService.createIngredient(IngredientId.create(), "Eggs", Unit.PIECE);
+
+        CreateRecipeDto dto = buildCreateRecipeDto(List.of(
+                new CreateRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY),
+                new CreateRecipeIngredientDto(eggs.id().id(), 2.0)
+        ));
 
         // Act & Assert
         performCreateRecipe(dto)
@@ -64,12 +76,10 @@ class CreateRecipeTests {
                 .andExpect(jsonPath("$.steps[0]").value(DEFAULT_STEPS.get(0)))
                 .andExpect(jsonPath("$.steps[1]").value(DEFAULT_STEPS.get(1)))
                 .andExpect(jsonPath("$.ingredients", hasSize(2)))
-                .andExpect(jsonPath("$.ingredients[0].name").value("Flour"))
-                .andExpect(jsonPath("$.ingredients[0].quantity").value(DEFAULT_QUANTITY))
-                .andExpect(jsonPath("$.ingredients[0].unit").value(DEFAULT_UNIT))
-                .andExpect(jsonPath("$.ingredients[1].name").value("Eggs"))
-                .andExpect(jsonPath("$.ingredients[1].quantity").value(2.0))
-                .andExpect(jsonPath("$.ingredients[1].unit").doesNotExist());
+                .andExpect(jsonPath("$.ingredients[0].ingredientId").value(flour.id().id().toString()))
+                .andExpect(jsonPath("$.ingredients[0].baseQuantity").value(DEFAULT_QUANTITY))
+                .andExpect(jsonPath("$.ingredients[1].ingredientId").value(eggs.id().id().toString()))
+                .andExpect(jsonPath("$.ingredients[1].baseQuantity").value(2.0));
 
         assertThat(recipeRepository.count()).isEqualTo(1);
     }
@@ -79,10 +89,11 @@ class CreateRecipeTests {
         // Arrange
         CreateRecipeDto dto = new CreateRecipeDto(
                 null,
-                DEFAULT_RECIPE_DESCRIPTION,
+                null,
                 DEFAULT_DURATION_IN_MINUTES,
                 DEFAULT_STEPS,
-                defaultIngredients()
+                List.of(),
+                DEFAULT_SERVINGS
         );
 
         // Act & Assert
@@ -90,27 +101,21 @@ class CreateRecipeTests {
                 .andExpect(status().isBadRequest());
     }
 
-    private List<IngredientDto> defaultIngredients() {
-        return List.of(
-                new IngredientDto("Flour", DEFAULT_QUANTITY, DEFAULT_UNIT),
-                new IngredientDto("Eggs", 2.0, null)
-        );
-    }
-
-    private CreateRecipeDto buildCreateRecipeDto(List<IngredientDto> ingredients) {
+    private CreateRecipeDto buildCreateRecipeDto(List<CreateRecipeIngredientDto> ingredients) {
         return new CreateRecipeDto(
                 DEFAULT_RECIPE_NAME,
                 DEFAULT_RECIPE_DESCRIPTION,
                 DEFAULT_DURATION_IN_MINUTES,
                 DEFAULT_STEPS,
-                ingredients
+                ingredients,
+                DEFAULT_SERVINGS
         );
     }
 
     private ResultActions performCreateRecipe(CreateRecipeDto dto) throws Exception {
         return mockMvc.perform(post("/api/recipes")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonMapper.writeValueAsString(dto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andDo(print());
     }
 }

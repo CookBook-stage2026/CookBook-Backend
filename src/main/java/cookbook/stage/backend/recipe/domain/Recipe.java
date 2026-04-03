@@ -4,17 +4,18 @@ import cookbook.stage.backend.recipe.shared.RecipeId;
 
 import java.util.List;
 
+// Will not convert to record class or add final since other issues include editing the Recipe class.
 public class Recipe {
-    private RecipeId id;
+    private final RecipeId id;
     private String name;
     private String description;
     private int durationInMinutes;
     private int servings;
-    private List<String> steps;
-    private List<Ingredient> ingredients;
+    private final List<String> steps;
+    private final  List<RecipeIngredient> ingredients;
 
     public Recipe(RecipeId id, String name, String description, int durationInMinutes,
-                  List<String> steps, List<Ingredient> ingredients) {
+                  List<String> steps, List<RecipeIngredient> ingredients, int servings) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("A recipe must have a name");
         }
@@ -30,6 +31,9 @@ public class Recipe {
         if (ingredients == null || ingredients.isEmpty()) {
             throw new IllegalArgumentException("A recipe must have at least one ingredient");
         }
+        if(servings <= 0){
+            servings = 1;
+        }
 
         this.id = id;
         this.name = name;
@@ -37,6 +41,7 @@ public class Recipe {
         this.durationInMinutes = durationInMinutes;
         this.steps = steps;
         this.ingredients = ingredients;
+        this.servings = servings;
     }
 
     public RecipeId getId() {
@@ -59,7 +64,11 @@ public class Recipe {
         return steps;
     }
 
-    public List<Ingredient> getIngredients() {
+    public List<RecipeIngredient> getIngredients() {
         return ingredients;
+    }
+
+    public int getServings() {
+        return servings;
     }
 }

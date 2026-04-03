@@ -2,6 +2,7 @@ package cookbook.stage.backend.ingredient.application;
 
 import cookbook.stage.backend.ingredient.domain.Ingredient;
 import cookbook.stage.backend.ingredient.domain.IngredientRepository;
+import cookbook.stage.backend.ingredient.domain.Unit;
 import cookbook.stage.backend.ingredient.shared.IngredientId;
 import cookbook.stage.backend.ingredient.shared.IngredientsApi;
 import org.springframework.data.domain.Pageable;
@@ -25,5 +26,10 @@ public class IngredientService implements IngredientsApi {
 
     public List<Ingredient> findAll(Pageable pageable) {
         return this.ingredientRepository.findAll(pageable);
+    }
+
+    public Ingredient createIngredient(IngredientId id, String name, Unit unit) {
+        Ingredient ingredient = new Ingredient(id, name, unit);
+        return ingredientRepository.save(ingredient);
     }
 }

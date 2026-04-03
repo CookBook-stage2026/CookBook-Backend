@@ -1,26 +1,19 @@
 package cookbook.stage.backend.recipe.infrastructure.jpa;
 
 import cookbook.stage.backend.recipe.domain.Recipe;
+import cookbook.stage.backend.recipe.domain.RecipeIngredient;
 import cookbook.stage.backend.recipe.domain.RecipeSummary;
 import cookbook.stage.backend.recipe.shared.RecipeId;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderColumn;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "recipes")
 public class JpaRecipeEntity {
+
     @Id
     @Column(name = "recipe_id")
     private UUID id;
@@ -34,6 +27,9 @@ public class JpaRecipeEntity {
     @Column(nullable = false)
     private int durationInMinutes;
 
+    @Column(nullable = false)
+    private int servings;
+
     @ElementCollection
     @CollectionTable(
             name = "recipe_steps",
@@ -45,17 +41,16 @@ public class JpaRecipeEntity {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JpaRecipeIngredientEntity> ingredients = new ArrayList<>();
 
+    protected JpaRecipeEntity() {}
+
     public JpaRecipeEntity(UUID id, String name, String description, int durationInMinutes,
-                           List<String> steps, List<JpaIngredient> ingredients) {
+                           List<String> steps, int servings) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.durationInMinutes = durationInMinutes;
         this.steps = steps;
-        this.ingredients = ingredients;
-    }
-
-    protected JpaRecipeEntity() {
+        this.servings = servings;
     }
 
     public static JpaRecipeEntity fromDomain(Recipe recipe) {
@@ -65,18 +60,15 @@ public class JpaRecipeEntity {
                 recipe.getDescription(),
                 recipe.getDurationInMinutes(),
                 recipe.getSteps(),
-                recipe.getIngredients().stream()
-                        .map(i -> new JpaIngredient(i.name(), i.quantity(), i.unit(), null))
-                        .toList()
+                recipe.getServings()
         );
-
-        entity.ingredients.forEach(i -> i.setRecipe(entity));
+        recipe.getIngredients().forEach(entity::addIngredient);
         return entity;
     }
 
     public Recipe toDomain() {
-        List<Ingredient> domainIngredients = ingredients.stream()
-                .map(i -> new Ingredient(i.getName(), i.getQuantity(), i.getUnit()))
+        List<RecipeIngredient> domainIngredients = ingredients.stream()
+                .map(JpaRecipeIngredientEntity::toDomain)
                 .toList();
 
         return new Recipe(
@@ -85,7 +77,8 @@ public class JpaRecipeEntity {
                 description,
                 durationInMinutes,
                 steps,
-                domainIngredients
+                domainIngredients,
+                servings
         );
     }
 
@@ -98,7 +91,22 @@ public class JpaRecipeEntity {
         );
     }
 
-    public UUID getId() {
-        return id;
+    public void addIngredient(RecipeIngredient recipeIngredient) {
+        JpaRecipeIngredientEntity entity = new JpaRecipeIngredientEntity(this, recipeIngredient);
+        ingredients.add(entity);
+    }
+
+    public UUID getId() { return id; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof JpaRecipeEntity that)) return false;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
