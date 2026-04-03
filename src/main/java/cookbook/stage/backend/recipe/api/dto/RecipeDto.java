@@ -15,7 +15,7 @@ public record RecipeDto(
 ) {
     public static RecipeDto fromDomain(Recipe recipe) {
         List<RecipeIngredientDto> recipeIngredientDtos = recipe.getIngredients().stream()
-                .map(i -> new RecipeIngredientDto(i.recipeId().id(), i.ingredientId().id(), i.baseQuantity()))
+                .map(i -> new RecipeIngredientDto(i.ingredientId().id(), i.baseQuantity()))
                 .toList();
 
         return new RecipeDto(

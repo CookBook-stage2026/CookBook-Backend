@@ -31,7 +31,7 @@ public class Recipe {
         if (ingredients == null || ingredients.isEmpty()) {
             throw new IllegalArgumentException("A recipe must have at least one ingredient");
         }
-        if(servings <= 0){
+        if (servings <= 0) {
             servings = 1;
         }
 

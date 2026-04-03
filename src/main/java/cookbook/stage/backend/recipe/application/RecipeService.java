@@ -22,13 +22,14 @@ public class RecipeService {
         this.ingredientsApi = ingredientsApi;
     }
 
-    public Recipe createRecipe(RecipeId id, String name, String description, int durationInMinutes,
+    public Recipe createRecipe(String name, String description, int durationInMinutes,
                                List<String> steps, List<RecipeIngredient> ingredients, int servings) {
         ingredientsApi.assertAllExist(ingredients.stream()
                 .map(RecipeIngredient::ingredientId)
                 .toList());
 
-        Recipe recipe = new Recipe(id, name, description, durationInMinutes, steps, ingredients, servings);
+        Recipe recipe = new Recipe(RecipeId.create(),
+                name, description, durationInMinutes, steps, ingredients, servings);
         return recipeRepository.save(recipe);
     }
 

@@ -2,7 +2,6 @@ package cookbook.stage.backend.ingredient.api.ingredientController;
 
 import cookbook.stage.backend.ingredient.application.IngredientService;
 import cookbook.stage.backend.ingredient.domain.Unit;
-import cookbook.stage.backend.ingredient.shared.IngredientId;
 import cookbook.stage.backend.ingredient.domain.IngredientRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -44,8 +43,8 @@ class GetAllIngredientsTests {
     @Test
     void getAllIngredients_shouldReturnAllIngredients_whenIngredientsExist() throws Exception {
         // Arrange
-        ingredientService.createIngredient(IngredientId.create(), "Flour", Unit.GRAM);
-        ingredientService.createIngredient(IngredientId.create(), "Eggs", Unit.PIECE);
+        ingredientService.createIngredient("Flour", Unit.GRAM);
+        ingredientService.createIngredient("Eggs", Unit.PIECE);
 
         // Act & Assert
         performGetAllIngredients(DEFAULT_PAGE, DEFAULT_PAGE_SIZE)
@@ -72,9 +71,9 @@ class GetAllIngredientsTests {
     @Test
     void getAllIngredients_shouldReturnPagedIngredients_whenPageSizeIsSmall() throws Exception {
         // Arrange
-        ingredientService.createIngredient(IngredientId.create(), "Flour",  Unit.GRAM);
-        ingredientService.createIngredient(IngredientId.create(), "Eggs",   Unit.PIECE);
-        ingredientService.createIngredient(IngredientId.create(), "Butter", Unit.GRAM);
+        ingredientService.createIngredient("Flour",  Unit.GRAM);
+        ingredientService.createIngredient("Eggs",   Unit.PIECE);
+        ingredientService.createIngredient("Butter", Unit.GRAM);
 
         // Act & Assert
         performGetAllIngredients(DEFAULT_PAGE, 2)
@@ -86,9 +85,9 @@ class GetAllIngredientsTests {
     @Test
     void getAllIngredients_shouldReturnSecondPage_whenRequestingPageOne() throws Exception {
         // Arrange
-        ingredientService.createIngredient(IngredientId.create(), "Flour",  Unit.GRAM);
-        ingredientService.createIngredient(IngredientId.create(), "Eggs",   Unit.PIECE);
-        ingredientService.createIngredient(IngredientId.create(), "Butter", Unit.GRAM);
+        ingredientService.createIngredient("Flour",  Unit.GRAM);
+        ingredientService.createIngredient("Eggs",   Unit.PIECE);
+        ingredientService.createIngredient("Butter", Unit.GRAM);
 
         // Act & Assert
         performGetAllIngredients(1, 2)

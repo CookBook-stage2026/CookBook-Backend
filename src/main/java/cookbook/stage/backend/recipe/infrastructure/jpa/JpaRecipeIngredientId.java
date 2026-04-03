@@ -15,22 +15,28 @@ public class JpaRecipeIngredientId implements Serializable {
     @Column(name = "ingredient_id", nullable = false)
     private UUID ingredientId;
 
-    protected JpaRecipeIngredientId() {}
+    protected JpaRecipeIngredientId() {
+    }
 
     public JpaRecipeIngredientId(UUID recipeId, UUID ingredientId) {
         this.recipeId = recipeId;
         this.ingredientId = ingredientId;
     }
 
-    public UUID getRecipeId() { return recipeId; }
-    public UUID getIngredientId() { return ingredientId; }
+    public UUID getIngredientId() {
+        return ingredientId;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof JpaRecipeIngredientId that)) return false;
-        return Objects.equals(recipeId, that.recipeId) &&
-                Objects.equals(ingredientId, that.ingredientId);
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof JpaRecipeIngredientId that)) {
+            return false;
+        }
+        return Objects.equals(recipeId, that.recipeId)
+                && Objects.equals(ingredientId, that.ingredientId);
     }
 
     @Override

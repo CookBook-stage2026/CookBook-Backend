@@ -3,7 +3,6 @@ package cookbook.stage.backend.recipe.api.recipeController;
 import cookbook.stage.backend.ingredient.application.IngredientService;
 import cookbook.stage.backend.ingredient.domain.Ingredient;
 import cookbook.stage.backend.ingredient.domain.Unit;
-import cookbook.stage.backend.ingredient.shared.IngredientId;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeDto;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeIngredientDto;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
@@ -57,9 +56,8 @@ class CreateRecipeTests {
     @Test
     void createRecipe_shouldReturnRecipe_whenRequestIsValid() throws Exception {
         // Arrange
-        Ingredient flour = ingredientService.createIngredient(IngredientId.create(), "Flour", Unit.GRAM);
-        Ingredient eggs = ingredientService.createIngredient(IngredientId.create(), "Eggs", Unit.PIECE);
-
+        Ingredient flour = ingredientService.createIngredient( "Flour", Unit.GRAM);
+        Ingredient eggs = ingredientService.createIngredient("Eggs", Unit.PIECE);
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
                 new CreateRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY),
                 new CreateRecipeIngredientDto(eggs.id().id(), 2.0)

@@ -8,4 +8,5 @@ import java.util.UUID;
 public record CreateRecipeIngredientDto(
         @NotNull UUID ingredientId,
         @Positive double baseQuantity
-) {}
+) {
+}

@@ -2,8 +2,15 @@ package cookbook.stage.backend.recipe.infrastructure.jpa;
 
 import cookbook.stage.backend.ingredient.shared.IngredientId;
 import cookbook.stage.backend.recipe.domain.RecipeIngredient;
-import cookbook.stage.backend.recipe.shared.RecipeId;
-import jakarta.persistence.*;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.ManyToOne;
+
 import java.util.Objects;
 
 @Entity
@@ -21,20 +28,28 @@ public class JpaRecipeIngredientEntity {
     @JoinColumn(name = "recipe_id", nullable = false)
     private JpaRecipeEntity recipe;
 
-    protected JpaRecipeIngredientEntity() {}
+    protected JpaRecipeIngredientEntity() {
+    }
 
     public JpaRecipeIngredientEntity(JpaRecipeEntity recipe, RecipeIngredient recipeIngredient) {
         this.id = new JpaRecipeIngredientId(
-                recipeIngredient.recipeId().id(),
+                recipe.getId(),
                 recipeIngredient.ingredientId().id()
         );
         this.recipe = recipe;
         this.baseQuantity = recipeIngredient.baseQuantity();
     }
 
+    public static JpaRecipeIngredientEntity fromDomain(JpaRecipeEntity recipe, RecipeIngredient ri) {
+        var entity = new JpaRecipeIngredientEntity();
+        entity.id = new JpaRecipeIngredientId(recipe.getId(), ri.ingredientId().id());
+        entity.recipe = recipe;
+        entity.baseQuantity = ri.baseQuantity();
+        return entity;
+    }
+
     public RecipeIngredient toDomain() {
         return new RecipeIngredient(
-                new RecipeId(id.getRecipeId()),
                 new IngredientId(id.getIngredientId()),
                 baseQuantity
         );
@@ -46,8 +61,12 @@ public class JpaRecipeIngredientEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof JpaRecipeIngredientEntity that)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof JpaRecipeIngredientEntity that)) {
+            return false;
+        }
         return Objects.equals(id, that.id);
     }
 

@@ -4,7 +4,17 @@ import cookbook.stage.backend.recipe.domain.Recipe;
 import cookbook.stage.backend.recipe.domain.RecipeIngredient;
 import cookbook.stage.backend.recipe.domain.RecipeSummary;
 import cookbook.stage.backend.recipe.shared.RecipeId;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OrderColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -41,7 +51,8 @@ public class JpaRecipeEntity {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JpaRecipeIngredientEntity> ingredients = new ArrayList<>();
 
-    protected JpaRecipeEntity() {}
+    protected JpaRecipeEntity() {
+    }
 
     public JpaRecipeEntity(UUID id, String name, String description, int durationInMinutes,
                            List<String> steps, int servings) {
@@ -96,12 +107,18 @@ public class JpaRecipeEntity {
         ingredients.add(entity);
     }
 
-    public UUID getId() { return id; }
+    public UUID getId() {
+        return id;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof JpaRecipeEntity that)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof JpaRecipeEntity that)) {
+            return false;
+        }
         return Objects.equals(id, that.id);
     }
 

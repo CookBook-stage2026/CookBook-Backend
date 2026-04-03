@@ -28,8 +28,8 @@ public class IngredientService implements IngredientsApi {
         return this.ingredientRepository.findAll(pageable);
     }
 
-    public Ingredient createIngredient(IngredientId id, String name, Unit unit) {
-        Ingredient ingredient = new Ingredient(id, name, unit);
+    public Ingredient createIngredient(String name, Unit unit) {
+        Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit);
         return ingredientRepository.save(ingredient);
     }
 }
