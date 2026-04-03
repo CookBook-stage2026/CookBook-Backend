@@ -1,7 +1,9 @@
 package cookbook.stage.backend;
 
-import cookbook.stage.backend.recipe.application.RecipeService;
 import cookbook.stage.backend.recipe.domain.Ingredient;
+import cookbook.stage.backend.recipe.domain.Recipe;
+import cookbook.stage.backend.recipe.domain.RecipeRepository;
+import cookbook.stage.backend.recipe.shared.RecipeId;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -10,16 +12,18 @@ import java.util.List;
 
 @Component
 public class DataInitializer implements ApplicationRunner {
-    private final RecipeService recipeService;
+    private final RecipeRepository recipeRepository;
 
-    public DataInitializer(RecipeService recipeService) {
-        this.recipeService = recipeService;
+    public DataInitializer(RecipeRepository recipeRepository) {
+        this.recipeRepository = recipeRepository;
     }
 
     @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void run(ApplicationArguments args) {
-        recipeService.createRecipe(
+
+        recipeRepository.save(new Recipe(
+                RecipeId.create(),
                 "Spaghetti Carbonara",
                 "A classic Italian pasta dish with eggs, cheese and pancetta",
                 30,
@@ -29,9 +33,10 @@ public class DataInitializer implements ApplicationRunner {
                         new Ingredient("Pancetta", 100, "gram"),
                         new Ingredient("Eggs", 2, null)
                 )
-        );
+        ));
 
-        recipeService.createRecipe(
+        recipeRepository.save(new Recipe(
+                RecipeId.create(),
                 "Chicken Tikka Masala",
                 "Creamy and spiced Indian curry with tender chicken",
                 45,
@@ -43,9 +48,10 @@ public class DataInitializer implements ApplicationRunner {
                         new Ingredient("Heavy cream", 100, "ml"),
                         new Ingredient("Garam masala", 2, "tsp")
                 )
-        );
+        ));
 
-        recipeService.createRecipe(
+        recipeRepository.save(new Recipe(
+                RecipeId.create(),
                 "Beef Tacos",
                 "Mexican street-style tacos with seasoned ground beef",
                 25,
@@ -57,9 +63,10 @@ public class DataInitializer implements ApplicationRunner {
                         new Ingredient("Salsa", 150, "gram"),
                         new Ingredient("Sour cream", 100, "gram")
                 )
-        );
+        ));
 
-        recipeService.createRecipe(
+        recipeRepository.save(new Recipe(
+                RecipeId.create(),
                 "Vegetable Stir Fry",
                 "Quick and healthy Asian-inspired stir fry",
                 20,
@@ -71,9 +78,10 @@ public class DataInitializer implements ApplicationRunner {
                         new Ingredient("Soy sauce", 3, "tbsp"),
                         new Ingredient("Sesame oil", 1, "tbsp")
                 )
-        );
+        ));
 
-        recipeService.createRecipe(
+        recipeRepository.save(new Recipe(
+                RecipeId.create(),
                 "French Onion Soup",
                 "Rich and hearty French classic topped with melted cheese",
                 60,
@@ -85,9 +93,10 @@ public class DataInitializer implements ApplicationRunner {
                         new Ingredient("Baguette", 4, null),
                         new Ingredient("Butter", 50, "gram")
                 )
-        );
+        ));
 
-        recipeService.createRecipe(
+        recipeRepository.save(new Recipe(
+                RecipeId.create(),
                 "Banana Pancakes",
                 "Fluffy pancakes with a hint of banana",
                 20,
@@ -99,9 +108,10 @@ public class DataInitializer implements ApplicationRunner {
                         new Ingredient("Eggs", 2, null),
                         new Ingredient("Butter", 30, "gram")
                 )
-        );
+        ));
 
-        recipeService.createRecipe(
+        recipeRepository.save(new Recipe(
+                RecipeId.create(),
                 "Greek Salad",
                 "Fresh Mediterranean salad with feta and olives",
                 15,
@@ -113,9 +123,10 @@ public class DataInitializer implements ApplicationRunner {
                         new Ingredient("Kalamata olives", 100, "gram"),
                         new Ingredient("Olive oil", 3, "tbsp")
                 )
-        );
+        ));
 
-        recipeService.createRecipe(
+        recipeRepository.save(new Recipe(
+                RecipeId.create(),
                 "Beef Bourguignon",
                 "Classic French braised beef stew in red wine",
                 180,
@@ -127,9 +138,10 @@ public class DataInitializer implements ApplicationRunner {
                         new Ingredient("Mushrooms", 200, "gram"),
                         new Ingredient("Bacon", 150, "gram")
                 )
-        );
+        ));
 
-        recipeService.createRecipe(
+        recipeRepository.save(new Recipe(
+                RecipeId.create(),
                 "Margherita Pizza",
                 "Simple Neapolitan pizza with fresh basil and mozzarella",
                 40,
@@ -141,9 +153,10 @@ public class DataInitializer implements ApplicationRunner {
                         new Ingredient("Fresh basil", 10, "gram"),
                         new Ingredient("Olive oil", 2, "tbsp")
                 )
-        );
+        ));
 
-        recipeService.createRecipe(
+        recipeRepository.save(new Recipe(
+                RecipeId.create(),
                 "Chocolate Lava Cake",
                 "Decadent warm chocolate cake with a molten center",
                 25,
@@ -155,6 +168,6 @@ public class DataInitializer implements ApplicationRunner {
                         new Ingredient("Sugar", 80, "gram"),
                         new Ingredient("Flour", 50, "gram")
                 )
-        );
+        ));
     }
 }

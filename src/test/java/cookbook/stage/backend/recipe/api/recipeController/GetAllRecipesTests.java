@@ -54,12 +54,15 @@ class GetAllRecipesTests {
         performGetAllRecipes()
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].name").value(DEFAULT_RECIPE_NAME))
-                .andExpect(jsonPath("$[0].description").value(DEFAULT_RECIPE_DESCRIPTION))
-                .andExpect(jsonPath("$[0].durationInMinutes").value(DEFAULT_DURATION_IN_MINUTES))
-                .andExpect(jsonPath("$[0].id").value(recipe1.getId().id().toString()))
-                .andExpect(jsonPath("$[1].id").value(recipe2.getId().id().toString()));
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].name").value(DEFAULT_RECIPE_NAME))
+                .andExpect(jsonPath("$.content[0].description").value(DEFAULT_RECIPE_DESCRIPTION))
+                .andExpect(jsonPath("$.content[0].durationInMinutes").value(DEFAULT_DURATION_IN_MINUTES))
+                .andExpect(jsonPath("$.content[0].id").value(recipe1.getId().id().toString()))
+                .andExpect(jsonPath("$.content[1].id").value(recipe2.getId().id().toString()))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.number").value(0));
     }
 
     @Test
@@ -67,24 +70,45 @@ class GetAllRecipesTests {
         performGetAllRecipes()
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.totalPages").value(0));
     }
 
     @Test
     void getAllRecipes_shouldReturnPagedResults_whenPageSizeIsSmall() throws Exception {
         // Arrange
-        recipeRepository.save(buildRecipe());
-        recipeRepository.save(buildRecipe());
-        recipeRepository.save(buildRecipe());
+        final int totalRecipes = 3;
+        final int pageSize = 2;
+        final int firstPageIndex = 0;
+        final int secondPageIndex = 1;
+
+        final int expectedTotalPages = (int) Math.ceil((double) totalRecipes / pageSize);
+        final int expectedFirstPageCount = Math.min(totalRecipes, pageSize);
+        final int expectedSecondPageCount = totalRecipes - pageSize;
+
+        for (int i = 0; i < totalRecipes; i++) {
+            recipeRepository.save(buildRecipe());
+        }
+
+        long totalElements = recipeRepository.count();
 
         // Act & Assert
-        performGetAllRecipes(0, 2)
+        performGetAllRecipes(firstPageIndex, pageSize)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(jsonPath("$.content", hasSize(expectedFirstPageCount)))
+                .andExpect(jsonPath("$.totalElements").value(totalElements))
+                .andExpect(jsonPath("$.totalPages").value(expectedTotalPages))
+                .andExpect(jsonPath("$.number").value(firstPageIndex))
+                .andExpect(jsonPath("$.size").value(pageSize))
+                .andExpect(jsonPath("$.numberOfElements").value(expectedFirstPageCount));
 
-        performGetAllRecipes(1, 2)
+        // Act & Assert
+        performGetAllRecipes(secondPageIndex, pageSize)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
+                .andExpect(jsonPath("$.content", hasSize(expectedSecondPageCount)))
+                .andExpect(jsonPath("$.number").value(secondPageIndex))
+                .andExpect(jsonPath("$.numberOfElements").value(expectedSecondPageCount));
     }
 
     private Recipe buildRecipe() {

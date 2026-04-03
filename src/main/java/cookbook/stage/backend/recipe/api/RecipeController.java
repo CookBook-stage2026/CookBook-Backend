@@ -7,6 +7,7 @@ import cookbook.stage.backend.recipe.application.RecipeService;
 import cookbook.stage.backend.recipe.domain.Ingredient;
 import cookbook.stage.backend.recipe.domain.Recipe;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -63,14 +64,13 @@ public class RecipeController {
      * @return List of recipes
      */
     @GetMapping
-    public List<RecipeSummaryDto> getAllRecipes(
+    public Page<RecipeSummaryDto> getAllRecipes(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        return recipeService.findAllSummaries(pageable).stream()
-                .map(RecipeSummaryDto::fromDomain)
-                .toList();
+        return recipeService.findAllSummaries(pageable)
+                .map(RecipeSummaryDto::fromDomain);
     }
 }

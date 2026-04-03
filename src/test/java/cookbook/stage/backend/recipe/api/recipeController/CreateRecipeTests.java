@@ -3,12 +3,11 @@ package cookbook.stage.backend.recipe.api.recipeController;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeDto;
 import cookbook.stage.backend.recipe.api.dto.IngredientDto;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -34,7 +33,6 @@ class CreateRecipeTests {
     private static final List<String> DEFAULT_STEPS = List.of("This is step 1", "This is step 2");
     private static final double DEFAULT_QUANTITY = 1.0;
     private static final String DEFAULT_UNIT = "gram";
-    private static final int PAGE_SIZE = 20;
 
     @Autowired
     private MockMvc mockMvc;
@@ -45,7 +43,7 @@ class CreateRecipeTests {
     @Autowired
     private RecipeRepository recipeRepository;
 
-    @AfterEach
+    @BeforeEach
     void tearDown() {
         recipeRepository.deleteAll();
     }
@@ -73,7 +71,7 @@ class CreateRecipeTests {
                 .andExpect(jsonPath("$.ingredients[1].quantity").value(2.0))
                 .andExpect(jsonPath("$.ingredients[1].unit").doesNotExist());
 
-        assertThat(recipeRepository.findAll(PageRequest.of(0, PAGE_SIZE))).hasSize(1);
+        assertThat(recipeRepository.count()).isEqualTo(1);
     }
 
     @Test

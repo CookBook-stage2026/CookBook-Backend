@@ -5,6 +5,7 @@ import cookbook.stage.backend.recipe.domain.Recipe;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
 import cookbook.stage.backend.recipe.domain.RecipeSummary;
 import cookbook.stage.backend.recipe.shared.RecipeId;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,7 @@ public class RecipeService {
         return recipeRepository.save(recipe);
     }
 
-    public List<RecipeSummary> findAllSummaries(Pageable pageable) {
+    public Page<RecipeSummary> findAllSummaries(Pageable pageable) {
         return recipeRepository.findAllSummaries(pageable);
     }
 }

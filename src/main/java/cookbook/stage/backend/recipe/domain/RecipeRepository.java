@@ -1,15 +1,14 @@
 package cookbook.stage.backend.recipe.domain;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 public interface RecipeRepository {
     Recipe save(Recipe recipe);
 
-    List<Recipe> findAll(Pageable pageable);
-
-    List<RecipeSummary> findAllSummaries(Pageable pageable);
+    Page<RecipeSummary> findAllSummaries(Pageable pageable);
 
     void deleteAll();
+
+    long count();
 }
