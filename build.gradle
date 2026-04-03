@@ -70,6 +70,10 @@ tasks.named('test') {
 
 checkstyle {
     toolVersion = '13.4.0'
+    configProperties = [
+            'org.checkstyle.sun.suppressionfilter.config':
+                    file("config/checkstyle/checkstyle-suppressions.xml").absolutePath
+    ]
 }
 
 sonar {

@@ -5,7 +5,7 @@
         "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 
 <suppressions>
-    <suppress files=".*DataInitializer\.java" checks="LineLength"/>
-    <suppress files=".*DataInitializer\.java" checks="MethodLength"/>
-    <suppress files=".*DataInitializer\.java" checks="MagicNumber"/>
+    <suppress files=".*DataInitializer.java" checks="LineLength"/>
+    <suppress files=".*DataInitializer.java" checks="MagicNumber"/>
+    <suppress files=".*DataInitializer.java" checks="MethodLength"/>
 </suppressions>
