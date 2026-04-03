@@ -9,6 +9,7 @@ public class Recipe {
     private String name;
     private String description;
     private int durationInMinutes;
+    private int servings;
     private List<String> steps;
     private List<Ingredient> ingredients;
 

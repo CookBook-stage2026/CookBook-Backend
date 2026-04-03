@@ -4,7 +4,6 @@ import cookbook.stage.backend.recipe.api.dto.CreateRecipeDto;
 import cookbook.stage.backend.recipe.api.dto.RecipeDto;
 import cookbook.stage.backend.recipe.api.dto.RecipeSummaryDto;
 import cookbook.stage.backend.recipe.application.RecipeService;
-import cookbook.stage.backend.recipe.domain.Ingredient;
 import cookbook.stage.backend.recipe.domain.Recipe;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;

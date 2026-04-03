@@ -1,6 +1,5 @@
 package cookbook.stage.backend.recipe.application;
 
-import cookbook.stage.backend.recipe.domain.Ingredient;
 import cookbook.stage.backend.recipe.domain.Recipe;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
 import cookbook.stage.backend.recipe.domain.RecipeSummary;

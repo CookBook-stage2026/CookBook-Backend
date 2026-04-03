@@ -1,6 +1,5 @@
 package cookbook.stage.backend.recipe.infrastructure.jpa;
 
-import cookbook.stage.backend.recipe.domain.Ingredient;
 import cookbook.stage.backend.recipe.domain.Recipe;
 import cookbook.stage.backend.recipe.domain.RecipeSummary;
 import cookbook.stage.backend.recipe.shared.RecipeId;
@@ -44,7 +43,7 @@ public class JpaRecipeEntity {
     private List<String> steps;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<JpaIngredient> ingredients = new ArrayList<>();
+    private List<JpaRecipeIngredientEntity> ingredients = new ArrayList<>();
 
     public JpaRecipeEntity(UUID id, String name, String description, int durationInMinutes,
                            List<String> steps, List<JpaIngredient> ingredients) {
@@ -97,5 +96,9 @@ public class JpaRecipeEntity {
                 description,
                 durationInMinutes
         );
+    }
+
+    public UUID getId() {
+        return id;
     }
 }
