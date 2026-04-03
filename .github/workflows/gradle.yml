@@ -27,8 +27,11 @@ jobs:
     - name: Change wrapper permissions
       run: chmod +x ./gradlew
 
-    - name: Run tests with coverage
-      run: ./gradlew build jacocoTestReport jacocoTestCoverageVerification --no-daemon
+    - name: Run checkstyle with Gradle
+      run: ./gradlew checkstyleMain checkstyleTest --no-daemon
+
+    - name: Run with coverage
+      run: ./gradlew build jacocoTestReport jacocoTestCoverageVerification --no-daemon -x checkstyleMain -x checkstyleTest
 
     - name: Upload JaCoCo XML report
       if: always()
@@ -37,10 +40,7 @@ jobs:
         name: jacoco-xml-report
         path: build/reports/jacoco/test/jacocoTestReport.xml
 
-    - name: Build and analyze
+    - name: Analyze with SonarQube
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: ./gradlew sonar --info --no-daemon
-
-    - name: Run checkstyle with Gradle
-      run: ./gradlew checkstyleMain checkstyleTest --no-daemon
