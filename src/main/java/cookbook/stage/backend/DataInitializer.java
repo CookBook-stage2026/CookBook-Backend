@@ -18,14 +18,13 @@ public class DataInitializer implements ApplicationRunner {
         this.recipeRepository = recipeRepository;
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void run(ApplicationArguments args) {
 
         recipeRepository.save(new Recipe(
                 RecipeId.create(),
-                "Spaghetti Carbonara",
-                "A classic Italian pasta dish with eggs, cheese and pancetta",
+                "Spaghetti Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara",
+                "A classic Italian pasta dish with eggs, cheese and pancetta A classic Italian pasta dish with eggs, cheese and pancetta A classic Italian pasta dish with eggs, cheese and pancetta A classic Italian pasta dish with eggs, cheese and pancetta",
                 30,
                 List.of("Boil pasta", "Fry pancetta", "Mix eggs and cheese", "Combine all"),
                 List.of(
