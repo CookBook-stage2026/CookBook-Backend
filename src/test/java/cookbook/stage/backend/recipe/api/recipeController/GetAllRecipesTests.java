@@ -4,7 +4,7 @@ import cookbook.stage.backend.recipe.domain.Ingredient;
 import cookbook.stage.backend.recipe.domain.Recipe;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
 import cookbook.stage.backend.recipe.shared.RecipeId;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,7 +39,7 @@ class GetAllRecipesTests {
     @Autowired
     private RecipeRepository recipeRepository;
 
-    @AfterEach
+    @BeforeEach
     void tearDown() {
         recipeRepository.deleteAll();
     }
@@ -60,9 +60,9 @@ class GetAllRecipesTests {
                 .andExpect(jsonPath("$.content[0].durationInMinutes").value(DEFAULT_DURATION_IN_MINUTES))
                 .andExpect(jsonPath("$.content[0].id").value(recipe1.getId().id().toString()))
                 .andExpect(jsonPath("$.content[1].id").value(recipe2.getId().id().toString()))
-                .andExpect(jsonPath("$.totalElements").value(2))
-                .andExpect(jsonPath("$.totalPages").value(1))
-                .andExpect(jsonPath("$.number").value(0));
+                .andExpect(jsonPath("$.page.totalElements").value(2))
+                .andExpect(jsonPath("$.page.totalPages").value(1))
+                .andExpect(jsonPath("$.page.number").value(0));
     }
 
     @Test
@@ -71,8 +71,8 @@ class GetAllRecipesTests {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(0)))
-                .andExpect(jsonPath("$.totalElements").value(0))
-                .andExpect(jsonPath("$.totalPages").value(0));
+                .andExpect(jsonPath("$.page.totalElements").value(0))
+                .andExpect(jsonPath("$.page.totalPages").value(0));
     }
 
     @Test
@@ -97,18 +97,18 @@ class GetAllRecipesTests {
         performGetAllRecipes(firstPageIndex, pageSize)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(expectedFirstPageCount)))
-                .andExpect(jsonPath("$.totalElements").value(totalElements))
-                .andExpect(jsonPath("$.totalPages").value(expectedTotalPages))
-                .andExpect(jsonPath("$.number").value(firstPageIndex))
-                .andExpect(jsonPath("$.size").value(pageSize))
-                .andExpect(jsonPath("$.numberOfElements").value(expectedFirstPageCount));
+                .andExpect(jsonPath("$.page.totalElements").value(totalElements))
+                .andExpect(jsonPath("$.page.totalPages").value(expectedTotalPages))
+                .andExpect(jsonPath("$.page.number").value(firstPageIndex))
+                .andExpect(jsonPath("$.page.size").value(pageSize))
+                .andExpect(jsonPath("$.content", hasSize(expectedFirstPageCount)));
 
         // Act & Assert
         performGetAllRecipes(secondPageIndex, pageSize)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(expectedSecondPageCount)))
-                .andExpect(jsonPath("$.number").value(secondPageIndex))
-                .andExpect(jsonPath("$.numberOfElements").value(expectedSecondPageCount));
+                .andExpect(jsonPath("$.page.number").value(secondPageIndex))
+                .andExpect(jsonPath("$.page.size").value(pageSize));
     }
 
     private Recipe buildRecipe() {

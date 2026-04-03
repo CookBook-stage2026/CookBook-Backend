@@ -12,6 +12,8 @@ import java.util.List;
 
 @Component
 public class DataInitializer implements ApplicationRunner {
+    private static final String BUTTER = "Butter";
+
     private final RecipeRepository recipeRepository;
 
     public DataInitializer(RecipeRepository recipeRepository) {
@@ -90,7 +92,7 @@ public class DataInitializer implements ApplicationRunner {
                         new Ingredient("Beef broth", 1, "liter"),
                         new Ingredient("Gruyere cheese", 150, "gram"),
                         new Ingredient("Baguette", 4, null),
-                        new Ingredient("Butter", 50, "gram")
+                        new Ingredient(BUTTER, 50, "gram")
                 )
         ));
 
@@ -105,7 +107,7 @@ public class DataInitializer implements ApplicationRunner {
                         new Ingredient("Flour", 150, "gram"),
                         new Ingredient("Milk", 200, "ml"),
                         new Ingredient("Eggs", 2, null),
-                        new Ingredient("Butter", 30, "gram")
+                        new Ingredient(BUTTER, 30, "gram")
                 )
         ));
 
@@ -162,7 +164,7 @@ public class DataInitializer implements ApplicationRunner {
                 List.of("Melt chocolate and butter", "Whisk eggs and sugar", "Fold in flour", "Pour into ramekins", "Bake for 12 minutes and serve immediately"),
                 List.of(
                         new Ingredient("Dark chocolate", 150, "gram"),
-                        new Ingredient("Butter", 100, "gram"),
+                        new Ingredient(BUTTER, 100, "gram"),
                         new Ingredient("Eggs", 3, null),
                         new Ingredient("Sugar", 80, "gram"),
                         new Ingredient("Flour", 50, "gram")
