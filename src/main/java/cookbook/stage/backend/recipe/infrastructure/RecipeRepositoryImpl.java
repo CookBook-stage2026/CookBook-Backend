@@ -2,12 +2,12 @@ package cookbook.stage.backend.recipe.infrastructure;
 
 import cookbook.stage.backend.recipe.domain.Recipe;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
+import cookbook.stage.backend.recipe.domain.RecipeSummary;
 import cookbook.stage.backend.recipe.infrastructure.jpa.JpaRecipeEntity;
 import cookbook.stage.backend.recipe.infrastructure.jpa.JpaRecipeRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public class RecipeRepositoryImpl implements RecipeRepository {
@@ -24,14 +24,18 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public List<Recipe> findAll(Pageable pageable) {
-        return jpaRecipeRepository.findAllWithStepsAndIngredients(pageable).stream()
-                .map(JpaRecipeEntity::toDomain)
-                .toList();
+    public Page<RecipeSummary> findAllSummaries(Pageable pageable) {
+        return jpaRecipeRepository.findAll(pageable)
+                .map(JpaRecipeEntity::toSummary);
     }
 
     @Override
     public void deleteAll() {
         jpaRecipeRepository.deleteAll();
+    }
+
+    @Override
+    public long count() {
+        return jpaRecipeRepository.count();
     }
 }
