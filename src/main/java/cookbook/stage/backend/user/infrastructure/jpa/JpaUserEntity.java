@@ -3,11 +3,13 @@ package cookbook.stage.backend.user.infrastructure.jpa;
 import cookbook.stage.backend.user.shared.User;
 import cookbook.stage.backend.user.shared.UserId;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.UniqueConstraint;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,12 @@ public class JpaUserEntity {
     @Column(name = "display_name")
     private String displayName;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ElementCollection
+    @CollectionTable(
+            name = "social_connections",
+            joinColumns = @JoinColumn(name = "user_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "provider_id"})
+    )
     private List<JpaSocialConnectionEntity> socialConnections = new ArrayList<>();
 
     protected JpaUserEntity() {
@@ -49,13 +56,9 @@ public class JpaUserEntity {
     }
 
     public static JpaUserEntity fromDomain(User user) {
-        var jpaUser = new JpaUserEntity();
-        jpaUser.userId = user.getId().id();
-        jpaUser.socialConnections = user.getSocialConnections().stream()
-                .map(sc -> JpaSocialConnectionEntity.fromDomain(sc, jpaUser))
-                .toList();
-        jpaUser.email = user.getEmail();
-        jpaUser.displayName = user.getDisplayName();
-        return jpaUser;
+        return new JpaUserEntity(user.getId().id(), user.getEmail(), user.getDisplayName(),
+                user.getSocialConnections().stream()
+                        .map(JpaSocialConnectionEntity::fromDomain)
+                        .toList());
     }
 }

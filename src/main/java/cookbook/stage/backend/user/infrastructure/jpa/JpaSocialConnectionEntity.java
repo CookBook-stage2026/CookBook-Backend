@@ -2,21 +2,14 @@ package cookbook.stage.backend.user.infrastructure.jpa;
 
 import cookbook.stage.backend.user.domain.SocialConnection;
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Embeddable;
 
 import java.util.UUID;
 
-@Entity
-@Table(name = "social_connections",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "provider_id"}))
-
+@Embeddable
 public class JpaSocialConnectionEntity {
-    @Id
+
+    @Column(name = "id")
     private UUID id;
 
     @Column(name = "provider", nullable = false)
@@ -25,34 +18,23 @@ public class JpaSocialConnectionEntity {
     @Column(name = "provider_id", nullable = false)
     private String providerId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private JpaUserEntity user;
-
     protected JpaSocialConnectionEntity() {
     }
 
-    private JpaSocialConnectionEntity(UUID id, String provider, String providerId, JpaUserEntity user) {
+    private JpaSocialConnectionEntity(UUID id, String provider, String providerId) {
         this.id = id;
         this.provider = provider;
         this.providerId = providerId;
-        this.user = user;
     }
 
     public SocialConnection toDomain() {
         return new SocialConnection(
                 this.provider,
-                this.providerId,
-                this.user.toDomain()
+                this.providerId
         );
     }
 
-    public static JpaSocialConnectionEntity fromDomain(SocialConnection domain, JpaUserEntity userEntity) {
-        JpaSocialConnectionEntity entity = new JpaSocialConnectionEntity();
-        entity.id = domain.getId();
-        entity.provider = domain.getProvider();
-        entity.providerId = domain.getProviderId();
-        entity.user = userEntity;
-        return entity;
+    public static JpaSocialConnectionEntity fromDomain(SocialConnection domain) {
+        return new JpaSocialConnectionEntity(domain.getId(), domain.getProvider(), domain.getProviderId());
     }
 }

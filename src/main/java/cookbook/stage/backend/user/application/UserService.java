@@ -31,7 +31,7 @@ public class UserService implements UserApi {
     @Override
     public User autoSaveAfterLogin(String email, String name, String provider, String providerId) {
         User user = new User(email, name, new ArrayList<>());
-        user.getSocialConnections().add(new SocialConnection(provider, providerId, user));
+        user.getSocialConnections().add(new SocialConnection(provider, providerId));
         return userRepository.save(user);
     }
 }

@@ -73,7 +73,6 @@ public class OAuth2AuthService {
         }
         String accessToken = (String) tokenResponse.getOrDefault("access_token", "");
 
-        // 2. Fetch user info from the provider
         Map<String, Object> userAttributes = restClient.get()
                 .uri(registration.getProviderDetails().getUserInfoEndpoint().getUri())
                 .header("Authorization", "Bearer " + accessToken)
@@ -81,10 +80,8 @@ public class OAuth2AuthService {
                 .body(new ParameterizedTypeReference<>() {
                 });
 
-        // 3. Normalize across providers
         OAuth2UserInfo userInfo = OAuth2UserInfo.from(provider, userAttributes);
 
-        // 4. Find or create user
         User user = userApi
                 .findBySocialConnection(userInfo.provider(), userInfo.providerId())
                 .orElseGet(() -> userApi.autoSaveAfterLogin(userInfo.email(),
@@ -92,7 +89,6 @@ public class OAuth2AuthService {
                         userInfo.provider(),
                         userInfo.providerId()));
 
-        // 5. Issue your own JWT
         return new AuthResponse(jwtService.generateToken(user), user.getEmail(), user.getDisplayName());
     }
 }
