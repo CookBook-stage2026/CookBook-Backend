@@ -21,7 +21,6 @@ import java.util.Map;
 @Service
 public class OAuth2AuthService {
     private final ClientRegistrationRepository registrationRepo;
-    private final OAuth2AuthorizedClientService authorizedClientService;
     private final UserApi userApi;
     private final JwtService jwtService;
     private final RestClient restClient;
@@ -31,7 +30,6 @@ public class OAuth2AuthService {
                              UserApi userApi,
                              JwtService jwtService) {
         this.registrationRepo = registrationRepo;
-        this.authorizedClientService = authorizedClientService;
         this.userApi = userApi;
         this.jwtService = jwtService;
         this.restClient = RestClient.create();
