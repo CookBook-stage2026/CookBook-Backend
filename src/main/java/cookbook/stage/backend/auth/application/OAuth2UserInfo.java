@@ -9,7 +9,7 @@ public record OAuth2UserInfo(
         String name
 ) {
     public static OAuth2UserInfo from(String provider, Map<String, Object> attributes) {
-        return switch (provider) {
+        return switch (provider.toLowerCase()) {
             case "google" -> new OAuth2UserInfo(
                     "google",
                     (String) attributes.get("sub"),
@@ -21,11 +21,21 @@ public record OAuth2UserInfo(
                     String.valueOf(attributes.get("id")),
                     (String) attributes.get("email"),
                     attributes.get("name") != null
-                            ?
-                            (String) attributes.get("name")
-                            :
-                            (String) attributes.get("login")
+                            ? (String) attributes.get("name")
+                            : (String) attributes.get("login")
             );
+            case "microsoft" -> {
+                String email = (String) attributes.get("email");
+                if (email == null) {
+                    email = (String) attributes.get("name");
+                }
+                yield new OAuth2UserInfo(
+                        "microsoft",
+                        (String) attributes.get("sub"),
+                        email,
+                        (String) attributes.get("name")
+                );
+            }
             default -> throw new IllegalArgumentException("Unknown provider: " + provider);
         };
     }
