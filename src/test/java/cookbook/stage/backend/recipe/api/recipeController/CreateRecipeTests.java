@@ -106,6 +106,38 @@ class CreateRecipeTests {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void createRecipe_shouldReturn400_whenQuantityIsNegative() throws Exception {
+        // Arrange
+        Ingredient flour = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()),
+                "Flour", Unit.GRAM));
+
+        CreateRecipeDto dto = new CreateRecipeDto(
+                DEFAULT_RECIPE_NAME,
+                DEFAULT_RECIPE_DESCRIPTION,
+                DEFAULT_DURATION_IN_MINUTES,
+                DEFAULT_STEPS,
+                List.of(new CreateRecipeIngredientDto(flour.id().id(), -1.0)),
+                DEFAULT_SERVINGS
+        );
+
+        // Act & Assert
+        performCreateRecipe(dto)
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createRecipe_shouldReturn404_whenIngredientDoesNotExist() throws Exception {
+        // Arrange
+        CreateRecipeDto dto = buildCreateRecipeDto(List.of(
+                new CreateRecipeIngredientDto(UUID.randomUUID(), DEFAULT_QUANTITY)
+        ));
+
+        // Act & Assert
+        performCreateRecipe(dto)
+                .andExpect(status().isNotFound());
+    }
+
     private CreateRecipeDto buildCreateRecipeDto(List<CreateRecipeIngredientDto> ingredients) {
         return new CreateRecipeDto(
                 DEFAULT_RECIPE_NAME,

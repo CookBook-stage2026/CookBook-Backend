@@ -113,6 +113,20 @@ class SearchIngredientsTests {
                 .andExpect(jsonPath("$", hasSize(DEFAULT_PAGE_SIZE)));
     }
 
+    @Test
+    void searchIngredient_shouldBeCaseInsensitive() throws Exception {
+        // Arrange
+        seedIngredient("All-Purpose Flour");
+
+        // Act & Assert
+        mockMvc.perform(get("/api/ingredients/search")
+                        .param("query", "flour")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
+    }
+
     private void seedIngredient(String name) {
         Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), name, Unit.GRAM);
         ingredientRepository.save(ingredient);

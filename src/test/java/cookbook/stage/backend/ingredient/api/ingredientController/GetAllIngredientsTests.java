@@ -71,8 +71,8 @@ class GetAllIngredientsTests {
     @Test
     void getAllIngredients_shouldReturnPagedIngredients_whenPageSizeIsSmall() throws Exception {
         // Arrange
-        ingredientService.createIngredient("Flour",  Unit.GRAM);
-        ingredientService.createIngredient("Eggs",   Unit.PIECE);
+        ingredientService.createIngredient("Flour", Unit.GRAM);
+        ingredientService.createIngredient("Eggs", Unit.PIECE);
         ingredientService.createIngredient("Butter", Unit.GRAM);
 
         // Act & Assert
@@ -85,8 +85,8 @@ class GetAllIngredientsTests {
     @Test
     void getAllIngredients_shouldReturnSecondPage_whenRequestingPageOne() throws Exception {
         // Arrange
-        ingredientService.createIngredient("Flour",  Unit.GRAM);
-        ingredientService.createIngredient("Eggs",   Unit.PIECE);
+        ingredientService.createIngredient("Flour", Unit.GRAM);
+        ingredientService.createIngredient("Eggs", Unit.PIECE);
         ingredientService.createIngredient("Butter", Unit.GRAM);
 
         // Act & Assert
@@ -95,6 +95,20 @@ class GetAllIngredientsTests {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].name").value("Butter"));
+    }
+
+    @Test
+    void getAllIngredients_shouldReturn400_whenPageIsNegative() throws Exception {
+        // Act & Assert
+        performGetAllIngredients(-1, DEFAULT_PAGE_SIZE)
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getAllIngredients_shouldReturn400_whenSizeIsNegative() throws Exception {
+        // Act & Assert
+        performGetAllIngredients(DEFAULT_PAGE, -1)
+                .andExpect(status().isBadRequest());
     }
 
     private ResultActions performGetAllIngredients(int page, int size) throws Exception {

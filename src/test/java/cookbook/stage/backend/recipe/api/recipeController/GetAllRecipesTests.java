@@ -37,6 +37,8 @@ class GetAllRecipesTests {
     private static final int DEFAULT_SERVINGS = 2;
     private static final List<String> DEFAULT_STEPS = List.of("This is step 1", "This is step 2");
     private static final double DEFAULT_QUANTITY = 1.0;
+    private static final int DEFAULT_PAGE = 0;
+    private static final int DEFAULT_PAGE_SIZE = 10;
 
     @Autowired
     private MockMvc mockMvc;
@@ -117,6 +119,18 @@ class GetAllRecipesTests {
                 .andExpect(jsonPath("$.content", hasSize(expectedSecondPageCount)))
                 .andExpect(jsonPath("$.page.number").value(secondPageIndex))
                 .andExpect(jsonPath("$.page.size").value(pageSize));
+    }
+
+    @Test
+    void getAllRecipes_shouldReturn400_whenPageIsNegative() throws Exception {
+        performGetAllRecipes(-1, DEFAULT_PAGE_SIZE)
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getAllRecipes_shouldReturn400_whenSizeIsNegative() throws Exception {
+        performGetAllRecipes(DEFAULT_PAGE, -1)
+                .andExpect(status().isBadRequest());
     }
 
     private Recipe buildRecipe() {
