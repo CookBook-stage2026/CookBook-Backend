@@ -2,7 +2,7 @@ package cookbook.stage.backend.ingredient.api.ingredientController;
 
 import cookbook.stage.backend.ingredient.application.IngredientService;
 import cookbook.stage.backend.ingredient.domain.Unit;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,7 +33,7 @@ class GetAllIngredientsTests {
     private MockMvc mockMvc;
     @Autowired
     private IngredientService ingredientService;
-    @AfterEach
+    @BeforeEach
     void tearDown() {
         JdbcTestUtils.deleteFromTables(jdbcTemplate,
                 "recipe_ingredients", "recipes", "ingredients");
