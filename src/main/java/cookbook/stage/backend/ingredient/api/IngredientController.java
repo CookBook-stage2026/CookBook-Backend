@@ -39,6 +39,13 @@ public class IngredientController {
                 .toList();
     }
 
+    /**
+     * Gets ingredients by name, with pagination (case-insensitive + doesn't matter where the letters are in the name)
+     * @param query the name
+     * @param page current page (default 0)
+     * @param size size of page (default 10)
+     * @return List of ingredients matching the query
+     */
     @GetMapping("/search")
     public List<IngredientDto> getIngredientByName(
             @RequestParam String query,

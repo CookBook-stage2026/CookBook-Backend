@@ -11,8 +11,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.ManyToOne;
 
-import java.util.Objects;
-
 @Entity
 @Table(name = "recipe_ingredients")
 public class JpaRecipeIngredientEntity {
@@ -57,21 +55,5 @@ public class JpaRecipeIngredientEntity {
 
     public void setRecipe(JpaRecipeEntity recipe) {
         this.recipe = recipe;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof JpaRecipeIngredientEntity that)) {
-            return false;
-        }
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }
