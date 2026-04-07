@@ -8,7 +8,5 @@ public interface RecipeRepository {
 
     Page<RecipeSummary> findAllSummaries(Pageable pageable);
 
-    void deleteAll();
-
     long count();
 }

@@ -17,7 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +44,7 @@ class CreateRecipeTests {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper mapper;
     @Autowired
     private RecipeRepository recipeRepository;
     @Autowired
@@ -153,7 +153,7 @@ class CreateRecipeTests {
     private ResultActions performCreateRecipe(CreateRecipeDto dto) throws Exception {
         return mockMvc.perform(post("/api/recipes")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(mapper.writeValueAsString(dto)))
                 .andDo(print());
     }
 }
