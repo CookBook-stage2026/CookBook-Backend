@@ -2,13 +2,14 @@ package cookbook.stage.backend.ingredient.api.ingredientController;
 
 import cookbook.stage.backend.ingredient.application.IngredientService;
 import cookbook.stage.backend.ingredient.domain.Unit;
-import cookbook.stage.backend.ingredient.domain.IngredientRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -27,17 +28,15 @@ class GetAllIngredientsTests {
     private static final int DEFAULT_PAGE_SIZE = 20;
 
     @Autowired
-    private MockMvc mockMvc;
-
+    private JdbcTemplate jdbcTemplate;
     @Autowired
-    private IngredientRepository ingredientRepository;
-
+    private MockMvc mockMvc;
     @Autowired
     private IngredientService ingredientService;
-
     @AfterEach
     void tearDown() {
-        ingredientRepository.deleteAll();
+        JdbcTestUtils.deleteFromTables(jdbcTemplate,
+                "recipe_ingredients", "recipes", "ingredients");
     }
 
     @Test

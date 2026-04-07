@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -42,17 +44,16 @@ class GetAllRecipesTests {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private RecipeRepository recipeRepository;
-
     @Autowired
     private IngredientRepository ingredientRepository;
-
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     @BeforeEach
     void tearDown() {
-        recipeRepository.deleteAll();
-        ingredientRepository.deleteAll();
+        JdbcTestUtils.deleteFromTables(jdbcTemplate,
+                "recipe_ingredients", "recipes", "ingredients");
     }
 
     @Test
