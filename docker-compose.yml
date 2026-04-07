@@ -15,7 +15,7 @@ services:
   frontend:
     image: cookbook-frontend
     ports:
-      - "80:80"
+      - "80:8081"
     depends_on:
       - backend
 
