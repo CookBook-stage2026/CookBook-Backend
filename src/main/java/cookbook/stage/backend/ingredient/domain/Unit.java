@@ -8,5 +8,6 @@ public enum Unit {
     TEASPOON,
     TABLESPOON,
     CUP,
-    PIECE
+    PIECE,
+    NONE
 }
