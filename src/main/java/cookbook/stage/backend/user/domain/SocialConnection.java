@@ -16,4 +16,20 @@ public class SocialConnection {
         this.providerId = providerId;
         this.user = user;
     }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public User getUser() {
+        return user;
+    }
 }

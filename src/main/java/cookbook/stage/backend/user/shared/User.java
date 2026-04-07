@@ -17,6 +17,13 @@ public class User {
         this.socialConnections = socialConnections;
     }
 
+    public User(UserId id, String email, String displayName, List<SocialConnection> socialConnections) {
+        this.id = id;
+        this.email = email;
+        this.displayName = displayName;
+        this.socialConnections = socialConnections;
+    }
+
     public UserId getId() {
         return id;
     }
