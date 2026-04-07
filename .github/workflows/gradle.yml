@@ -67,10 +67,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      - name: Set image name
+        run: echo "IMAGE_NAME=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/cookbook-backend" >> $GITHUB_ENV
+
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/cookbook-backend:latest
-            ghcr.io/${{ github.repository_owner }}/cookbook-backend:${{ github.ref_name }}
+            ${{ env.IMAGE_NAME }}:latest
