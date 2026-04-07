@@ -29,6 +29,8 @@ class SearchIngredientsTests {
 
     @Autowired
     private IngredientRepository ingredientRepository;
+    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int NUMBER_OF_INGREDIENTS = 12;
 
     @BeforeEach
     void tearDown() {
@@ -98,7 +100,7 @@ class SearchIngredientsTests {
     @Test
     void searchIngredient_shouldUseDefaultPagination_whenParamsOmitted() throws Exception {
         // Arrange
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < NUMBER_OF_INGREDIENTS; i++) {
             seedIngredient("Tomato " + i);
         }
 
@@ -108,7 +110,7 @@ class SearchIngredientsTests {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(10)));
+                .andExpect(jsonPath("$", hasSize(DEFAULT_PAGE_SIZE)));
     }
 
     private void seedIngredient(String name) {

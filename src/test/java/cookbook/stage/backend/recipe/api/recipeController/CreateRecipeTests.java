@@ -60,8 +60,10 @@ class CreateRecipeTests {
     @Test
     void createRecipe_shouldReturnRecipe_whenRequestIsValid() throws Exception {
         // Arrange
-        Ingredient flour = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()), "Flour", Unit.GRAM));
-        Ingredient eggs = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()), "Eggs", Unit.PIECE));
+        Ingredient flour = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()),
+                "Flour", Unit.GRAM));
+        Ingredient eggs = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()),
+                "Eggs", Unit.PIECE));
 
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
                 new CreateRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY),

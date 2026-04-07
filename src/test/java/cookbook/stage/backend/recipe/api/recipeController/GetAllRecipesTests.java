@@ -120,7 +120,8 @@ class GetAllRecipesTests {
     }
 
     private Recipe buildRecipe() {
-        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), "Flour " + UUID.randomUUID(), Unit.GRAM);
+        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()),
+                "Flour " + UUID.randomUUID(), Unit.GRAM);
         ingredientRepository.save(ingredient);
 
         return new Recipe(
