@@ -64,6 +64,7 @@ public class OAuth2AuthService {
         Map<String, Object> tokenResponse = restClient.post()
                 .uri(registration.getProviderDetails().getTokenUri())
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .accept(MediaType.APPLICATION_JSON)
                 .body(params)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {

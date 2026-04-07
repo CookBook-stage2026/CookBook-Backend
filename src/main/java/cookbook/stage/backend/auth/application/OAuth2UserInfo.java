@@ -16,6 +16,16 @@ public record OAuth2UserInfo(
                     (String) attributes.get("email"),
                     (String) attributes.get("name")
             );
+            case "github" -> new OAuth2UserInfo(
+                    "github",
+                    String.valueOf(attributes.get("id")),
+                    (String) attributes.get("email"),
+                    attributes.get("name") != null
+                            ?
+                            (String) attributes.get("name")
+                            :
+                            (String) attributes.get("login")
+            );
             default -> throw new IllegalArgumentException("Unknown provider: " + provider);
         };
     }
