@@ -15,6 +15,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.management.ServiceNotFoundException;
 import java.util.Map;
 
 @Service
@@ -28,12 +29,12 @@ public class OAuth2AuthService {
     public OAuth2AuthService(ClientRegistrationRepository registrationRepo,
                              OAuth2AuthorizedClientService authorizedClientService,
                              UserApi userApi,
-                             JwtService jwtService, RestClient restClient) {
+                             JwtService jwtService) {
         this.registrationRepo = registrationRepo;
         this.authorizedClientService = authorizedClientService;
         this.userApi = userApi;
         this.jwtService = jwtService;
-        this.restClient = restClient;
+        this.restClient = RestClient.create();
     }
 
     public String buildAuthorizationUrl(String provider, String redirectUri) {
@@ -48,7 +49,9 @@ public class OAuth2AuthService {
                 .toUriString();
     }
 
-    public AuthResponse handleCallback(String provider, String code, String redirectUri) {
+    public AuthResponse handleCallback(String provider,
+                                       String code,
+                                       String redirectUri) throws ServiceNotFoundException {
         ClientRegistration registration = registrationRepo.findByRegistrationId(provider);
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -61,22 +64,22 @@ public class OAuth2AuthService {
         Map<String, Object> tokenResponse = restClient.post()
                 .uri(registration.getProviderDetails().getTokenUri())
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .bodyValue(params)
+                .body(params)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
-                .block();
-
-        String accessToken = (String) tokenResponse.get("access_token");
+                .body(new ParameterizedTypeReference<>() {
+                });
+        if (tokenResponse == null) {
+            throw new ServiceNotFoundException("Tokenresponse is null. Provider: " + provider);
+        }
+        String accessToken = (String) tokenResponse.getOrDefault("access_token", "");
 
         // 2. Fetch user info from the provider
         Map<String, Object> userAttributes = restClient.get()
                 .uri(registration.getProviderDetails().getUserInfoEndpoint().getUri())
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
-                .block();
+                .body(new ParameterizedTypeReference<>() {
+                });
 
         // 3. Normalize across providers
         OAuth2UserInfo userInfo = OAuth2UserInfo.from(provider, userAttributes);

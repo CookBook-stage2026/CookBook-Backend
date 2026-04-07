@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.management.ServiceNotFoundException;
 import java.util.Map;
 
 @RestController
@@ -33,7 +34,7 @@ public class AuthController {
     @PostMapping("/{provider}/callback")
     public ResponseEntity<AuthResponse> handleCallback(
             @PathVariable String provider,
-            @RequestBody CallbackRequest request) {
+            @RequestBody CallbackRequest request) throws ServiceNotFoundException {
         return ResponseEntity.ok(authService.handleCallback(
                 provider, request.code(), request.redirectUri()
         ));
