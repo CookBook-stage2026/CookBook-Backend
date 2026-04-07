@@ -1,0 +1,23 @@
+name: cookbook
+
+services:
+  backend:
+    image: cookbook-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_USERNAME=username
+      - DB_PASSWORD=password
+      - SPRING_PROFILES_ACTIVE=deploy
+    volumes:
+      - db-data:/app/data
+
+  frontend:
+    image: cookbook-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  db-data:
