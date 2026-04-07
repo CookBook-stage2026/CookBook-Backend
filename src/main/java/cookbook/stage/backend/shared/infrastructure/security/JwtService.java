@@ -20,20 +20,19 @@ public class JwtService {
     private String secret;
 
     @Value("${app.jwt.expiration-ms}")
-    private long expirationSeconds;
+    private long expirationMs;
 
     private SecretKey signingKey() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     public String generateToken(User user) {
         return Jwts.builder()
-                .subject(user.getId().id().toString())
+                .subject(String.valueOf(user.getId()))
                 .claim("email", user.getEmail())
                 .claim("name", user.getDisplayName())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationSeconds * 1000))
+                .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(signingKey())
                 .compact();
     }
@@ -54,7 +53,7 @@ public class JwtService {
         try {
             extractClaims(token);
             return true;
-        } catch (JwtException | IllegalArgumentException _) {
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
