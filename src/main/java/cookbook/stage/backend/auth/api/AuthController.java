@@ -1,6 +1,11 @@
 package cookbook.stage.backend.auth.api;
 
+import cookbook.stage.backend.auth.api.dto.AuthResponse;
+import cookbook.stage.backend.auth.api.dto.CallbackRequest;
+import cookbook.stage.backend.auth.api.dto.TokenRefreshRequest;
+import cookbook.stage.backend.auth.api.dto.TokenRefreshResponse;
 import cookbook.stage.backend.auth.application.OAuth2AuthService;
+import cookbook.stage.backend.auth.application.RefreshTokenService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,9 +23,11 @@ import java.util.Map;
 public class AuthController {
 
     private final OAuth2AuthService authService;
+    private final RefreshTokenService refreshTokenService;
 
-    public AuthController(OAuth2AuthService authService) {
+    public AuthController(OAuth2AuthService authService, RefreshTokenService refreshTokenService) {
         this.authService = authService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @GetMapping("/{provider}/url")
@@ -36,8 +43,12 @@ public class AuthController {
             @PathVariable String provider,
             @RequestBody CallbackRequest request) throws ServiceNotFoundException {
         return ResponseEntity.ok(authService.handleCallback(
-                provider, request.code(), request.redirectUri()
+                provider, request.code(), request.redirectUri(), request.rememberMe()
         ));
     }
-}
 
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenRefreshResponse> refreshToken(@RequestBody TokenRefreshRequest request) {
+        return ResponseEntity.ok(refreshTokenService.refreshAccessToken(request.refreshToken()));
+    }
+}
