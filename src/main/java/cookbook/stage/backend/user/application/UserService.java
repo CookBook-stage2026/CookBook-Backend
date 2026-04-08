@@ -7,6 +7,7 @@ import cookbook.stage.backend.user.shared.User;
 import cookbook.stage.backend.user.shared.UserApi;
 import cookbook.stage.backend.user.shared.UserId;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -20,6 +21,7 @@ public class UserService implements UserApi {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<User> findById(UserId id) {
         if (id == null) {
             throw new NotFoundException("User ID cannot be null");
@@ -28,6 +30,7 @@ public class UserService implements UserApi {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<User> findBySocialConnection(String provider, String providerId) {
         return userRepository.findBySocialConnection(provider, providerId);
     }

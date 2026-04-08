@@ -1,12 +1,11 @@
 package cookbook.stage.backend.auth.application;
 
-import cookbook.stage.backend.auth.api.AuthResponse;
+import cookbook.stage.backend.auth.api.dto.AuthResponse;
 import cookbook.stage.backend.shared.infrastructure.security.JwtService;
 import cookbook.stage.backend.user.shared.User;
 import cookbook.stage.backend.user.shared.UserApi;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.stereotype.Service;
@@ -24,14 +23,16 @@ public class OAuth2AuthService {
     private final UserApi userApi;
     private final JwtService jwtService;
     private final RestClient restClient;
+    private final RefreshTokenService refreshTokenService;
 
     public OAuth2AuthService(ClientRegistrationRepository registrationRepo,
-                             OAuth2AuthorizedClientService authorizedClientService,
                              UserApi userApi,
-                             JwtService jwtService) {
+                             JwtService jwtService,
+                             RefreshTokenService refreshTokenService) {
         this.registrationRepo = registrationRepo;
         this.userApi = userApi;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
         this.restClient = RestClient.create();
     }
 
@@ -49,7 +50,8 @@ public class OAuth2AuthService {
 
     public AuthResponse handleCallback(String provider,
                                        String code,
-                                       String redirectUri) throws ServiceNotFoundException {
+                                       String redirectUri,
+                                       boolean rememberMe) throws ServiceNotFoundException {
         ClientRegistration registration = registrationRepo.findByRegistrationId(provider);
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -67,6 +69,7 @@ public class OAuth2AuthService {
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {
                 });
+
         if (tokenResponse == null) {
             throw new ServiceNotFoundException("Tokenresponse is null. Provider: " + provider);
         }
@@ -88,6 +91,13 @@ public class OAuth2AuthService {
                         userInfo.provider(),
                         userInfo.providerId()));
 
-        return new AuthResponse(jwtService.generateToken(user), user.getEmail(), user.getDisplayName());
+        String accessJwtToken = jwtService.generateToken(user);
+        String refreshToken = null;
+
+        if (rememberMe) {
+            refreshToken = refreshTokenService.createRefreshToken(user.getId());
+        }
+
+        return new AuthResponse(accessJwtToken, refreshToken, user.getEmail(), user.getDisplayName());
     }
 }
