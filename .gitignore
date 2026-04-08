@@ -37,3 +37,4 @@ out/
 .vscode/
 
 myDatabase.db
+src/main/resources/application-dev.properties
