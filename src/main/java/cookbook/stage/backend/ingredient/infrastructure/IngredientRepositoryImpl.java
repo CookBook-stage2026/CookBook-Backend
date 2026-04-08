@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class IngredientRepositoryImpl implements IngredientRepository {
@@ -34,6 +35,15 @@ public class IngredientRepositoryImpl implements IngredientRepository {
     public Optional<Ingredient> findById(IngredientId id) {
         return jpaIngredientRepository.findById(id.id())
                 .map(JpaIngredientEntity::toDomain);
+    }
+
+    @Override
+    public List<Ingredient> findByIds(List<IngredientId> ids) {
+        List<UUID> uuids = ids.stream().map(IngredientId::id).toList();
+        return jpaIngredientRepository.findAllById(uuids)
+                .stream()
+                .map(JpaIngredientEntity::toDomain)
+                .toList();
     }
 
     @Override

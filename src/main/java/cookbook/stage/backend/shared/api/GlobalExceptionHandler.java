@@ -1,5 +1,6 @@
 package cookbook.stage.backend.shared.api;
 
+import cookbook.stage.backend.shared.domain.DataIntegrityException;
 import cookbook.stage.backend.shared.domain.NotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler({
-            NullPointerException.class
+            NullPointerException.class,
+            DataIntegrityException.class
     })
     ResponseEntity<Object> handleBadRequestExceptions(RuntimeException ex, WebRequest request) {
         String responseBody = ex.getMessage();

@@ -5,14 +5,16 @@ import cookbook.stage.backend.recipe.api.dto.CreateRecipeDto;
 import cookbook.stage.backend.recipe.api.dto.RecipeDto;
 import cookbook.stage.backend.recipe.api.dto.RecipeSummaryDto;
 import cookbook.stage.backend.recipe.application.RecipeService;
-import cookbook.stage.backend.recipe.domain.Recipe;
+import cookbook.stage.backend.recipe.application.RecipeWithIngredients;
 import cookbook.stage.backend.recipe.domain.RecipeIngredient;
+import cookbook.stage.backend.recipe.shared.RecipeId;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/recipes")
@@ -44,7 +47,7 @@ public class RecipeController {
                 .map(i -> new RecipeIngredient(new IngredientId(i.ingredientId()), i.baseQuantity()))
                 .toList();
 
-        Recipe recipe = recipeService.createRecipe(
+        RecipeWithIngredients recipe = recipeService.createRecipe(
                 createRecipeDto.name(),
                 createRecipeDto.description(),
                 createRecipeDto.durationInMinutes(),
@@ -52,6 +55,21 @@ public class RecipeController {
                 ingredients,
                 createRecipeDto.servings()
         );
+
+        return RecipeDto.fromDomain(recipe);
+    }
+
+    /**
+     * Gets a recipe by id
+     *
+     * @param id The id of the requested recipe
+     * @return Recipe
+     */
+    @GetMapping("/{id}")
+    public RecipeDto getRecipeById(
+            @PathVariable UUID id
+    ) {
+        RecipeWithIngredients recipe = recipeService.findById(new RecipeId(id));
 
         return RecipeDto.fromDomain(recipe);
     }

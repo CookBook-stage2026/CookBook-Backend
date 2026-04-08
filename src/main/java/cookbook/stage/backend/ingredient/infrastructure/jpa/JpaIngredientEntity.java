@@ -1,7 +1,7 @@
 package cookbook.stage.backend.ingredient.infrastructure.jpa;
 
 import cookbook.stage.backend.ingredient.domain.Ingredient;
-import cookbook.stage.backend.ingredient.domain.Unit;
+import cookbook.stage.backend.ingredient.shared.Unit;
 import cookbook.stage.backend.ingredient.shared.IngredientId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

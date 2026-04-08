@@ -1,6 +1,7 @@
 package cookbook.stage.backend.ingredient.domain;
 
 import cookbook.stage.backend.ingredient.shared.IngredientId;
+import cookbook.stage.backend.ingredient.shared.Unit;
 
 public record Ingredient(
         IngredientId id,

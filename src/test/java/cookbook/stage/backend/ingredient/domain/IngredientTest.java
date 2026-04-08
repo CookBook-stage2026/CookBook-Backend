@@ -1,6 +1,7 @@
 package cookbook.stage.backend.ingredient.domain;
 
 import cookbook.stage.backend.ingredient.shared.IngredientId;
+import cookbook.stage.backend.ingredient.shared.Unit;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

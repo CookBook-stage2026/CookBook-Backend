@@ -47,8 +47,8 @@ VALUES ('11111111-0000-0000-0000-000000000001', 'Spaghetti', 'GRAM'),
 -- RECIPES
 -- ---------------------------------------------------------
 INSERT INTO recipes (recipe_id, name, description, duration_in_minutes, servings)
-VALUES ('22222222-0000-0000-0000-000000000001', 'Spaghetti Carbonara',
-        'A classic Italian pasta dish with eggs, cheese and pancetta', 30, 2),
+VALUES ('22222222-0000-0000-0000-000000000001', 'Spaghetti Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara Carbonara',
+        'A classic Italian pasta dish with eggs, cheese and pancetta A classic Italian pasta dish with eggs, cheese and pancetta A classic Italian pasta dish with eggs, cheese and pancetta A classic Italian pasta dish with eggs, cheese and pancetta', 30, 2),
        ('22222222-0000-0000-0000-000000000002', 'Chicken Tikka Masala',
         'Creamy and spiced Indian curry with tender chicken', 45, 4),
        ('22222222-0000-0000-0000-000000000003', 'Beef Tacos', 'Mexican street-style tacos with seasoned ground beef',
@@ -145,7 +145,7 @@ VALUES
 INSERT INTO recipe_steps (recipe_id, step_order, steps)
 VALUES
     -- Spaghetti Carbonara
-    ('22222222-0000-0000-0000-000000000001', 0, 'Boil pasta'),
+    ('22222222-0000-0000-0000-000000000001', 0, 'Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta Boil pasta'),
     ('22222222-0000-0000-0000-000000000001', 1, 'Fry pancetta'),
     ('22222222-0000-0000-0000-000000000001', 2, 'Mix eggs and cheese'),
     ('22222222-0000-0000-0000-000000000001', 3, 'Combine all'),

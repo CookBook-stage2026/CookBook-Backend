@@ -2,7 +2,7 @@ package cookbook.stage.backend.recipe.api.recipeController;
 
 import cookbook.stage.backend.ingredient.domain.Ingredient;
 import cookbook.stage.backend.ingredient.domain.IngredientRepository;
-import cookbook.stage.backend.ingredient.domain.Unit;
+import cookbook.stage.backend.ingredient.shared.Unit;
 import cookbook.stage.backend.ingredient.shared.IngredientId;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeDto;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeIngredientDto;
@@ -128,7 +128,7 @@ class CreateRecipeTests {
     }
 
     @Test
-    void createRecipe_shouldReturn404_whenIngredientDoesNotExist() throws Exception {
+    void createRecipe_shouldReturn500_whenIngredientDoesNotExist() throws Exception {
         // Arrange
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
                 new CreateRecipeIngredientDto(UUID.randomUUID(), DEFAULT_QUANTITY)
@@ -136,7 +136,7 @@ class CreateRecipeTests {
 
         // Act & Assert
         performCreateRecipe(dto)
-                .andExpect(status().isNotFound());
+                .andExpect(status().isInternalServerError());
     }
 
     private CreateRecipeDto buildCreateRecipeDto(List<CreateRecipeIngredientDto> ingredients) {

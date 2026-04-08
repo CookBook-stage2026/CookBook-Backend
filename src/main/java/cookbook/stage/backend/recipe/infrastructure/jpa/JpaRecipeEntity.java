@@ -4,18 +4,16 @@ import cookbook.stage.backend.recipe.domain.Recipe;
 import cookbook.stage.backend.recipe.domain.RecipeIngredient;
 import cookbook.stage.backend.recipe.domain.RecipeSummary;
 import cookbook.stage.backend.recipe.shared.RecipeId;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OrderColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.CascadeType;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import jakarta.persistence.OrderColumn;
+import jakarta.persistence.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +25,6 @@ public class JpaRecipeEntity {
 
     @Id
     @Column(name = "recipe_id")
-    @JdbcTypeCode(SqlTypes.VARCHAR)
     private UUID id;
 
     @Column(nullable = false)

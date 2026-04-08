@@ -2,7 +2,8 @@ package cookbook.stage.backend.ingredient.application;
 
 import cookbook.stage.backend.ingredient.domain.Ingredient;
 import cookbook.stage.backend.ingredient.domain.IngredientRepository;
-import cookbook.stage.backend.ingredient.domain.Unit;
+import cookbook.stage.backend.ingredient.shared.Unit;
+import cookbook.stage.backend.ingredient.shared.IngredientApiDto;
 import cookbook.stage.backend.ingredient.shared.IngredientId;
 import cookbook.stage.backend.ingredient.shared.IngredientsApi;
 import org.springframework.data.domain.Pageable;
@@ -19,9 +20,10 @@ public class IngredientService implements IngredientsApi {
     }
 
     @Override
-    public void assertAllExist(List<IngredientId> ids) {
-        ids.forEach(id -> ingredientRepository.findById(id)
-                .orElseThrow(id::notFound));
+    public List<IngredientApiDto> getIngredientsByIds(List<IngredientId> ids) {
+        return ingredientRepository.findByIds(ids).stream()
+                .map(IngredientApiDto::fromDomain)
+                .toList();
     }
 
     public List<Ingredient> findAll(Pageable pageable) {

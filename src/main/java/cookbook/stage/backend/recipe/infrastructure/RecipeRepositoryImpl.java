@@ -5,9 +5,12 @@ import cookbook.stage.backend.recipe.domain.RecipeRepository;
 import cookbook.stage.backend.recipe.domain.RecipeSummary;
 import cookbook.stage.backend.recipe.infrastructure.jpa.JpaRecipeEntity;
 import cookbook.stage.backend.recipe.infrastructure.jpa.JpaRecipeRepository;
+import cookbook.stage.backend.recipe.shared.RecipeId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 public class RecipeRepositoryImpl implements RecipeRepository {
@@ -21,6 +24,15 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     public Recipe save(Recipe recipe) {
         return jpaRecipeRepository.save(JpaRecipeEntity.fromDomain(recipe))
                 .toDomain();
+    }
+
+    @Override
+    public Optional<Recipe> findById(RecipeId id) {
+        return jpaRecipeRepository.findByIdWithIngredients(id.id())
+                .map(entity -> {
+                    jpaRecipeRepository.findByIdWithSteps(id.id());
+                    return entity.toDomain();
+                });
     }
 
     @Override

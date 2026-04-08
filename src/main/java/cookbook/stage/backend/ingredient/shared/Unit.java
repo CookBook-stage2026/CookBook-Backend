@@ -1,4 +1,4 @@
-package cookbook.stage.backend.ingredient.domain;
+package cookbook.stage.backend.ingredient.shared;
 
 public enum Unit {
     GRAM,

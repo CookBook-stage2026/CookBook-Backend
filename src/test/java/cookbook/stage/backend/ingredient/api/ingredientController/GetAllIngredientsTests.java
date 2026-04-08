@@ -1,7 +1,7 @@
 package cookbook.stage.backend.ingredient.api.ingredientController;
 
 import cookbook.stage.backend.ingredient.application.IngredientService;
-import cookbook.stage.backend.ingredient.domain.Unit;
+import cookbook.stage.backend.ingredient.shared.Unit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

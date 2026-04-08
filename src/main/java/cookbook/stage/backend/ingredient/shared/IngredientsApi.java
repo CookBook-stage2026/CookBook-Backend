@@ -6,5 +6,5 @@ import java.util.List;
 
 @NamedInterface
 public interface IngredientsApi {
-    void assertAllExist(List<IngredientId> ids);
+    List<IngredientApiDto> getIngredientsByIds(List<IngredientId> ids);
 }

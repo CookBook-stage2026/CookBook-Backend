@@ -13,5 +13,7 @@ public interface IngredientRepository {
 
     Optional<Ingredient> findById(IngredientId id);
 
+    List<Ingredient> findByIds(List<IngredientId> ids);
+
     List<Ingredient> searchByName(String name, Pageable pageable);
 }

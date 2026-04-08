@@ -1,12 +1,13 @@
 package cookbook.stage.backend.recipe.api.dto;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import cookbook.stage.backend.ingredient.shared.Unit;
 
 import java.util.UUID;
 
 public record RecipeIngredientDto(
-        @NotNull UUID ingredientId,
-        @Positive double baseQuantity
+        UUID ingredientId,
+        String name,
+        double baseQuantity,
+        Unit unit
 ) {
 }
