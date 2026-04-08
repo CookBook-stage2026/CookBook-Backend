@@ -1,10 +1,9 @@
 package cookbook.stage.backend.auth.api.authController;
 
-import cookbook.stage.backend.auth.api.dto.TokenRefreshRequest;
-import cookbook.stage.backend.auth.api.dto.TokenRefreshResponse;
+import cookbook.stage.backend.auth.api.dto.AuthResponse;
+import cookbook.stage.backend.auth.api.dto.CallbackRequest;
 import cookbook.stage.backend.auth.application.OAuth2AuthService;
 import cookbook.stage.backend.auth.application.RefreshTokenService;
-import cookbook.stage.backend.auth.shared.RefreshTokenService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +14,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.json.JsonMapper;
 
+import javax.management.ServiceNotFoundException;
+
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,10 +28,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SpringBootTest
-class RefreshTokenTests {
+class HandleCallbackTests {
 
+    private static final String DEFAULT_PROVIDER = "google";
+    private static final String DEFAULT_REDIRECT_URI = "http://localhost:3000/callback";
+    private static final String DEFAULT_CODE = "auth-code-123";
     private static final String DEFAULT_ACCESS_TOKEN = "access-token-abc";
     private static final String DEFAULT_REFRESH_TOKEN = "refresh-token-xyz";
+    private static final String DEFAULT_EMAIL = "user@example.com";
+    private static final String DEFAULT_DISPLAY_NAME = "Test User";
 
     @Autowired
     private MockMvc mockMvc;
@@ -43,26 +51,44 @@ class RefreshTokenTests {
     private RefreshTokenService refreshTokenService;
 
     @Test
-    void refreshToken_shouldReturnNewTokens_whenRefreshTokenIsValid() throws Exception {
+    void handleCallback_shouldReturnAuthResponse_whenCallbackIsValid() throws Exception {
         // Arrange
-        TokenRefreshResponse refreshResponse = new TokenRefreshResponse(
+        AuthResponse authResponse = new AuthResponse(
                 DEFAULT_ACCESS_TOKEN,
-                DEFAULT_REFRESH_TOKEN
+                DEFAULT_REFRESH_TOKEN,
+                DEFAULT_EMAIL,
+                DEFAULT_DISPLAY_NAME
         );
-        when(refreshTokenService.refreshAccessToken(DEFAULT_REFRESH_TOKEN)).thenReturn(refreshResponse);
+        when(authService.handleCallback(anyString(), anyString(), anyString(), anyBoolean()))
+                .thenReturn(authResponse);
 
-        TokenRefreshRequest request = new TokenRefreshRequest(DEFAULT_REFRESH_TOKEN);
+        CallbackRequest request = new CallbackRequest(DEFAULT_CODE, DEFAULT_REDIRECT_URI, false);
 
         // Act & Assert
-        performRefreshToken(request)
+        performHandleCallback(DEFAULT_PROVIDER, request)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.accessToken").value(DEFAULT_ACCESS_TOKEN))
-                .andExpect(jsonPath("$.refreshToken").value(DEFAULT_REFRESH_TOKEN));
+                .andExpect(jsonPath("$.refreshToken").value(DEFAULT_REFRESH_TOKEN))
+                .andExpect(jsonPath("$.email").value(DEFAULT_EMAIL))
+                .andExpect(jsonPath("$.displayName").value(DEFAULT_DISPLAY_NAME));
     }
 
-    private ResultActions performRefreshToken(TokenRefreshRequest request) throws Exception {
-        return mockMvc.perform(post("/auth/refresh")
+    @Test
+    void handleCallback_shouldPropagateException_whenServiceThrows() throws Exception {
+        // Arrange
+        when(authService.handleCallback(anyString(), anyString(), anyString(), anyBoolean()))
+                .thenThrow(new ServiceNotFoundException("Provider not found"));
+
+        CallbackRequest request = new CallbackRequest(DEFAULT_CODE, DEFAULT_REDIRECT_URI, false);
+
+        // Act & Assert
+        performHandleCallback(DEFAULT_PROVIDER, request)
+                .andExpect(status().is5xxServerError());
+    }
+
+    private ResultActions performHandleCallback(String provider, CallbackRequest request) throws Exception {
+        return mockMvc.perform(post("/auth/{provider}/callback", provider)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))

@@ -2,6 +2,7 @@ package cookbook.stage.backend.auth.application.refreshTokenService;
 
 import cookbook.stage.backend.auth.api.dto.TokenRefreshResponse;
 import cookbook.stage.backend.auth.shared.RefreshTokenService;
+import cookbook.stage.backend.auth.application.RefreshTokenService;
 import cookbook.stage.backend.auth.domain.RefreshToken;
 import cookbook.stage.backend.auth.domain.RefreshTokenRepository;
 import cookbook.stage.backend.auth.infrastructure.RefreshTokenRepositoryImpl;

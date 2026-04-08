@@ -27,13 +27,13 @@ public class OAuth2AuthService {
 
     public OAuth2AuthService(ClientRegistrationRepository registrationRepo,
                              UserApi userApi,
-                             JwtService jwtService,
+                             JwtService jwtService, RestClient.Builder restClientBuilder,
                              RefreshTokenService refreshTokenService) {
         this.registrationRepo = registrationRepo;
         this.userApi = userApi;
         this.jwtService = jwtService;
+        this.restClient = restClientBuilder.build();
         this.refreshTokenService = refreshTokenService;
-        this.restClient = RestClient.create();
     }
 
     public String buildAuthorizationUrl(String provider, String redirectUri) {

@@ -1,6 +1,7 @@
 package cookbook.stage.backend.auth.application.refreshTokenService;
 
 import cookbook.stage.backend.auth.shared.RefreshTokenService;
+import cookbook.stage.backend.auth.application.RefreshTokenService;
 import cookbook.stage.backend.auth.infrastructure.RefreshTokenRepositoryImpl;
 import cookbook.stage.backend.auth.infrastructure.jpa.JpaRefreshTokenRepository;
 import cookbook.stage.backend.shared.infrastructure.security.JwtService;
