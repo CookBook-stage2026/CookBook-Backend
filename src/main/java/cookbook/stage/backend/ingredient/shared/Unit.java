@@ -9,5 +9,6 @@ public enum Unit {
     TABLESPOON,
     CUP,
     PIECE,
+    PINCH,
     NONE
 }
