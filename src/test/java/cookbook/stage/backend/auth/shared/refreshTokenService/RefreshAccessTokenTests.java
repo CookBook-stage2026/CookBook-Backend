@@ -29,6 +29,7 @@ class RefreshAccessTokenTests {
 
     @Autowired
     private UserApi userApi;
+    private static final int EXPIRE_TIME = 3600;
 
     @Test
     void refreshAccessToken_TokenNotFound_ThrowsException() {
@@ -50,7 +51,7 @@ class RefreshAccessTokenTests {
         RefreshToken expiredToken = new RefreshToken(
                 expiredTokenString,
                 user.getId(),
-                Instant.now().minusSeconds(3600)
+                Instant.now().minusSeconds(EXPIRE_TIME)
         );
         refreshTokenRepository.save(expiredToken);
 

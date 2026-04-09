@@ -35,6 +35,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     private long jwtTokenExpiration;
     @Value("${app.jwt.remember-me-expiration-seconds}")
     private long refreshTokenExpiration;
+    private static final long TO_SECONDS = 1000;
 
     public OAuth2AuthenticationSuccessHandler(UserApi userApi,
                                               JwtService jwtService,
@@ -78,7 +79,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         cookieRepo.removeAuthorizationRequestCookies(request, response);
 
         String accessToken = jwtService.generateToken(user);
-        cookieUtils.addCookie(response, "access_token", accessToken, jwtTokenExpiration / 1000 /* to seconds */, false);
+        cookieUtils.addCookie(response, "access_token", accessToken, jwtTokenExpiration / TO_SECONDS, false);
 
         if (rememberMe) {
             String refreshToken = refreshTokenService.createRefreshToken(user.getId());

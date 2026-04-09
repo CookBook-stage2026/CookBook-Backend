@@ -33,6 +33,7 @@ class RefreshTokenTests {
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
+    private static final int EXPIRE_TIME = 3600;
 
     @Test
     void refreshToken_ValidCookie_ReturnsTokenRefreshResponse() throws Exception {
@@ -43,9 +44,7 @@ class RefreshTokenTests {
         RefreshToken refreshToken = new RefreshToken(
                 plainToken,
                 user.getId(),
-                // This is the same as in the application.properties test file,
-                // if you edit the app.jwt.expiration-ms value, be sure to update this test accordingly.
-                Instant.now().plusSeconds(3600)
+                Instant.now().plusSeconds(EXPIRE_TIME)
         );
         refreshTokenRepository.save(refreshToken);
 

@@ -27,13 +27,15 @@ class CreateRefreshTokenTests {
 
     @Autowired
     private UserApi userApi;
+    private static final int SECONDS_TO_ADD = 100;
 
     @Test
     void createRefreshToken_ValidUserId_DeletesOldAndCreatesNewToken() {
         // Arrange
         User user = userApi.autoSaveAfterLogin("create@example.com", "Create User", "google", "create-123");
 
-        RefreshToken oldToken = new RefreshToken("old-token-value", user.getId(), Instant.now().plusSeconds(100));
+        RefreshToken oldToken = new RefreshToken("old-token-value", user.getId(), Instant.now()
+                .plusSeconds(SECONDS_TO_ADD));
         refreshTokenRepository.save(oldToken);
 
         // Act

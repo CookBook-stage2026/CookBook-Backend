@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OAuth2UserInfoFromTests {
+    private static final int RANDOM_ID = 98765;
 
     @Test
     void from_GoogleProvider_ReturnsCorrectUserInfo() {
@@ -33,7 +34,7 @@ class OAuth2UserInfoFromTests {
     void from_GithubProviderWithEmail_ReturnsCorrectUserInfo() {
         // Arrange
         Map<String, Object> attributes = Map.of(
-                "id", 98765,
+                "id", RANDOM_ID,
                 "email", "github@example.com",
                 "login", "githublogin"
         );
@@ -53,7 +54,7 @@ class OAuth2UserInfoFromTests {
     void from_GithubProviderWithoutEmail_AssignsFallbackEmail() {
         // Arrange
         Map<String, Object> attributes = Map.of(
-                "id", 98765,
+                "id", RANDOM_ID,
                 "name", "Github User"
         );
 

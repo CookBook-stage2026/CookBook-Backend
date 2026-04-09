@@ -1,6 +1,5 @@
 package cookbook.stage.backend.auth.shared.oAuth2AuthenticationSuccessHandler;
 
-import cookbook.stage.backend.auth.domain.RefreshTokenRepository;
 import cookbook.stage.backend.auth.shared.CookieAuthorizationRequestRepository;
 import cookbook.stage.backend.auth.shared.OAuth2AuthenticationSuccessHandler;
 import cookbook.stage.backend.user.shared.UserApi;
@@ -37,9 +36,7 @@ class OAuth2AuthenticationSuccessHandlerOnAuthenticationSuccessTests {
 
     @Autowired
     private UserApi userApi;
-
-    @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
+    private static final int RANDOM_ID = 9999;
 
     @Value("${frontend.url:http://localhost:4200/}")
     private String frontendUrl;
@@ -93,7 +90,7 @@ class OAuth2AuthenticationSuccessHandlerOnAuthenticationSuccessTests {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         Map<String, Object> attributes = Map.of(
-                "id", 9999,
+                "id", RANDOM_ID,
                 "email", "newgithub@example.com",
                 "login", "githublogin"
         );
