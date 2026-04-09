@@ -1,6 +1,5 @@
 package cookbook.stage.backend.auth.api.authController;
 
-import cookbook.stage.backend.auth.api.dto.TokenRefreshRequest;
 import cookbook.stage.backend.auth.api.dto.TokenRefreshResponse;
 import cookbook.stage.backend.auth.shared.RefreshTokenService;
 import org.junit.jupiter.api.Test;

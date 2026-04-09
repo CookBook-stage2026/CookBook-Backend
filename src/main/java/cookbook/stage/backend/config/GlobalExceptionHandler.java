@@ -2,6 +2,7 @@ package cookbook.stage.backend.config;
 
 import cookbook.stage.backend.domain.exception.DataIntegrityException;
 import cookbook.stage.backend.domain.exception.NotFoundException;
+import cookbook.stage.backend.shared.domain.OAuth2Exception;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+    @ExceptionHandler(OAuth2Exception.class)
+    ResponseEntity<Object> handleUnauthorizedException(OAuth2Exception ex, WebRequest request) {
+        String responseBody = ex.getMessage();
+        return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
+    }
+
     @ExceptionHandler(NotFoundException.class)
     ResponseEntity<Object> handleNotFoundException(NotFoundException ex, WebRequest request) {
         String responseBody = ex.getMessage();

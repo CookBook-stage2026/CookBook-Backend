@@ -21,10 +21,10 @@ public class JpaUserEntity {
     @Id
     private UUID userId;
 
-    @Column(name = "email")
+    @Column
     private String email;
 
-    @Column(name = "display_name")
+    @Column
     private String displayName;
 
     @ElementCollection
