@@ -1,12 +1,17 @@
 package cookbook.stage.backend.api;
 
+import cookbook.stage.backend.api.input.IngredientSearchRequest;
 import cookbook.stage.backend.api.result.IngredientDto;
+import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.service.IngredientService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -21,40 +26,23 @@ public class IngredientController {
     }
 
     /**
-     * Gets all ingredients with pagination
+     * Searches ingredients by name, with pagination (case-insensitive, substring match).
      *
-     * @param page current page (default 0)
-     * @param size size of page (default 20)
-     * @return List of ingredients
+     * @param request search parameters including query, excluded ids, and pagination
+     * @return list of ingredients matching the query
      */
-    @GetMapping
-    public List<IngredientDto> getAllIngredients(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+    @PostMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<IngredientDto> searchIngredients(
+            @RequestBody @Valid IngredientSearchRequest request
     ) {
-        Pageable pageable = PageRequest.of(page, size);
-
-        return ingredientService.findAll(pageable).stream()
-                .map(IngredientDto::fromDomain)
+        List<IngredientId> selected = request.alreadySelectedIds().stream()
+                .map(IngredientId::new)
                 .toList();
-    }
 
-    /**
-     * Gets ingredients by name, with pagination (case-insensitive + doesn't matter where the letters are in the name)
-     * @param query the name
-     * @param page current page (default 0)
-     * @param size size of page (default 10)
-     * @return List of ingredients matching the query
-     */
-    @GetMapping("/search")
-    public List<IngredientDto> getIngredientByName(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(request.page(), request.size());
 
-        return ingredientService.searchByName(query, pageable).stream()
+        return ingredientService.searchByName(request.query(), selected, pageable).stream()
                 .map(IngredientDto::fromDomain)
                 .toList();
     }

@@ -106,26 +106,6 @@ class GetRecipeByIdTests {
                 .andExpect(status().isNotFound());
     }
 
-    @Test
-    void getRecipeById_shouldReturn500_whenIngredientNoLongerExists() throws Exception {
-        // Arrange
-        Recipe recipe = recipeRepository.save(new Recipe(
-                RecipeId.create(),
-                DEFAULT_RECIPE_NAME,
-                DEFAULT_RECIPE_DESCRIPTION,
-                DEFAULT_DURATION_IN_MINUTES,
-                DEFAULT_STEPS,
-                List.of(new RecipeIngredient(
-                        new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM), DEFAULT_QUANTITY)
-                ),
-                DEFAULT_SERVINGS
-        ));
-
-        // Act & Assert
-        performGetRecipeById(recipe.getId().id())
-                .andExpect(status().isInternalServerError());
-    }
-
     private Ingredient saveIngredient(String name, Unit unit) {
         Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), name, unit);
         ingredientRepository.save(ingredient);

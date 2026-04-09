@@ -24,17 +24,13 @@ public class IngredientService {
                 .toList();
     }
 
-    public List<Ingredient> findAll(Pageable pageable) {
-        return this.ingredientRepository.findAll(pageable);
-    }
-
     @Transactional
     public Ingredient createIngredient(String name, Unit unit) {
         Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit);
         return ingredientRepository.save(ingredient);
     }
 
-    public List<Ingredient> searchByName(String name, Pageable pageable) {
-        return this.ingredientRepository.searchByName(name, pageable);
+    public List<Ingredient> searchByName(String name, List<IngredientId> selectedIds, Pageable pageable) {
+        return this.ingredientRepository.searchByName(name, selectedIds, pageable);
     }
 }

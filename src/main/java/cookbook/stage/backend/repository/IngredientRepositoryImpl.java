@@ -25,12 +25,6 @@ public class IngredientRepositoryImpl implements IngredientRepository {
                 .toDomain();
     }
 
-    public List<Ingredient> findAll(Pageable pageable) {
-        return this.jpaIngredientRepository.findAll(pageable).stream()
-                .map(JpaIngredientEntity::toDomain)
-                .toList();
-    }
-
     @Override
     public Optional<Ingredient> findById(IngredientId id) {
         return jpaIngredientRepository.findById(id.id())
@@ -47,8 +41,15 @@ public class IngredientRepositoryImpl implements IngredientRepository {
     }
 
     @Override
-    public List<Ingredient> searchByName(String name, Pageable pageable) {
-        return this.jpaIngredientRepository.findByNameContainingIgnoreCase(name, pageable).stream()
+    public List<Ingredient> searchByName(String name, List<IngredientId> selectedIds, Pageable pageable) {
+        String searchName = name != null ? name : "";
+        List<UUID> selectedUuids = selectedIds != null
+                ? selectedIds.stream().map(IngredientId::id).toList()
+                : List.of();
+
+        return this.jpaIngredientRepository
+                .searchByNamePrioritizingStartsWith(searchName, selectedUuids, pageable)
+                .stream()
                 .map(JpaIngredientEntity::toDomain)
                 .toList();
     }
