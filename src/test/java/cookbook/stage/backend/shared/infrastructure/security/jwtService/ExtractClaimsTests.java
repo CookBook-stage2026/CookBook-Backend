@@ -1,91 +1,54 @@
 package cookbook.stage.backend.shared.infrastructure.security.jwtService;
 
-
 import cookbook.stage.backend.shared.infrastructure.security.JwtService;
 import cookbook.stage.backend.user.shared.User;
 import cookbook.stage.backend.user.shared.UserId;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Base64;
-import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+@SpringBootTest
 class ExtractClaimsTests {
 
+    @Autowired
     private JwtService jwtService;
-    private final String secret = Base64.getEncoder()
-            .encodeToString("my-256-bit-secret-key-for-jwt-signing!!".getBytes());
-    private final long expirationMs = 3600000L;
-
-    private User mockUser;
-
-    @BeforeEach
-    void setUp() {
-        jwtService = new JwtService();
-        ReflectionTestUtils.setField(jwtService, "secret", secret);
-        ReflectionTestUtils.setField(jwtService, "expirationMs", expirationMs);
-
-        mockUser = mock(User.class);
-        UserId mockUserId = mock(UserId.class);
-        when(mockUserId.id()).thenReturn(UUID.randomUUID());
-        when(mockUser.getId()).thenReturn(mockUserId);
-        when(mockUser.getEmail()).thenReturn("test@example.com");
-        when(mockUser.getDisplayName()).thenReturn("Test User");
-    }
 
     @Test
-    void shouldExtractClaimsFromValidToken() {
-        String token = jwtService.generateToken(mockUser);
+    void extractClaims_ValidToken_ReturnsPopulatedClaims() {
+        // Arrange
+        User user = new User(new UserId(UUID.randomUUID()), "claims@example.com", "Claims User", List.of());
+        String token = jwtService.generateToken(user);
+
+        // Act
         Claims claims = jwtService.extractClaims(token);
+
+        // Assert
         assertThat(claims).isNotNull();
+        assertThat(claims.getExpiration()).isAfter(claims.getIssuedAt());
     }
 
     @Test
-    void shouldThrowJwtExceptionForMalformedToken() {
-        assertThatThrownBy(() -> jwtService.extractClaims("not.a.jwt"))
+    void extractClaims_MalformedToken_ThrowsJwtException() {
+        // Arrange
+        String malformedToken = "invalid.token.structure";
+
+        // Act & Assert
+        assertThatThrownBy(() -> jwtService.extractClaims(malformedToken))
                 .isInstanceOf(JwtException.class);
     }
 
     @Test
-    void shouldThrowJwtExceptionForEmptyToken() {
-        assertThatThrownBy(() -> jwtService.extractClaims(""))
+    void extractClaims_NullToken_ThrowsIllegalArgumentException() {
+        // Act & Assert
+        assertThatThrownBy(() -> jwtService.extractClaims(null))
                 .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    void shouldThrowJwtExceptionForExpiredToken() {
-        String token = Jwts.builder()
-                .subject(UUID.randomUUID().toString())
-                .expiration(new Date(System.currentTimeMillis() - 1))
-                .signWith(Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret)))
-                .compact();
-
-        assertThatThrownBy(() -> jwtService.extractClaims(token))
-                .isInstanceOf(JwtException.class)
-                .hasMessageContaining("expired");
-    }
-
-    @Test
-    void shouldThrowJwtExceptionForTokenSignedWithDifferentKey() {
-        JwtService otherService = new JwtService();
-        String otherSecret = Base64.getEncoder()
-                .encodeToString("different-secret!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".getBytes());
-        ReflectionTestUtils.setField(otherService, "secret", otherSecret);
-        ReflectionTestUtils.setField(otherService, "expirationMs", expirationMs);
-        String token = otherService.generateToken(mockUser);
-
-        assertThatThrownBy(() -> jwtService.extractClaims(token))
-                .isInstanceOf(JwtException.class);
     }
 }

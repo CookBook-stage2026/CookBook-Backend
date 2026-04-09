@@ -1,69 +1,83 @@
 package cookbook.stage.backend.auth.api.authController;
 
-import cookbook.stage.backend.auth.api.dto.TokenRefreshResponse;
-import cookbook.stage.backend.auth.shared.RefreshTokenService;
-import cookbook.stage.backend.auth.shared.RefreshTokenService;
+import cookbook.stage.backend.auth.domain.RefreshToken;
+import cookbook.stage.backend.auth.domain.RefreshTokenRepository;
+import cookbook.stage.backend.user.shared.User;
+import cookbook.stage.backend.user.shared.UserApi;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import tools.jackson.databind.json.JsonMapper;
+import org.springframework.transaction.annotation.Transactional;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import java.time.Instant;
+import java.util.UUID;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
 @SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
 class RefreshTokenTests {
-
-    private static final String DEFAULT_ACCESS_TOKEN = "access-token-abc";
-    private static final String DEFAULT_REFRESH_TOKEN = "refresh-token-xyz";
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private JsonMapper jsonMapper;
+    private UserApi userApi;
 
-    @MockitoBean
-    private OAuth2AuthService authService;
-
-    @MockitoBean
-    private RefreshTokenService refreshTokenService;
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
 
     @Test
-    void refreshToken_shouldReturnNewTokens_whenRefreshTokenIsValid() throws Exception {
+    void refreshToken_ValidCookie_ReturnsTokenRefreshResponse() throws Exception {
         // Arrange
-        TokenRefreshResponse refreshResponse = new TokenRefreshResponse(
-                DEFAULT_ACCESS_TOKEN,
-                DEFAULT_REFRESH_TOKEN
-        );
-        when(refreshTokenService.refreshAccessToken(DEFAULT_REFRESH_TOKEN)).thenReturn(refreshResponse);
+        User user = userApi.autoSaveAfterLogin("refresh@example.com", "Refresh User", "google", "refresh-123");
 
-        TokenRefreshRequest request = new TokenRefreshRequest(DEFAULT_REFRESH_TOKEN);
+        String plainToken = UUID.randomUUID().toString();
+        RefreshToken refreshToken = new RefreshToken(
+                plainToken,
+                user.getId(),
+                // This is the same as in the application.properties test file,
+                // if you edit the app.jwt.expiration-ms value, be sure to update this test accordingly.
+                Instant.now().plusSeconds(3600)
+        );
+        refreshTokenRepository.save(refreshToken);
+
+        Cookie cookie = new Cookie("refresh_token", plainToken);
 
         // Act & Assert
-        performRefreshToken(request)
+        mockMvc.perform(post("/auth/refresh")
+                        .cookie(cookie)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.accessToken").value(DEFAULT_ACCESS_TOKEN))
-                .andExpect(jsonPath("$.refreshToken").value(DEFAULT_REFRESH_TOKEN));
+                .andExpect(jsonPath("$.accessToken").exists())
+                .andExpect(jsonPath("$.accessToken").isString())
+                .andExpect(jsonPath("$.refreshToken").value(plainToken));
     }
 
-    private ResultActions performRefreshToken(TokenRefreshRequest request) throws Exception {
-        return mockMvc.perform(post("/auth/refresh")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(request)))
-                .andDo(print());
+    @Test
+    void refreshToken_MissingCookie_ReturnsUnauthorized() throws Exception {
+        // Act & Assert
+        mockMvc.perform(post("/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void refreshToken_BlankCookie_ReturnsUnauthorized() throws Exception {
+        // Arrange
+        Cookie emptyCookie = new Cookie("refresh_token", "");
+
+        // Act & Assert
+        mockMvc.perform(post("/auth/refresh")
+                        .cookie(emptyCookie)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
     }
 }

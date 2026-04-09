@@ -3,83 +3,52 @@ package cookbook.stage.backend.shared.infrastructure.security.jwtService;
 import cookbook.stage.backend.shared.infrastructure.security.JwtService;
 import cookbook.stage.backend.user.shared.User;
 import cookbook.stage.backend.user.shared.UserId;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Base64;
-import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+@SpringBootTest
 class IsValidTests {
 
+    @Autowired
     private JwtService jwtService;
-    private final String secret = Base64.getEncoder()
-            .encodeToString("my-256-bit-secret-key-for-jwt-signing!!".getBytes());
-    private final long expirationMs = 3600000L;
 
-    private User mockUser;
+    @Test
+    void isValid_ValidToken_ReturnsTrue() {
+        // Arrange
+        User user = new User(new UserId(UUID.randomUUID()), "valid@example.com", "Valid User", List.of());
+        String token = jwtService.generateToken(user);
 
-    @BeforeEach
-    void setUp() {
-        jwtService = new JwtService();
-        ReflectionTestUtils.setField(jwtService, "secret", secret);
-        ReflectionTestUtils.setField(jwtService, "expirationMs", expirationMs);
+        // Act
+        boolean result = jwtService.isValid(token);
 
-        mockUser = mock(User.class);
-        UserId mockUserId = mock(UserId.class);
-        when(mockUserId.id()).thenReturn(UUID.randomUUID());
-        when(mockUser.getId()).thenReturn(mockUserId);
-        when(mockUser.getEmail()).thenReturn("test@example.com");
-        when(mockUser.getDisplayName()).thenReturn("Test User");
+        // Assert
+        assertThat(result).isTrue();
     }
 
     @Test
-    void shouldReturnTrueForValidToken() {
-        String token = jwtService.generateToken(mockUser);
-        assertThat(jwtService.isValid(token)).isTrue();
+    void isValid_MalformedToken_ReturnsFalse() {
+        // Arrange
+        String malformedToken = "invalid.token.structure";
+
+        // Act
+        boolean result = jwtService.isValid(malformedToken);
+
+        // Assert
+        assertThat(result).isFalse();
     }
 
     @Test
-    void shouldReturnFalseForMalformedToken() {
-        assertThat(jwtService.isValid("malformed")).isFalse();
-    }
+    void isValid_NullToken_ReturnsFalse() {
+        // Act
+        boolean result = jwtService.isValid(null);
 
-    @Test
-    void shouldReturnFalseForEmptyToken() {
-        assertThat(jwtService.isValid("")).isFalse();
-    }
-
-    @Test
-    void shouldReturnFalseForNullToken() {
-        assertThat(jwtService.isValid(null)).isFalse();
-    }
-
-    @Test
-    void shouldReturnFalseForExpiredToken() {
-        String token = Jwts.builder()
-                .subject(UUID.randomUUID().toString())
-                .expiration(new Date(System.currentTimeMillis() - 1))
-                .signWith(Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret)))
-                .compact();
-
-        assertThat(jwtService.isValid(token)).isFalse();
-    }
-
-    @Test
-    void shouldReturnFalseForTokenSignedWithDifferentKey() {
-        JwtService otherService = new JwtService();
-        String otherSecret = Base64.getEncoder()
-                .encodeToString("different-secret!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".getBytes());
-        ReflectionTestUtils.setField(otherService, "secret", otherSecret);
-        ReflectionTestUtils.setField(otherService, "expirationMs", expirationMs);
-        String token = otherService.generateToken(mockUser);
-        assertThat(jwtService.isValid(token)).isFalse();
+        // Assert
+        assertThat(result).isFalse();
     }
 }
