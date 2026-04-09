@@ -23,6 +23,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
+    @ExceptionHandler({
+            NullPointerException.class
+    })
+    ResponseEntity<Object> handleBadRequestExceptions(RuntimeException ex, WebRequest request) {
+        String responseBody = ex.getMessage();
+        return super.handleExceptionInternal(ex,
+                responseBody, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+    }
+
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> handleAll(Exception ex, WebRequest request) {
         String responseBody = "An unexpected internal server error occurred: " + ex.getMessage();

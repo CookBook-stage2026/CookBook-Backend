@@ -1,7 +1,8 @@
 package cookbook.stage.backend.recipe.application;
 
-import cookbook.stage.backend.recipe.domain.Ingredient;
+import cookbook.stage.backend.ingredient.shared.IngredientsApi;
 import cookbook.stage.backend.recipe.domain.Recipe;
+import cookbook.stage.backend.recipe.domain.RecipeIngredient;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
 import cookbook.stage.backend.recipe.domain.RecipeSummary;
 import cookbook.stage.backend.recipe.shared.RecipeId;
@@ -14,15 +15,21 @@ import java.util.List;
 @Service
 public class RecipeService {
     private final RecipeRepository recipeRepository;
+    private final IngredientsApi ingredientsApi;
 
-    public RecipeService(RecipeRepository recipeRepository) {
+    public RecipeService(RecipeRepository recipeRepository, IngredientsApi ingredientsApi) {
         this.recipeRepository = recipeRepository;
+        this.ingredientsApi = ingredientsApi;
     }
 
     public Recipe createRecipe(String name, String description, int durationInMinutes,
-                               List<String> steps, List<Ingredient> ingredients) {
-        Recipe recipe = new Recipe(RecipeId.create(), name, description, durationInMinutes, steps, ingredients);
+                               List<String> steps, List<RecipeIngredient> ingredients, int servings) {
+        ingredientsApi.assertAllExist(ingredients.stream()
+                .map(RecipeIngredient::ingredientId)
+                .toList());
 
+        Recipe recipe = new Recipe(RecipeId.create(),
+                name, description, durationInMinutes, steps, ingredients, servings);
         return recipeRepository.save(recipe);
     }
 

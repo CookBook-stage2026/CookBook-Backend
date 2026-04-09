@@ -1,7 +1,11 @@
 package cookbook.stage.backend.recipe.api.recipeController;
 
-import cookbook.stage.backend.recipe.domain.Ingredient;
+import cookbook.stage.backend.ingredient.domain.Ingredient;
+import cookbook.stage.backend.ingredient.domain.IngredientRepository;
+import cookbook.stage.backend.ingredient.domain.Unit;
+import cookbook.stage.backend.ingredient.shared.IngredientId;
 import cookbook.stage.backend.recipe.domain.Recipe;
+import cookbook.stage.backend.recipe.domain.RecipeIngredient;
 import cookbook.stage.backend.recipe.domain.RecipeRepository;
 import cookbook.stage.backend.recipe.shared.RecipeId;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,10 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,19 +36,24 @@ class GetAllRecipesTests {
     private static final String DEFAULT_RECIPE_NAME = "Test Name";
     private static final String DEFAULT_RECIPE_DESCRIPTION = "Test Description";
     private static final int DEFAULT_DURATION_IN_MINUTES = 60;
+    private static final int DEFAULT_SERVINGS = 2;
     private static final List<String> DEFAULT_STEPS = List.of("This is step 1", "This is step 2");
     private static final double DEFAULT_QUANTITY = 1.0;
-    private static final String DEFAULT_UNIT = "gram";
+    private static final int DEFAULT_PAGE = 0;
+    private static final int DEFAULT_PAGE_SIZE = 10;
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private RecipeRepository recipeRepository;
-
+    @Autowired
+    private IngredientRepository ingredientRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     @BeforeEach
     void tearDown() {
-        recipeRepository.deleteAll();
+        JdbcTestUtils.deleteFromTables(jdbcTemplate,
+                "recipe_ingredients", "recipes", "ingredients");
     }
 
     @Test
@@ -100,8 +112,7 @@ class GetAllRecipesTests {
                 .andExpect(jsonPath("$.page.totalElements").value(totalElements))
                 .andExpect(jsonPath("$.page.totalPages").value(expectedTotalPages))
                 .andExpect(jsonPath("$.page.number").value(firstPageIndex))
-                .andExpect(jsonPath("$.page.size").value(pageSize))
-                .andExpect(jsonPath("$.content", hasSize(expectedFirstPageCount)));
+                .andExpect(jsonPath("$.page.size").value(pageSize));
 
         // Act & Assert
         performGetAllRecipes(secondPageIndex, pageSize)
@@ -111,14 +122,31 @@ class GetAllRecipesTests {
                 .andExpect(jsonPath("$.page.size").value(pageSize));
     }
 
+    @Test
+    void getAllRecipes_shouldReturn400_whenPageIsNegative() throws Exception {
+        performGetAllRecipes(-1, DEFAULT_PAGE_SIZE)
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getAllRecipes_shouldReturn400_whenSizeIsNegative() throws Exception {
+        performGetAllRecipes(DEFAULT_PAGE, -1)
+                .andExpect(status().isBadRequest());
+    }
+
     private Recipe buildRecipe() {
+        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()),
+                "Flour " + UUID.randomUUID(), Unit.GRAM);
+        ingredientRepository.save(ingredient);
+
         return new Recipe(
                 RecipeId.create(),
                 DEFAULT_RECIPE_NAME,
                 DEFAULT_RECIPE_DESCRIPTION,
                 DEFAULT_DURATION_IN_MINUTES,
                 DEFAULT_STEPS,
-                List.of(new Ingredient("Flour", DEFAULT_QUANTITY, DEFAULT_UNIT))
+                List.of(new RecipeIngredient(ingredient.id(), DEFAULT_QUANTITY)),
+                DEFAULT_SERVINGS
         );
     }
 

@@ -30,11 +30,6 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public void deleteAll() {
-        jpaRecipeRepository.deleteAll();
-    }
-
-    @Override
     public long count() {
         return jpaRecipeRepository.count();
     }
