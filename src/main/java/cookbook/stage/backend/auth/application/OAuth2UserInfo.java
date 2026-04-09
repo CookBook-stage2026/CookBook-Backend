@@ -37,19 +37,20 @@ public record OAuth2UserInfo(
                     (String) attributes.get(emailWord),
                     (String) attributes.get("name")
             );
-            case "github" -> new OAuth2UserInfo(
-                    "github",
-                    String.valueOf(attributes.get("id")),
-                    (String) attributes.get("email"),
-                    attributes.get("name") != null
-                            ? (String) attributes.get("name")
-                            : (String) attributes.get("login")
-            );
+            case "github" -> {
+                String email = (String) attributes.get("email");
+                String name = attributes.get("name") != null
+                        ? (String) attributes.get("name")
+                        : (String) attributes.get("login");
+                yield new OAuth2UserInfo(
+                        "github",
+                        String.valueOf(attributes.get("id")),
+                        email,
+                        name
+                );
+            }
             case "microsoft" -> {
                 String email = (String) attributes.get("email");
-                if (email == null) {
-                    email = (String) attributes.get("name");
-                }
                 yield new OAuth2UserInfo(
                         "microsoft",
                         (String) attributes.get("sub"),
