@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.UUID;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -52,6 +53,7 @@ class RefreshTokenTests {
 
         // Act & Assert
         mockMvc.perform(post("/auth/refresh")
+                        .with(csrf())
                         .cookie(cookie)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -64,6 +66,7 @@ class RefreshTokenTests {
     void refreshToken_MissingCookie_ReturnsUnauthorized() throws Exception {
         // Act & Assert
         mockMvc.perform(post("/auth/refresh")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
     }
@@ -75,6 +78,7 @@ class RefreshTokenTests {
 
         // Act & Assert
         mockMvc.perform(post("/auth/refresh")
+                        .with(csrf())
                         .cookie(emptyCookie)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
