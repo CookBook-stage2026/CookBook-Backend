@@ -1,4 +1,4 @@
-package cookbook.stage.backend.auth.application;
+package cookbook.stage.backend.auth.shared;
 
 import cookbook.stage.backend.auth.api.dto.TokenRefreshResponse;
 import cookbook.stage.backend.auth.domain.RefreshToken;

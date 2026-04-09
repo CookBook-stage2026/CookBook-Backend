@@ -2,8 +2,7 @@ package cookbook.stage.backend.auth.api.authController;
 
 import cookbook.stage.backend.auth.api.dto.TokenRefreshRequest;
 import cookbook.stage.backend.auth.api.dto.TokenRefreshResponse;
-import cookbook.stage.backend.auth.application.OAuth2AuthService;
-import cookbook.stage.backend.auth.application.RefreshTokenService;
+import cookbook.stage.backend.auth.shared.RefreshTokenService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
