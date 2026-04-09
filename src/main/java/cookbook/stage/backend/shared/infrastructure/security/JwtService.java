@@ -20,19 +20,20 @@ public class JwtService {
     private String secret;
 
     @Value("${app.jwt.expiration-ms}")
-    private long expirationMs;
+    private long expirationSeconds;
 
     private SecretKey signingKey() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     public String generateToken(User user) {
         return Jwts.builder()
                 .subject(user.getId().id().toString())
                 .claim("email", user.getEmail())
                 .claim("name", user.getDisplayName())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationMs))
+                .expiration(new Date(System.currentTimeMillis() + expirationSeconds * 1000))
                 .signWith(signingKey())
                 .compact();
     }

@@ -36,7 +36,7 @@ public class RefreshTokenService {
         refreshTokenRepository.deleteByUserId(userId);
 
         String token = UUID.randomUUID().toString();
-        Instant expiryDate = Instant.now().plusMillis(refreshTokenDurationMs);
+        Instant expiryDate = Instant.now().plusSeconds(refreshTokenDurationMs);
 
         RefreshToken refreshToken = new RefreshToken(token, userId, expiryDate);
         refreshTokenRepository.save(refreshToken);
