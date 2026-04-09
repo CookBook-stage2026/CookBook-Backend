@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -88,10 +89,12 @@ class GetRecipeByIdTests {
                 .andExpect(jsonPath("$.servings").value(DEFAULT_SERVINGS))
                 .andExpect(jsonPath("$.steps[0]").value(DEFAULT_STEPS.getFirst()))
                 .andExpect(jsonPath("$.steps[1]").value(DEFAULT_STEPS.get(1)))
-                .andExpect(jsonPath("$.ingredients[*].ingredientId", hasItem(ingredient1.id().id().toString())))
-                .andExpect(jsonPath("$.ingredients[*].ingredientId", hasItem(ingredient2.id().id().toString())))
-                .andExpect(jsonPath("$.ingredients[*].name", hasItem(DEFAULT_INGREDIENT_NAME)))
-                .andExpect(jsonPath("$.ingredients[*].name", hasItem(DEFAULT_INGREDIENT_NAME_2)))
+                .andExpect(jsonPath("$.ingredients[*].ingredientId", hasItems(
+                        ingredient1.id().id().toString(),
+                        ingredient2.id().id().toString()
+                )))
+                .andExpect(jsonPath("$.ingredients[*].name", hasItems(
+                        DEFAULT_INGREDIENT_NAME, DEFAULT_INGREDIENT_NAME_2)))
                 .andExpect(jsonPath("$.ingredients[*].baseQuantity", hasItem(DEFAULT_QUANTITY)))
                 .andExpect(jsonPath("$.ingredients[*].unit", hasItem(DEFAULT_UNIT.toString())));
     }
