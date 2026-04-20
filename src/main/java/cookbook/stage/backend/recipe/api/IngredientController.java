@@ -1,6 +1,6 @@
 package cookbook.stage.backend.recipe.api;
 
-import cookbook.stage.backend.recipe.api.dto.IngredientDto;
+import cookbook.stage.backend.recipe.api.result.IngredientDto;
 import cookbook.stage.backend.recipe.application.IngredientService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

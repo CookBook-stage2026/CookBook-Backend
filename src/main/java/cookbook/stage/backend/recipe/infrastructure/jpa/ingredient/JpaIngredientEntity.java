@@ -1,16 +1,14 @@
 package cookbook.stage.backend.recipe.infrastructure.jpa.ingredient;
 
 import cookbook.stage.backend.recipe.domain.ingredient.Ingredient;
-import cookbook.stage.backend.recipe.domain.ingredient.Unit;
 import cookbook.stage.backend.recipe.domain.ingredient.IngredientId;
+import cookbook.stage.backend.recipe.domain.ingredient.Unit;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
 
@@ -19,7 +17,6 @@ import java.util.UUID;
 public class JpaIngredientEntity {
     @Id
     @Column(name = "ingredient_id")
-    @JdbcTypeCode(SqlTypes.VARCHAR)
     private UUID id;
 
     @Column(nullable = false)
@@ -48,5 +45,9 @@ public class JpaIngredientEntity {
 
     public Ingredient toDomain() {
         return new Ingredient(new IngredientId(id), name, unit);
+    }
+
+    public UUID getId() {
+        return id;
     }
 }

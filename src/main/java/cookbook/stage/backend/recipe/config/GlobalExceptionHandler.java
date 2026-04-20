@@ -1,4 +1,4 @@
-package cookbook.stage.backend.recipe.api;
+package cookbook.stage.backend.recipe.config;
 
 import cookbook.stage.backend.recipe.domain.exception.DataIntegrityException;
 import cookbook.stage.backend.recipe.domain.exception.NotFoundException;
@@ -18,20 +18,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
-        String responseBody = ex.getMessage();
-        return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
-    }
-
     @ExceptionHandler({
-            NullPointerException.class,
+            IllegalArgumentException.class,
             DataIntegrityException.class
     })
     ResponseEntity<Object> handleBadRequestExceptions(RuntimeException ex, WebRequest request) {
         String responseBody = ex.getMessage();
-        return super.handleExceptionInternal(ex,
-                responseBody, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+        return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(Exception.class)

@@ -1,14 +1,16 @@
 package cookbook.stage.backend.recipe.infrastructure.jpa.recipe;
 
 import cookbook.stage.backend.recipe.domain.recipe.Recipe;
+import cookbook.stage.backend.recipe.domain.recipe.RecipeId;
 import cookbook.stage.backend.recipe.domain.recipe.RecipeIngredient;
 import cookbook.stage.backend.recipe.domain.recipe.RecipeSummary;
-import cookbook.stage.backend.recipe.domain.recipe.RecipeId;
+import cookbook.stage.backend.recipe.infrastructure.jpa.ingredient.JpaIngredientEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
@@ -47,7 +49,7 @@ public class JpaRecipeEntity {
     @OrderColumn(name = "step_order")
     private List<String> steps;
 
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<JpaRecipeIngredientEntity> ingredients = new ArrayList<>();
 
     protected JpaRecipeEntity() {
@@ -102,7 +104,10 @@ public class JpaRecipeEntity {
     }
 
     public void addIngredient(RecipeIngredient recipeIngredient) {
-        JpaRecipeIngredientEntity entity = new JpaRecipeIngredientEntity(this, recipeIngredient);
+        // This jpaIngredient is only used as reference, it should not be stored in db again
+        JpaIngredientEntity jpaIngredient = JpaIngredientEntity.fromDomain(recipeIngredient.ingredient());
+
+        JpaRecipeIngredientEntity entity = new JpaRecipeIngredientEntity(this, recipeIngredient, jpaIngredient);
         ingredients.add(entity);
     }
 

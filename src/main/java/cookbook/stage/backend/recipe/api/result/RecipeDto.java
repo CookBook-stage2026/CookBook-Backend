@@ -1,11 +1,8 @@
-package cookbook.stage.backend.recipe.api.dto;
+package cookbook.stage.backend.recipe.api.result;
 
-import cookbook.stage.backend.recipe.domain.ingredient.Ingredient;
-import cookbook.stage.backend.recipe.domain.ingredient.IngredientId;
 import cookbook.stage.backend.recipe.domain.recipe.Recipe;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public record RecipeDto(
@@ -17,17 +14,9 @@ public record RecipeDto(
         List<RecipeIngredientDto> ingredients,
         int servings
 ) {
-    public static RecipeDto fromDomain(Recipe recipe, Map<IngredientId, Ingredient> ingredientMap) {
+    public static RecipeDto fromDomain(Recipe recipe) {
         List<RecipeIngredientDto> ingredientDtos = recipe.getIngredients().stream()
-                .map(ri -> {
-                    Ingredient ingredient = ingredientMap.get(ri.ingredientId());
-                    return new RecipeIngredientDto(
-                            ingredient.id().id(),
-                            ingredient.name(),
-                            ri.baseQuantity(),
-                            ingredient.unit()
-                    );
-                })
+                .map(RecipeIngredientDto::fromDomain)
                 .toList();
 
         return new RecipeDto(

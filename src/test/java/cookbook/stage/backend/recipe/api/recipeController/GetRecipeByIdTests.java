@@ -72,8 +72,8 @@ class GetRecipeByIdTests {
                 DEFAULT_DURATION_IN_MINUTES,
                 DEFAULT_STEPS,
                 List.of(
-                        new RecipeIngredient(ingredient1.id(), DEFAULT_QUANTITY),
-                        new RecipeIngredient(ingredient2.id(), DEFAULT_QUANTITY)
+                        new RecipeIngredient(ingredient1, DEFAULT_QUANTITY),
+                        new RecipeIngredient(ingredient2, DEFAULT_QUANTITY)
                 ),
                 DEFAULT_SERVINGS
         ));
@@ -114,7 +114,9 @@ class GetRecipeByIdTests {
                 DEFAULT_RECIPE_DESCRIPTION,
                 DEFAULT_DURATION_IN_MINUTES,
                 DEFAULT_STEPS,
-                List.of(new RecipeIngredient(new IngredientId(UUID.randomUUID()), DEFAULT_QUANTITY)),
+                List.of(new RecipeIngredient(
+                        new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM), DEFAULT_QUANTITY)
+                ),
                 DEFAULT_SERVINGS
         ));
 

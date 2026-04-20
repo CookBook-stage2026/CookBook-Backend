@@ -1,7 +1,7 @@
 package cookbook.stage.backend.recipe.infrastructure.jpa.recipe;
 
-import cookbook.stage.backend.recipe.domain.ingredient.IngredientId;
 import cookbook.stage.backend.recipe.domain.recipe.RecipeIngredient;
+import cookbook.stage.backend.recipe.infrastructure.jpa.ingredient.JpaIngredientEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -26,21 +26,28 @@ public class JpaRecipeIngredientEntity {
     @JoinColumn(name = "recipe_id", nullable = false)
     private JpaRecipeEntity recipe;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("ingredientId")
+    @JoinColumn(name = "ingredient_id", nullable = false)
+    private JpaIngredientEntity ingredient;
+
     protected JpaRecipeIngredientEntity() {
     }
 
-    public JpaRecipeIngredientEntity(JpaRecipeEntity recipe, RecipeIngredient recipeIngredient) {
+    public JpaRecipeIngredientEntity(
+            JpaRecipeEntity recipe, RecipeIngredient recipeIngredient, JpaIngredientEntity ingredient) {
         this.id = new JpaRecipeIngredientId(
                 recipe.getId(),
-                recipeIngredient.ingredientId().id()
+                ingredient.getId()
         );
         this.recipe = recipe;
+        this.ingredient = ingredient;
         this.baseQuantity = recipeIngredient.baseQuantity();
     }
 
     public RecipeIngredient toDomain() {
         return new RecipeIngredient(
-                new IngredientId(id.getIngredientId()),
+                ingredient.toDomain(),
                 baseQuantity
         );
     }

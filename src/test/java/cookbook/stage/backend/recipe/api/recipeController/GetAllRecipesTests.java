@@ -145,7 +145,7 @@ class GetAllRecipesTests {
                 DEFAULT_RECIPE_DESCRIPTION,
                 DEFAULT_DURATION_IN_MINUTES,
                 DEFAULT_STEPS,
-                List.of(new RecipeIngredient(ingredient.id(), DEFAULT_QUANTITY)),
+                List.of(new RecipeIngredient(ingredient, DEFAULT_QUANTITY)),
                 DEFAULT_SERVINGS
         );
     }

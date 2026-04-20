@@ -1,4 +1,4 @@
-package cookbook.stage.backend.recipe.api.dto;
+package cookbook.stage.backend.recipe.api.result;
 
 import cookbook.stage.backend.recipe.domain.recipe.RecipeSummary;
 

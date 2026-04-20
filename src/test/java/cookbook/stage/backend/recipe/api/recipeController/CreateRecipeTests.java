@@ -4,8 +4,8 @@ import cookbook.stage.backend.recipe.domain.ingredient.Ingredient;
 import cookbook.stage.backend.recipe.domain.ingredient.IngredientRepository;
 import cookbook.stage.backend.recipe.domain.ingredient.Unit;
 import cookbook.stage.backend.recipe.domain.ingredient.IngredientId;
-import cookbook.stage.backend.recipe.api.dto.CreateRecipeDto;
-import cookbook.stage.backend.recipe.api.dto.CreateRecipeIngredientDto;
+import cookbook.stage.backend.recipe.api.input.CreateRecipeDto;
+import cookbook.stage.backend.recipe.api.input.CreateRecipeIngredientDto;
 import cookbook.stage.backend.recipe.domain.recipe.RecipeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -82,10 +83,14 @@ class CreateRecipeTests {
                 .andExpect(jsonPath("$.steps[0]").value(DEFAULT_STEPS.get(0)))
                 .andExpect(jsonPath("$.steps[1]").value(DEFAULT_STEPS.get(1)))
                 .andExpect(jsonPath("$.ingredients", hasSize(2)))
-                .andExpect(jsonPath("$.ingredients[0].ingredientId").value(flour.id().id().toString()))
-                .andExpect(jsonPath("$.ingredients[0].baseQuantity").value(DEFAULT_QUANTITY))
-                .andExpect(jsonPath("$.ingredients[1].ingredientId").value(eggs.id().id().toString()))
-                .andExpect(jsonPath("$.ingredients[1].baseQuantity").value(2.0));
+                .andExpect(jsonPath("$.ingredients[*].ingredientId", hasItems(
+                        flour.id().id().toString(),
+                        eggs.id().id().toString()
+                )))
+                .andExpect(jsonPath("$.ingredients[*].baseQuantity", hasItems(
+                        DEFAULT_QUANTITY,
+                        2.0
+                )));
 
         assertThat(recipeRepository.count()).isEqualTo(1);
     }
@@ -128,7 +133,7 @@ class CreateRecipeTests {
     }
 
     @Test
-    void createRecipe_shouldReturn500_whenIngredientDoesNotExist() throws Exception {
+    void createRecipe_shouldReturn400_whenIngredientDoesNotExist() throws Exception {
         // Arrange
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
                 new CreateRecipeIngredientDto(UUID.randomUUID(), DEFAULT_QUANTITY)
@@ -136,7 +141,7 @@ class CreateRecipeTests {
 
         // Act & Assert
         performCreateRecipe(dto)
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
     }
 
     private CreateRecipeDto buildCreateRecipeDto(List<CreateRecipeIngredientDto> ingredients) {

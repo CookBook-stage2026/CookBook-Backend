@@ -1,4 +1,4 @@
-package cookbook.stage.backend.recipe.api.dto;
+package cookbook.stage.backend.recipe.api.input;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

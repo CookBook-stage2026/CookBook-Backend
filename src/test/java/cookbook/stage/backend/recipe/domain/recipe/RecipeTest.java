@@ -1,10 +1,11 @@
 package cookbook.stage.backend.recipe.domain.recipe;
 
+import cookbook.stage.backend.recipe.domain.ingredient.Ingredient;
 import cookbook.stage.backend.recipe.domain.ingredient.IngredientId;
+import cookbook.stage.backend.recipe.domain.ingredient.Unit;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -17,7 +18,7 @@ class RecipeTest {
     private static final int VALID_DURATION = 30;
     private static final List<String> VALID_STEPS = List.of("Boil water", "Add pasta");
     private static final List<RecipeIngredient> VALID_INGREDIENTS = List.of(
-            new RecipeIngredient(new IngredientId(UUID.randomUUID()), 200.0)
+            new RecipeIngredient(new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM), 200.0)
     );
     private static final int VALID_SERVINGS = 2;
 

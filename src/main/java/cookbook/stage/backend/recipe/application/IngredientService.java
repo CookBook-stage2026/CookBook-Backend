@@ -6,10 +6,12 @@ import cookbook.stage.backend.recipe.domain.ingredient.IngredientRepository;
 import cookbook.stage.backend.recipe.domain.ingredient.Unit;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class IngredientService {
     private final IngredientRepository ingredientRepository;
 
@@ -26,6 +28,7 @@ public class IngredientService {
         return this.ingredientRepository.findAll(pageable);
     }
 
+    @Transactional
     public Ingredient createIngredient(String name, Unit unit) {
         Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit);
         return ingredientRepository.save(ingredient);
