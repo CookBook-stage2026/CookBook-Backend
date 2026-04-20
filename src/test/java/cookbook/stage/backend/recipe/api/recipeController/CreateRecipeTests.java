@@ -1,12 +1,12 @@
 package cookbook.stage.backend.recipe.api.recipeController;
 
-import cookbook.stage.backend.ingredient.domain.Ingredient;
-import cookbook.stage.backend.ingredient.domain.IngredientRepository;
-import cookbook.stage.backend.ingredient.shared.Unit;
-import cookbook.stage.backend.ingredient.shared.IngredientId;
+import cookbook.stage.backend.recipe.domain.ingredient.Ingredient;
+import cookbook.stage.backend.recipe.domain.ingredient.IngredientRepository;
+import cookbook.stage.backend.recipe.domain.ingredient.Unit;
+import cookbook.stage.backend.recipe.domain.ingredient.IngredientId;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeDto;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeIngredientDto;
-import cookbook.stage.backend.recipe.domain.RecipeRepository;
+import cookbook.stage.backend.recipe.domain.recipe.RecipeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

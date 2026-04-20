@@ -1,11 +1,11 @@
 package cookbook.stage.backend.recipe.infrastructure;
 
-import cookbook.stage.backend.recipe.domain.Recipe;
-import cookbook.stage.backend.recipe.domain.RecipeRepository;
-import cookbook.stage.backend.recipe.domain.RecipeSummary;
-import cookbook.stage.backend.recipe.infrastructure.jpa.JpaRecipeEntity;
-import cookbook.stage.backend.recipe.infrastructure.jpa.JpaRecipeRepository;
-import cookbook.stage.backend.recipe.shared.RecipeId;
+import cookbook.stage.backend.recipe.domain.recipe.Recipe;
+import cookbook.stage.backend.recipe.domain.recipe.RecipeRepository;
+import cookbook.stage.backend.recipe.domain.recipe.RecipeSummary;
+import cookbook.stage.backend.recipe.infrastructure.jpa.recipe.JpaRecipeEntity;
+import cookbook.stage.backend.recipe.infrastructure.jpa.recipe.JpaRecipeRepository;
+import cookbook.stage.backend.recipe.domain.recipe.RecipeId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -22,8 +22,8 @@ public class RecipeRepositoryImpl implements RecipeRepository {
 
     @Override
     public Recipe save(Recipe recipe) {
-        return jpaRecipeRepository.save(JpaRecipeEntity.fromDomain(recipe))
-                .toDomain();
+        jpaRecipeRepository.save(JpaRecipeEntity.fromDomain(recipe));
+        return recipe;
     }
 
     @Override

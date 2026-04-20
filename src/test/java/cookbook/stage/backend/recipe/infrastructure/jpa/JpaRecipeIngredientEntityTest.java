@@ -1,7 +1,9 @@
 package cookbook.stage.backend.recipe.infrastructure.jpa;
 
-import cookbook.stage.backend.ingredient.shared.IngredientId;
-import cookbook.stage.backend.recipe.domain.RecipeIngredient;
+import cookbook.stage.backend.recipe.domain.ingredient.IngredientId;
+import cookbook.stage.backend.recipe.domain.recipe.RecipeIngredient;
+import cookbook.stage.backend.recipe.infrastructure.jpa.recipe.JpaRecipeEntity;
+import cookbook.stage.backend.recipe.infrastructure.jpa.recipe.JpaRecipeIngredientEntity;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -23,7 +25,7 @@ class JpaRecipeIngredientEntityTest {
         RecipeIngredient ri = new RecipeIngredient(new IngredientId(INGREDIENT_ID), QUANTITY);
 
         // Act
-        JpaRecipeIngredientEntity entity = JpaRecipeIngredientEntity.fromDomain(recipe, ri);
+        JpaRecipeIngredientEntity entity = new JpaRecipeIngredientEntity(recipe, ri);
 
         // Assert
         assertThat(entity.toDomain()).isEqualTo(ri);

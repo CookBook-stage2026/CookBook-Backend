@@ -1,13 +1,13 @@
 package cookbook.stage.backend.recipe.api;
 
-import cookbook.stage.backend.ingredient.shared.IngredientId;
 import cookbook.stage.backend.recipe.api.dto.CreateRecipeDto;
 import cookbook.stage.backend.recipe.api.dto.RecipeDto;
 import cookbook.stage.backend.recipe.api.dto.RecipeSummaryDto;
 import cookbook.stage.backend.recipe.application.RecipeService;
-import cookbook.stage.backend.recipe.application.RecipeWithIngredients;
-import cookbook.stage.backend.recipe.domain.RecipeIngredient;
-import cookbook.stage.backend.recipe.shared.RecipeId;
+import cookbook.stage.backend.recipe.domain.ingredient.Ingredient;
+import cookbook.stage.backend.recipe.domain.ingredient.IngredientId;
+import cookbook.stage.backend.recipe.domain.recipe.Recipe;
+import cookbook.stage.backend.recipe.domain.recipe.RecipeId;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -43,20 +43,17 @@ public class RecipeController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RecipeDto createRecipe(@Valid @RequestBody CreateRecipeDto createRecipeDto) {
-        List<RecipeIngredient> ingredients = createRecipeDto.ingredients().stream()
-                .map(i -> new RecipeIngredient(new IngredientId(i.ingredientId()), i.baseQuantity()))
-                .toList();
-
-        RecipeWithIngredients recipe = recipeService.createRecipe(
+        Recipe recipe = recipeService.createRecipe(
                 createRecipeDto.name(),
                 createRecipeDto.description(),
                 createRecipeDto.durationInMinutes(),
                 createRecipeDto.steps(),
-                ingredients,
+                createRecipeDto.ingredients(),
                 createRecipeDto.servings()
         );
+        Map<IngredientId, Ingredient> ingredientMap = recipeService.getIngredientMapForRecipe(recipe);
 
-        return RecipeDto.fromDomain(recipe);
+        return RecipeDto.fromDomain(recipe, ingredientMap);
     }
 
     /**
@@ -69,9 +66,10 @@ public class RecipeController {
     public RecipeDto getRecipeById(
             @PathVariable UUID id
     ) {
-        RecipeWithIngredients recipe = recipeService.findById(new RecipeId(id));
+        Recipe recipe = recipeService.findById(new RecipeId(id));
+        Map<IngredientId, Ingredient> ingredientMap = recipeService.getIngredientMapForRecipe(recipe);
 
-        return RecipeDto.fromDomain(recipe);
+        return RecipeDto.fromDomain(recipe, ingredientMap);
     }
 
     /**

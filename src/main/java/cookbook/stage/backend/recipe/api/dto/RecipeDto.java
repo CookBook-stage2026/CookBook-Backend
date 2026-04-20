@@ -1,11 +1,11 @@
 package cookbook.stage.backend.recipe.api.dto;
 
-import cookbook.stage.backend.ingredient.shared.IngredientApiDto;
-import cookbook.stage.backend.recipe.application.RecipeWithIngredients;
-import cookbook.stage.backend.recipe.domain.Recipe;
-import cookbook.stage.backend.shared.domain.DataIntegrityException;
+import cookbook.stage.backend.recipe.domain.ingredient.Ingredient;
+import cookbook.stage.backend.recipe.domain.ingredient.IngredientId;
+import cookbook.stage.backend.recipe.domain.recipe.Recipe;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public record RecipeDto(
@@ -17,17 +17,10 @@ public record RecipeDto(
         List<RecipeIngredientDto> ingredients,
         int servings
 ) {
-    public static RecipeDto fromDomain(RecipeWithIngredients data) {
-        List<RecipeIngredientDto> ingredientDtos = data.recipe().getIngredients().stream()
+    public static RecipeDto fromDomain(Recipe recipe, Map<IngredientId, Ingredient> ingredientMap) {
+        List<RecipeIngredientDto> ingredientDtos = recipe.getIngredients().stream()
                 .map(ri -> {
-                    IngredientApiDto ingredient = data.ingredientMap().get(ri.ingredientId());
-
-                    if (ingredient == null) {
-                        throw new DataIntegrityException(
-                                "Recipe references ingredient " + ri.ingredientId().id() + " which no longer exists"
-                        );
-                    }
-
+                    Ingredient ingredient = ingredientMap.get(ri.ingredientId());
                     return new RecipeIngredientDto(
                             ingredient.id().id(),
                             ingredient.name(),
@@ -36,8 +29,6 @@ public record RecipeDto(
                     );
                 })
                 .toList();
-
-        Recipe recipe = data.recipe();
 
         return new RecipeDto(
                 recipe.getId().id(),

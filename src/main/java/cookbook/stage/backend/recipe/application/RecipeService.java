@@ -1,18 +1,17 @@
 package cookbook.stage.backend.recipe.application;
 
-import cookbook.stage.backend.ingredient.shared.IngredientApiDto;
-import cookbook.stage.backend.ingredient.shared.IngredientId;
-import cookbook.stage.backend.ingredient.shared.IngredientsApi;
-import cookbook.stage.backend.recipe.domain.Recipe;
-import cookbook.stage.backend.recipe.domain.RecipeIngredient;
-import cookbook.stage.backend.recipe.domain.RecipeRepository;
-import cookbook.stage.backend.recipe.domain.RecipeSummary;
-import cookbook.stage.backend.recipe.shared.RecipeId;
-import cookbook.stage.backend.shared.domain.DataIntegrityException;
+import cookbook.stage.backend.recipe.api.dto.CreateRecipeIngredientDto;
+import cookbook.stage.backend.recipe.domain.exception.DataIntegrityException;
+import cookbook.stage.backend.recipe.domain.ingredient.Ingredient;
+import cookbook.stage.backend.recipe.domain.ingredient.IngredientId;
+import cookbook.stage.backend.recipe.domain.recipe.Recipe;
+import cookbook.stage.backend.recipe.domain.recipe.RecipeId;
+import cookbook.stage.backend.recipe.domain.recipe.RecipeIngredient;
+import cookbook.stage.backend.recipe.domain.recipe.RecipeRepository;
+import cookbook.stage.backend.recipe.domain.recipe.RecipeSummary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -23,46 +22,47 @@ import static java.util.stream.Collectors.toMap;
 @Service
 public class RecipeService {
     private final RecipeRepository recipeRepository;
-    private final IngredientsApi ingredientsApi;
+    private final IngredientService ingredientService;
 
-    public RecipeService(RecipeRepository recipeRepository, IngredientsApi ingredientsApi) {
+    public RecipeService(RecipeRepository recipeRepository, IngredientService ingredientService) {
         this.recipeRepository = recipeRepository;
-        this.ingredientsApi = ingredientsApi;
+        this.ingredientService = ingredientService;
     }
 
-    public RecipeWithIngredients createRecipe(String name, String description, int durationInMinutes,
-                                              List<String> steps, List<RecipeIngredient> ingredients, int servings) {
-        List<IngredientId> ingredientIds = ingredients.stream()
-                .map(RecipeIngredient::ingredientId)
+    public Recipe createRecipe(String name, String description, int durationInMinutes,
+                               List<String> steps, List<CreateRecipeIngredientDto> ingredientDtos, int servings) {
+        List<IngredientId> ingredientIds = ingredientDtos.stream()
+                .map(i -> new IngredientId(i.ingredientId()))
                 .toList();
 
-        Map<IngredientId, IngredientApiDto> ingredientMap = ingredientsApi.getIngredientsByIds(ingredientIds)
-                .stream()
-                .collect(toMap(IngredientApiDto::id, identity()));
-
-        if (ingredientMap.size() != ingredients.size()) {
+        int foundCount = ingredientService.getIngredientsByIds(ingredientIds).size();
+        if (foundCount != ingredientIds.size()) {
             throw new DataIntegrityException("One or more ingredients do not exist");
         }
 
-        Recipe recipe = recipeRepository.save(new Recipe(RecipeId.create(),
-                name, description, durationInMinutes, steps, ingredients, servings));
+        List<RecipeIngredient> recipeIngredients = ingredientDtos.stream()
+                .map(i -> new RecipeIngredient(
+                        new IngredientId(i.ingredientId()),
+                        i.baseQuantity()
+                ))
+                .toList();
 
-        return new RecipeWithIngredients(recipe, ingredientMap);
+        return recipeRepository.save(new Recipe(
+                RecipeId.create(), name, description, durationInMinutes, steps, recipeIngredients, servings
+        ));
     }
 
-    @Transactional(readOnly = true)
-    public RecipeWithIngredients findById(RecipeId id) {
-        Recipe recipe = recipeRepository.findById(id).orElseThrow(id::notFound);
+    public Recipe findById(RecipeId id) {
+        return recipeRepository.findById(id).orElseThrow(id::notFound);
+    }
 
-        List<IngredientId> ingredientIds = recipe.getIngredients().stream()
+    public Map<IngredientId, Ingredient> getIngredientMapForRecipe(Recipe recipe) {
+        List<IngredientId> ids = recipe.getIngredients().stream()
                 .map(RecipeIngredient::ingredientId)
                 .toList();
 
-        Map<IngredientId, IngredientApiDto> ingredientMap = ingredientsApi.getIngredientsByIds(ingredientIds)
-                .stream()
-                .collect(toMap(IngredientApiDto::id, identity()));
-
-        return new RecipeWithIngredients(recipe, ingredientMap);
+        return ingredientService.getIngredientsByIds(ids).stream()
+                .collect(toMap(Ingredient::id, identity()));
     }
 
     public Page<RecipeSummary> findAllSummaries(Pageable pageable) {

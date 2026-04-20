@@ -1,6 +1,6 @@
 package cookbook.stage.backend.recipe.api.dto;
 
-import cookbook.stage.backend.ingredient.shared.Unit;
+import cookbook.stage.backend.recipe.domain.ingredient.Unit;
 
 import java.util.UUID;
 
