@@ -25,7 +25,6 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
     private final UserApi userApi;
     private final JwtService jwtService;
-    private final RefreshTokenService refreshTokenService;
     private final CookieAuthorizationRequestRepository cookieRepo;
     private final CookieUtils cookieUtils;
 
@@ -33,23 +32,18 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     private String frontendUrl;
     @Value("${app.jwt.expiration-ms}")
     private long jwtTokenExpiration;
-    @Value("${app.jwt.remember-me-expiration-seconds}")
-    private long refreshTokenExpiration;
     private static final long TO_SECONDS = 1000;
 
     public OAuth2AuthenticationSuccessHandler(UserApi userApi,
                                               JwtService jwtService,
-                                              RefreshTokenService refreshTokenService,
                                               CookieAuthorizationRequestRepository cookieRepo,
                                               CookieUtils cookieUtils) {
         this.userApi = userApi;
         this.jwtService = jwtService;
-        this.refreshTokenService = refreshTokenService;
         this.cookieRepo = cookieRepo;
         this.cookieUtils = cookieUtils;
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void onAuthenticationSuccess(@NonNull HttpServletRequest request,
                                         @NonNull HttpServletResponse response,
@@ -61,31 +55,17 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
             throw new OAuth2Exception("OAuth2 authentication failed");
         }
 
-        OAuth2UserInfo userInfo = OAuth2UserInfo.from(
-                token.getAuthorizedClientRegistrationId(),
-                oauth2User.getAttributes()
-        );
+        OAuth2UserInfo userInfo = OAuth2UserInfo.from(token);
 
         User user = userApi.findBySocialConnection(userInfo.provider(), userInfo.providerId())
                 .orElseGet(() -> userApi.autoSaveAfterLogin(
                         userInfo.email(), userInfo.name(), userInfo.provider(), userInfo.providerId()
                 ));
 
-        boolean rememberMe = cookieUtils.getCookie(request,
-                        CookieAuthorizationRequestRepository.REMEMBER_ME_COOKIE_NAME)
-                .map(cookie -> Boolean.parseBoolean(cookie.getValue()))
-                .orElse(false);
-
         cookieRepo.removeAuthorizationRequestCookies(request, response);
 
         String accessToken = jwtService.generateToken(user);
-        cookieUtils.addCookie(response, "access_token", accessToken, jwtTokenExpiration / TO_SECONDS, false);
-
-        if (rememberMe) {
-            String refreshToken = refreshTokenService.createRefreshToken(user.getId());
-            cookieUtils.addCookie(response, "refresh_token", refreshToken, refreshTokenExpiration, true);
-        }
-
+        cookieUtils.addCookie(response, "access_token", accessToken, jwtTokenExpiration / TO_SECONDS, true);
         response.sendRedirect(frontendUrl + "auth/callback");
     }
 }

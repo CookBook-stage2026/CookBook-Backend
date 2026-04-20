@@ -51,8 +51,7 @@ class SaveAuthorizationRequestTests {
 
         request.setCookies(
                 new Cookie(CookieAuthorizationRequestRepository.OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
-                        "existing-value"),
-                new Cookie(CookieAuthorizationRequestRepository.REMEMBER_ME_COOKIE_NAME, "true")
+                        "existing-value")
         );
 
         // Act
@@ -64,9 +63,8 @@ class SaveAuthorizationRequestTests {
                 .isNotEmpty()
                 .anyMatch(header -> header.contains(
                         CookieAuthorizationRequestRepository.OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME + "=")
-                        && header.contains("Max-Age=0"))
-                .anyMatch(header -> header.contains(CookieAuthorizationRequestRepository.REMEMBER_ME_COOKIE_NAME + "=")
-                        && header.contains("Max-Age=0"));    }
+                        && header.contains("Max-Age=0"));
+    }
 
     private String extractCookieValue(String header, String cookieName) {
         String prefix = cookieName + "=";

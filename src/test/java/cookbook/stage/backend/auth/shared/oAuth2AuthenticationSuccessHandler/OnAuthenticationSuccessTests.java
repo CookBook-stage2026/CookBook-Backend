@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
-class OAuth2AuthenticationSuccessHandlerOnAuthenticationSuccessTests {
+class OnAuthenticationSuccessTests {
 
     @Autowired
     private OAuth2AuthenticationSuccessHandler successHandler;
@@ -42,14 +42,13 @@ class OAuth2AuthenticationSuccessHandlerOnAuthenticationSuccessTests {
     private String frontendUrl;
 
     @Test
-    void onAuthenticationSuccess_ExistingUserWithRememberMe_SetsBothCookiesAndRedirects() throws IOException {
+    void onAuthenticationSuccess_ExistingUser_SetsCookieAndRedirects() throws IOException {
         // Arrange
         userApi.autoSaveAfterLogin(
                 "existing@example.com", "Existing User", "google", "google-123");
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setCookies(
-                new Cookie(CookieAuthorizationRequestRepository.REMEMBER_ME_COOKIE_NAME, "true"),
                 new Cookie(CookieAuthorizationRequestRepository.OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
                         "auth-req-data")
         );
@@ -75,15 +74,13 @@ class OAuth2AuthenticationSuccessHandlerOnAuthenticationSuccessTests {
         assertThat(setCookieHeaders)
                 .isNotEmpty()
                 .anyMatch(header -> header.contains("access_token="))
-                .anyMatch(header -> header.contains("refresh_token="))
                 .anyMatch(header -> header.contains(
                         CookieAuthorizationRequestRepository.OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME + "=")
                         && header.contains("Max-Age=0"));
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Test
-    void onAuthenticationSuccess_NewUserWithoutRememberMe_CreatesUserSetsOnlyAccessTokenAndRedirects()
+    void onAuthenticationSuccess_NewUser_CreatesUserSetsAccessTokenAndRedirects()
             throws IOException {
         // Arrange
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -110,8 +107,7 @@ class OAuth2AuthenticationSuccessHandlerOnAuthenticationSuccessTests {
         var setCookieHeaders = response.getHeaders(HttpHeaders.SET_COOKIE);
         assertThat(setCookieHeaders)
                 .isNotEmpty()
-                .anyMatch(header -> header.contains("access_token="))
-                .noneMatch(header -> header.contains("refresh_token="));
+                .anyMatch(header -> header.contains("access_token="));
     }
 
     @Test

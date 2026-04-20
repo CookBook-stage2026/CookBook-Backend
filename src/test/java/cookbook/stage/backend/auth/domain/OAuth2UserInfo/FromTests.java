@@ -2,13 +2,18 @@ package cookbook.stage.backend.auth.domain.OAuth2UserInfo;
 
 import cookbook.stage.backend.auth.application.OAuth2UserInfo;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import java.util.Collections;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class OAuth2UserInfoFromTests {
+class FromTests {
     private static final int RANDOM_ID = 98765;
 
     @Test
@@ -19,9 +24,10 @@ class OAuth2UserInfoFromTests {
                 "email", "google@example.com",
                 "name", "Google User"
         );
+        OAuth2AuthenticationToken token = createAuthenticationToken("google", attributes);
 
         // Act
-        OAuth2UserInfo userInfo = OAuth2UserInfo.from("google", attributes);
+        OAuth2UserInfo userInfo = OAuth2UserInfo.from(token);
 
         // Assert
         assertThat(userInfo.provider()).isEqualTo("google");
@@ -38,9 +44,10 @@ class OAuth2UserInfoFromTests {
                 "email", "github@example.com",
                 "login", "githublogin"
         );
+        OAuth2AuthenticationToken token = createAuthenticationToken("github", attributes);
 
         // Act
-        OAuth2UserInfo userInfo = OAuth2UserInfo.from("github", attributes);
+        OAuth2UserInfo userInfo = OAuth2UserInfo.from(token);
 
         // Assert
         assertThat(userInfo.provider()).isEqualTo("github");
@@ -49,7 +56,6 @@ class OAuth2UserInfoFromTests {
         assertThat(userInfo.name()).isEqualTo("githublogin");
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Test
     void from_GithubProviderWithoutEmail_AssignsFallbackEmail() {
         // Arrange
@@ -57,9 +63,10 @@ class OAuth2UserInfoFromTests {
                 "id", RANDOM_ID,
                 "name", "Github User"
         );
+        OAuth2AuthenticationToken token = createAuthenticationToken("github", attributes);
 
         // Act
-        OAuth2UserInfo userInfo = OAuth2UserInfo.from("github", attributes);
+        OAuth2UserInfo userInfo = OAuth2UserInfo.from(token);
 
         // Assert
         assertThat(userInfo.email()).isEqualTo("98765@github.local");
@@ -74,23 +81,40 @@ class OAuth2UserInfoFromTests {
                 "email", "ms@example.com",
                 "name", "MS User"
         );
+        OAuth2AuthenticationToken token = createAuthenticationToken("microsoft", attributes);
 
         // Act
-        OAuth2UserInfo userInfo = OAuth2UserInfo.from("microsoft", attributes);
+        OAuth2UserInfo userInfo = OAuth2UserInfo.from(token);
 
         // Assert
         assertThat(userInfo.provider()).isEqualTo("microsoft");
         assertThat(userInfo.providerId()).isEqualTo("ms-123");
+        assertThat(userInfo.email()).isEqualTo("ms@example.com");
+        assertThat(userInfo.name()).isEqualTo("MS User");
     }
 
     @Test
     void from_UnknownProvider_ThrowsIllegalArgumentException() {
         // Arrange
         Map<String, Object> attributes = Map.of("sub", "123");
+        OAuth2AuthenticationToken token = createAuthenticationToken("yahoo", attributes);
 
         // Act & Assert
-        assertThatThrownBy(() -> OAuth2UserInfo.from("yahoo", attributes))
+        assertThatThrownBy(() -> OAuth2UserInfo.from(token))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Unknown provider: yahoo");
+    }
+
+    private OAuth2AuthenticationToken createAuthenticationToken(String provider, Map<String, Object> attributes) {
+        OAuth2User oauth2User = new DefaultOAuth2User(
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
+                attributes,
+                switch (provider) {
+                    case "google", "microsoft" -> "sub";
+                    case "github" -> "id";
+                    default -> "sub";
+                }
+        );
+        return new OAuth2AuthenticationToken(oauth2User, oauth2User.getAuthorities(), provider);
     }
 }

@@ -1,6 +1,7 @@
 package cookbook.stage.backend.auth.application;
 
-import java.util.Map;
+import cookbook.stage.backend.shared.domain.OAuth2Exception;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 public record OAuth2UserInfo(
         String provider,
@@ -8,7 +9,14 @@ public record OAuth2UserInfo(
         String email,
         String name
 ) {
-    public static OAuth2UserInfo from(String provider, Map<String, Object> attributes) {
+    public static OAuth2UserInfo from(OAuth2AuthenticationToken token) {
+        String provider = token.getAuthorizedClientRegistrationId();
+        var principal = token.getPrincipal();
+        if (principal == null) {
+            throw new OAuth2Exception("User could not be found in the token.");
+        }
+        var attributes = principal.getAttributes();
+
         String emailWord = "email";
         return switch (provider.toLowerCase()) {
             case "google" -> new OAuth2UserInfo(
