@@ -36,7 +36,7 @@ class SearchIngredientsTests {
     private static final int NUMBER_OF_INGREDIENTS = 12;
 
     @BeforeEach
-    void tearDown() {
+    void clearDatabase() {
         JdbcTestUtils.deleteFromTables(jdbcTemplate,
                 "recipe_ingredients", "recipes", "ingredients");
     }

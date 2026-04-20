@@ -54,7 +54,7 @@ class GetRecipeByIdTests {
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
-    void tearDown() {
+    void clearDatabase() {
         JdbcTestUtils.deleteFromTables(jdbcTemplate,
                 "recipe_ingredients", "recipe_steps", "recipes", "ingredients");
     }
