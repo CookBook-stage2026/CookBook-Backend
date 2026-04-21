@@ -45,14 +45,11 @@ ext {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.modulith:spring-modulith-starter-core'
-    implementation 'org.springframework.modulith:spring-modulith-starter-jpa'
     implementation 'org.xerial:sqlite-jdbc:3.51.3.0'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.hibernate.orm:hibernate-community-dialects'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-    testImplementation 'org.springframework.modulith:spring-modulith-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-webmvc-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
