@@ -47,8 +47,8 @@ VALUES ('11111111-0000-0000-0000-000000000001', 'Spaghetti', 'GRAM'),
 -- RECIPES
 -- ---------------------------------------------------------
 INSERT INTO recipes (recipe_id, name, description, duration_in_minutes, servings)
-VALUES ('22222222-0000-0000-0000-000000000001', 'Spaghetti Carbonara',
-        'A classic Italian pasta dish with eggs, cheese and pancetta', 30, 2),
+VALUES ('22222222-0000-0000-0000-000000000001', 'A classic Italian pasta dish originating from Rome, made with spaghetti, eggs, aged cheese, pancetta, and freshly ground black pepper, known for its rich texture and simple, traditional ingredients',
+        'Spaghetti Carbonara prepared with al dente pasta, crisp pancetta, eggs, Pecorino Romano cheese, black pepper, and a silky sauce created by emulsifying the ingredients without using cream', 30, 2),
        ('22222222-0000-0000-0000-000000000002', 'Chicken Tikka Masala',
         'Creamy and spiced Indian curry with tender chicken', 45, 4),
        ('22222222-0000-0000-0000-000000000003', 'Beef Tacos', 'Mexican street-style tacos with seasoned ground beef',
@@ -145,7 +145,7 @@ VALUES
 INSERT INTO recipe_steps (recipe_id, step_order, steps)
 VALUES
     -- Spaghetti Carbonara
-    ('22222222-0000-0000-0000-000000000001', 0, 'Boil pasta'),
+    ('22222222-0000-0000-0000-000000000001', 0, 'Bring a large pot of well-salted water to a rolling boil, add the pasta, and cook until al dente according to the package instructions, stirring occasionally to prevent sticking and reserving about 1 cup of the pasta water before draining'),
     ('22222222-0000-0000-0000-000000000001', 1, 'Fry pancetta'),
     ('22222222-0000-0000-0000-000000000001', 2, 'Mix eggs and cheese'),
     ('22222222-0000-0000-0000-000000000001', 3, 'Combine all'),
