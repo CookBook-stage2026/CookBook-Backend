@@ -1,6 +1,5 @@
-package cookbook.stage.backend.auth.domain.OAuth2UserInfo;
+package cookbook.stage.backend.auth.application;
 
-import cookbook.stage.backend.auth.application.OAuth2UserInfo;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -13,11 +12,12 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class FromTests {
+class GetUserFromTokenTests {
     private static final int RANDOM_ID = 98765;
+    private final AuthService authService = new AuthService();
 
     @Test
-    void from_GoogleProvider_ReturnsCorrectUserInfo() {
+    void getUserFromToken_GoogleProvider_ReturnsCorrectUserInfo() {
         // Arrange
         Map<String, Object> attributes = Map.of(
                 "sub", "google-123",
@@ -27,7 +27,7 @@ class FromTests {
         OAuth2AuthenticationToken token = createAuthenticationToken("google", attributes);
 
         // Act
-        OAuth2UserInfo userInfo = OAuth2UserInfo.from(token);
+        OAuth2UserInfo userInfo = authService.getUserFromToken(token);
 
         // Assert
         assertThat(userInfo.provider()).isEqualTo("google");
@@ -37,7 +37,7 @@ class FromTests {
     }
 
     @Test
-    void from_GithubProviderWithEmail_ReturnsCorrectUserInfo() {
+    void getUserFromToken_GithubProviderWithEmail_ReturnsCorrectUserInfo() {
         // Arrange
         Map<String, Object> attributes = Map.of(
                 "id", RANDOM_ID,
@@ -47,7 +47,7 @@ class FromTests {
         OAuth2AuthenticationToken token = createAuthenticationToken("github", attributes);
 
         // Act
-        OAuth2UserInfo userInfo = OAuth2UserInfo.from(token);
+        OAuth2UserInfo userInfo = authService.getUserFromToken(token);
 
         // Assert
         assertThat(userInfo.provider()).isEqualTo("github");
@@ -57,7 +57,7 @@ class FromTests {
     }
 
     @Test
-    void from_GithubProviderWithoutEmail_AssignsFallbackEmail() {
+    void getUserFromToken_GithubProviderWithoutEmail_AssignsFallbackEmail() {
         // Arrange
         Map<String, Object> attributes = Map.of(
                 "id", RANDOM_ID,
@@ -66,7 +66,7 @@ class FromTests {
         OAuth2AuthenticationToken token = createAuthenticationToken("github", attributes);
 
         // Act
-        OAuth2UserInfo userInfo = OAuth2UserInfo.from(token);
+        OAuth2UserInfo userInfo = authService.getUserFromToken(token);
 
         // Assert
         assertThat(userInfo.email()).isEqualTo("98765@github.local");
@@ -74,7 +74,7 @@ class FromTests {
     }
 
     @Test
-    void from_MicrosoftProvider_ReturnsCorrectUserInfo() {
+    void getUserFromToken_MicrosoftProvider_ReturnsCorrectUserInfo() {
         // Arrange
         Map<String, Object> attributes = Map.of(
                 "sub", "ms-123",
@@ -84,7 +84,7 @@ class FromTests {
         OAuth2AuthenticationToken token = createAuthenticationToken("microsoft", attributes);
 
         // Act
-        OAuth2UserInfo userInfo = OAuth2UserInfo.from(token);
+        OAuth2UserInfo userInfo = authService.getUserFromToken(token);
 
         // Assert
         assertThat(userInfo.provider()).isEqualTo("microsoft");
@@ -94,13 +94,13 @@ class FromTests {
     }
 
     @Test
-    void from_UnknownProvider_ThrowsIllegalArgumentException() {
+    void getUserFromToken_UnknownProvider_ThrowsIllegalArgumentException() {
         // Arrange
         Map<String, Object> attributes = Map.of("sub", "123");
         OAuth2AuthenticationToken token = createAuthenticationToken("yahoo", attributes);
 
         // Act & Assert
-        assertThatThrownBy(() -> OAuth2UserInfo.from(token))
+        assertThatThrownBy(() -> authService.getUserFromToken(token))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Unknown provider: yahoo");
     }

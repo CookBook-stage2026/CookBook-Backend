@@ -1,5 +1,6 @@
 package cookbook.stage.backend.auth.shared;
 
+import cookbook.stage.backend.auth.application.AuthService;
 import cookbook.stage.backend.auth.application.OAuth2UserInfo;
 import cookbook.stage.backend.shared.domain.OAuth2Exception;
 import cookbook.stage.backend.shared.infrastructure.security.CookieUtils;
@@ -27,6 +28,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     private final JwtService jwtService;
     private final CookieAuthorizationRequestRepository cookieRepo;
     private final CookieUtils cookieUtils;
+    private final AuthService authService;
 
     @Value("${frontend.url:http://localhost:4200/}")
     private String frontendUrl;
@@ -37,11 +39,12 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     public OAuth2AuthenticationSuccessHandler(UserApi userApi,
                                               JwtService jwtService,
                                               CookieAuthorizationRequestRepository cookieRepo,
-                                              CookieUtils cookieUtils) {
+                                              CookieUtils cookieUtils, AuthService authService) {
         this.userApi = userApi;
         this.jwtService = jwtService;
         this.cookieRepo = cookieRepo;
         this.cookieUtils = cookieUtils;
+        this.authService = authService;
     }
 
     @Override
@@ -55,7 +58,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
             throw new OAuth2Exception("OAuth2 authentication failed");
         }
 
-        OAuth2UserInfo userInfo = OAuth2UserInfo.from(token);
+        OAuth2UserInfo userInfo = authService.getUserFromToken(token);
 
         User user = userApi.findBySocialConnection(userInfo.provider(), userInfo.providerId())
                 .orElseGet(() -> userApi.autoSaveAfterLogin(
