@@ -52,7 +52,6 @@ class OAuth2LoginEndToEndTest {
     private static final String MOCK_USER_SUB = "123456789";
     private static final String MOCK_USER_EMAIL = "testuser@gmail.com";
     private static final String MOCK_USER_NAME = "Test User";
-    private static final int HTTP_STATUS_FOUND = 302;
 
     private static WireMockServer wireMockServer;
     private static String mockProviderBaseUrl;
@@ -78,15 +77,6 @@ class OAuth2LoginEndToEndTest {
 
     @BeforeEach
     void stubOAuth2Endpoints() {
-        // Authorization endpoint
-        WireMock.stubFor(WireMock.get(WireMock.urlPathEqualTo("/oauth2/auth"))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_STATUS_FOUND)
-                        .withHeader("Location", "http://localhost/login/oauth2/code/" + PROVIDER_ID
-                                +
-                                "?code=" + MOCK_AUTH_CODE + "&state={{request.query.state}}")
-                        .withTransformers("response-template")));
-
         // Token
         WireMock.stubFor(WireMock.post(WireMock.urlPathEqualTo("/oauth2/token"))
                 .willReturn(WireMock.aResponse()
@@ -149,6 +139,8 @@ class OAuth2LoginEndToEndTest {
                 .andExpect(cookie().httpOnly("access_token", true))
                 .andReturn();
 
+        WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlPathEqualTo("/oauth2/token")));
+        WireMock.verify(1, WireMock.getRequestedFor(WireMock.urlPathEqualTo("/oauth2/userinfo")));
         Cookie clearedStateCookie = callbackResult.getResponse().getCookie(
                 CookieAuthorizationRequestRepository.OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
         assertThat(clearedStateCookie).isNotNull();
