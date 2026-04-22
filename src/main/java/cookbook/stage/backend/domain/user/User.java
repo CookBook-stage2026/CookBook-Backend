@@ -1,5 +1,8 @@
 package cookbook.stage.backend.domain.user;
 
+import cookbook.stage.backend.domain.recipe.Recipe;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class User {
@@ -8,6 +11,7 @@ public class User {
     private String email;
     private String displayName;
     private List<SocialConnection> socialConnections;
+    private final List<Recipe> recipes = new ArrayList<>();
 
     public User(String email, String displayName, List<SocialConnection> socialConnections) {
         this.id = UserId.create();
@@ -37,5 +41,13 @@ public class User {
 
     public List<SocialConnection> getSocialConnections() {
         return socialConnections;
+    }
+
+    public List<Recipe> getRecipes() {
+        return recipes;
+    }
+
+    public void addRecipe(Recipe recipe) {
+        recipes.add(recipe);
     }
 }
