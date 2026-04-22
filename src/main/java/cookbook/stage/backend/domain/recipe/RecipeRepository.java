@@ -1,7 +1,7 @@
 package cookbook.stage.backend.domain.recipe;
 
-import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
+import cookbook.stage.backend.domain.user.UserId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
