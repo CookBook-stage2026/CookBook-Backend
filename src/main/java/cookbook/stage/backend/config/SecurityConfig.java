@@ -38,6 +38,9 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-methods:GET,POST,PUT,DELETE,OPTIONS}")
     private String allowedMethods;
 
+    @Value("${app.cors.allowed-headers:*}")
+    private String allowedHeaders;
+
     private final OAuth2AuthenticationSuccessHandler handler;
     private final CookieAuthorizationRequestRepository cookieAuthorizationRequestRepository;
 
@@ -98,7 +101,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(allowedOrigins));
         config.setAllowedMethods(List.of(allowedMethods.split(",")));
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedHeaders(List.of(allowedHeaders.split(",")));
         config.setAllowCredentials(true);
         return _ -> config;
     }

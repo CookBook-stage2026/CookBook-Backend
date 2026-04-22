@@ -44,9 +44,10 @@ class LoadAuthorizationRequestTests {
         OAuth2AuthorizationRequest loadedRequest = repository.loadAuthorizationRequest(loadRequest);
 
         // Assert
-        assertThat(loadedRequest).isNotNull();
-        assertThat(loadedRequest.getState()).isEqualTo("test-state");
-        assertThat(loadedRequest.getClientId()).isEqualTo("test-client");
+        assertThat(loadedRequest)
+                .isNotNull()
+                .returns("test-state", OAuth2AuthorizationRequest::getState)
+                .returns("test-client", OAuth2AuthorizationRequest::getClientId);
     }
 
     @Test
