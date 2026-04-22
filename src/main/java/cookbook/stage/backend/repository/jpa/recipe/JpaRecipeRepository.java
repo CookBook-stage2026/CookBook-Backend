@@ -18,16 +18,23 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
     @EntityGraph(attributePaths = {"steps", "ingredients", "ingredients.ingredient"})
     Optional<JpaRecipeEntity> findById(@NonNull UUID id);
 
+    @EntityGraph(attributePaths = {"steps", "ingredients", "ingredients.ingredient"})
+    Optional<JpaRecipeEntity> findByIdAndCreatorId(UUID id, UUID creatorId);
+
+    Page<JpaRecipeEntity> findByCreatorId(UUID creatorId, Pageable pageable);
+
     @Query("""
                 SELECT r FROM JpaRecipeEntity r
                 JOIN r.ingredients i
                 WHERE i.id.ingredientId IN :ingredientIds
+                    AND r.creatorId = :creatorId
                 GROUP BY r.id
                 HAVING COUNT(DISTINCT i.id.ingredientId) >= :idCount
             """)
-    Page<JpaRecipeEntity> findByIngredients(
+    Page<JpaRecipeEntity> findByIngredientsAndCreatorId(
             @Param("ingredientIds") List<UUID> ingredientIds,
             @Param("idCount") int idCount,
+            @Param("creatorId") UUID creatorId,
             Pageable pageable
     );
 }

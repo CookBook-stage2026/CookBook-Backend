@@ -1,13 +1,17 @@
 package cookbook.stage.backend.api.recipeController;
 
 import cookbook.stage.backend.domain.ingredient.Ingredient;
+import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.ingredient.IngredientRepository;
 import cookbook.stage.backend.domain.ingredient.Unit;
-import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.recipe.Recipe;
+import cookbook.stage.backend.domain.recipe.RecipeId;
 import cookbook.stage.backend.domain.recipe.RecipeIngredient;
 import cookbook.stage.backend.domain.recipe.RecipeRepository;
-import cookbook.stage.backend.domain.recipe.RecipeId;
+import cookbook.stage.backend.domain.user.User;
+import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.domain.user.UserRepository;
+import cookbook.stage.backend.repository.jpa.recipe.RecipeDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,17 +19,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -44,27 +49,38 @@ class GetAllRecipesTests {
     private static final double DEFAULT_QUANTITY = 1.0;
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final UserId USER_ID = UserId.create();
+    private static final String USER_NAME = "username";
+    private static final String USER_EMAIL = "user@email.com";
 
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private RecipeRepository recipeRepository;
+
     @Autowired
     private IngredientRepository ingredientRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void clearDatabase() {
         JdbcTestUtils.deleteFromTables(jdbcTemplate,
-                "recipe_ingredients", "recipes", "ingredients");
+                "recipe_ingredients", "recipe_steps", "recipes", "ingredients", "users");
     }
 
     @Test
     void getAllRecipes_shouldReturnAllRecipes_whenRecipesExist() throws Exception {
         // Arrange
-        Recipe recipe1 = recipeRepository.save(buildRecipe());
-        Recipe recipe2 = recipeRepository.save(buildRecipe());
+        User user = createUser();
+
+        Recipe recipe1 = recipeRepository.save(buildRecipe(user));
+        Recipe recipe2 = recipeRepository.save(buildRecipe(user));
 
         // Act & Assert
         performGetAllRecipes()
@@ -83,6 +99,8 @@ class GetAllRecipesTests {
 
     @Test
     void getAllRecipes_shouldReturnEmptyList_whenNoRecipesExist() throws Exception {
+        createUser();
+
         performGetAllRecipes()
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -94,6 +112,8 @@ class GetAllRecipesTests {
     @Test
     void getAllRecipes_shouldReturnPagedResults_whenPageSizeIsSmall() throws Exception {
         // Arrange
+        User user = createUser();
+
         final int totalRecipes = 3;
         final int pageSize = 2;
         final int firstPageIndex = 0;
@@ -104,7 +124,7 @@ class GetAllRecipesTests {
         final int expectedSecondPageCount = totalRecipes - pageSize;
 
         for (int i = 0; i < totalRecipes; i++) {
-            recipeRepository.save(buildRecipe());
+            recipeRepository.save(buildRecipe(user));
         }
 
         long totalElements = recipeRepository.count();
@@ -128,17 +148,50 @@ class GetAllRecipesTests {
 
     @Test
     void getAllRecipes_shouldReturn400_whenPageIsNegative() throws Exception {
+        // Arrange
+        createUser();
+
+        // Act & Assert
         performGetAllRecipes(-1, DEFAULT_PAGE_SIZE)
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void getAllRecipes_shouldReturn400_whenSizeIsNegative() throws Exception {
+        // Arrange
+        createUser();
+
+        // Act & Assert
         performGetAllRecipes(DEFAULT_PAGE, -1)
                 .andExpect(status().isBadRequest());
     }
 
-    @Transactional
+    @Test
+    void getAllRecipes_shouldReturn401_whenNotAuthenticated() throws Exception {
+        // Arrange
+        User user = createUser();
+        recipeRepository.save(buildRecipe(user));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/recipes"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void getAllRecipes_shouldReturnEmptyList_whenNoRecipesOfLoggedInUserExist() throws Exception {
+        // Arrange
+        createUser();
+        recipeRepository.save(buildRecipe(new User("email", "name", List.of())));
+
+        // Act & Assert
+        performGetAllRecipes()
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.page.totalElements").value(0))
+                .andExpect(jsonPath("$.page.totalPages").value(0));
+    }
+
     @Test
     void getAllRecipes_shouldFilterByIngredients_whenIngredientIdsProvided() throws Exception {
         // Arrange
@@ -146,10 +199,12 @@ class GetAllRecipesTests {
         Ingredient sugar = createAndSaveIngredient("Sugar");
         Ingredient salt = createAndSaveIngredient("Salt");
 
-        Recipe recipe1 = recipeRepository.save(buildRecipeWithIngredients(List.of(flour, sugar)));
-        Recipe recipe2 = recipeRepository.save(buildRecipeWithIngredients(List.of(flour, sugar, salt)));
-        recipeRepository.save(buildRecipeWithIngredients(List.of(flour)));
-        recipeRepository.save(buildRecipeWithIngredients(List.of(salt)));
+        User user = createUser();
+
+        Recipe recipe1 = recipeRepository.save(buildRecipeWithIngredients(List.of(flour, sugar), user));
+        Recipe recipe2 = recipeRepository.save(buildRecipeWithIngredients(List.of(flour, sugar, salt), user));
+        recipeRepository.save(buildRecipeWithIngredients(List.of(flour), user));
+        recipeRepository.save(buildRecipeWithIngredients(List.of(salt), user));
 
         // Act & Assert
         performGetAllRecipesWithIngredients(List.of(flour.id().id(), sugar.id().id()), DEFAULT_PAGE, DEFAULT_PAGE_SIZE)
@@ -167,7 +222,9 @@ class GetAllRecipesTests {
         // Arrange
         Ingredient flour = createAndSaveIngredient("Flour");
 
-        recipeRepository.save(buildRecipeWithIngredients(List.of(flour)));
+        User user = createUser();
+
+        recipeRepository.save(buildRecipeWithIngredients(List.of(flour), user));
 
         // Act & Assert
         performGetAllRecipesWithIngredients(List.of(UUID.randomUUID()), DEFAULT_PAGE, DEFAULT_PAGE_SIZE)
@@ -176,25 +233,30 @@ class GetAllRecipesTests {
                 .andExpect(jsonPath("$.page.totalElements").value(0));
     }
 
-    private Recipe buildRecipe() {
-        Ingredient ingredient = createAndSaveIngredient("Flour " + UUID.randomUUID());
+    private Recipe buildRecipe(User user) {
+        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()),
+                "Flour " + UUID.randomUUID(), Unit.GRAM);
+        ingredientRepository.save(ingredient);
 
-        return buildRecipeWithIngredients(List.of(ingredient));
+        return buildRecipeWithIngredients(List.of(ingredient), user);
     }
 
-    private Recipe buildRecipeWithIngredients(List<Ingredient> ingredients) {
+    private Recipe buildRecipeWithIngredients(List<Ingredient> ingredients, User user) {
         List<RecipeIngredient> recipeIngredients = ingredients.stream()
                 .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY))
                 .toList();
 
         return new Recipe(
                 RecipeId.create(),
-                DEFAULT_RECIPE_NAME,
-                DEFAULT_RECIPE_DESCRIPTION,
-                DEFAULT_DURATION_IN_MINUTES,
-                DEFAULT_STEPS,
-                recipeIngredients,
-                DEFAULT_SERVINGS
+                new RecipeDetails(
+                        DEFAULT_RECIPE_NAME,
+                        DEFAULT_RECIPE_DESCRIPTION,
+                        DEFAULT_DURATION_IN_MINUTES,
+                        DEFAULT_SERVINGS,
+                        DEFAULT_STEPS,
+                        recipeIngredients
+                ),
+                user.getId()
         );
     }
 
@@ -205,22 +267,36 @@ class GetAllRecipesTests {
 
     private ResultActions performGetAllRecipes() throws Exception {
         return mockMvc.perform(get("/api/recipes")
-                        .with(user("testuser")))
+                        .with(validJwt())
+                        .with(csrf()))
                 .andDo(print());
     }
 
     private ResultActions performGetAllRecipes(int page, int size) throws Exception {
         return mockMvc.perform(get("/api/recipes")
-                        .with(user("testuser"))
+                        .with(validJwt())
+                        .with(csrf())
                         .param("page", String.valueOf(page))
                         .param("size", String.valueOf(size)))
                 .andDo(print());
     }
 
+    private User createUser() {
+        return userRepository.save(new User(USER_ID, USER_NAME, USER_EMAIL, List.of()));
+    }
+
+    private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor validJwt() {
+        return jwt().jwt(builder -> builder
+                .subject(USER_ID.id().toString())
+                .claim("email", USER_EMAIL)
+                .claim("name", USER_NAME));
+    }
+
     private ResultActions performGetAllRecipesWithIngredients(List<UUID> ingredientIds, int page, int size)
             throws Exception {
         var request = get("/api/recipes")
-                .with(user("testuser"))
+                .with(validJwt())
+                .with(csrf())
                 .param("page", String.valueOf(page))
                 .param("size", String.valueOf(size));
 

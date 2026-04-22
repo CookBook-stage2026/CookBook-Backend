@@ -46,24 +46,24 @@ VALUES ('11111111-0000-0000-0000-000000000001', 'Spaghetti', 'GRAM'),
 -- ---------------------------------------------------------
 -- RECIPES
 -- ---------------------------------------------------------
-INSERT INTO recipes (recipe_id, name, description, duration_in_minutes, servings)
-VALUES ('22222222-0000-0000-0000-000000000001', 'A classic Italian pasta dish originating from Rome, made with spaghetti, eggs, aged cheese, pancetta, and freshly ground black pepper, known for its rich texture and simple, traditional ingredients',
+INSERT INTO recipes (recipe_id, creator_id, name, description, duration_in_minutes, servings)
+VALUES ('22222222-0000-0000-0000-000000000001', '99999999-0000-0000-0000-000000000001', 'A classic Italian pasta dish originating from Rome, made with spaghetti, eggs, aged cheese, pancetta, and freshly ground black pepper, known for its rich texture and simple, traditional ingredients',
         'Spaghetti Carbonara prepared with al dente pasta, crisp pancetta, eggs, Pecorino Romano cheese, black pepper, and a silky sauce created by emulsifying the ingredients without using cream', 30, 2),
-       ('22222222-0000-0000-0000-000000000002', 'Chicken Tikka Masala',
+       ('22222222-0000-0000-0000-000000000002', '99999999-0000-0000-0000-000000000001', 'Chicken Tikka Masala',
         'Creamy and spiced Indian curry with tender chicken', 45, 4),
-       ('22222222-0000-0000-0000-000000000003', 'Beef Tacos', 'Mexican street-style tacos with seasoned ground beef',
+       ('22222222-0000-0000-0000-000000000003', '99999999-0000-0000-0000-000000000001', 'Beef Tacos', 'Mexican street-style tacos with seasoned ground beef',
         25, 4),
-       ('22222222-0000-0000-0000-000000000004', 'Vegetable Stir Fry', 'Quick and healthy Asian-inspired stir fry', 20,
+       ('22222222-0000-0000-0000-000000000004', '99999999-0000-0000-0000-000000000001', 'Vegetable Stir Fry', 'Quick and healthy Asian-inspired stir fry', 20,
         2),
-       ('22222222-0000-0000-0000-000000000005', 'French Onion Soup',
+       ('22222222-0000-0000-0000-000000000005', '99999999-0000-0000-0000-000000000001', 'French Onion Soup',
         'Rich and hearty French classic topped with melted cheese', 60, 4),
-       ('22222222-0000-0000-0000-000000000006', 'Banana Pancakes', 'Fluffy pancakes with a hint of banana', 20, 2),
-       ('22222222-0000-0000-0000-000000000007', 'Greek Salad', 'Fresh Mediterranean salad with feta and olives', 15, 2),
-       ('22222222-0000-0000-0000-000000000008', 'Beef Bourguignon', 'Classic French braised beef stew in red wine', 180,
+       ('22222222-0000-0000-0000-000000000006', '99999999-0000-0000-0000-000000000001', 'Banana Pancakes', 'Fluffy pancakes with a hint of banana', 20, 2),
+       ('22222222-0000-0000-0000-000000000007', '99999999-0000-0000-0000-000000000001', 'Greek Salad', 'Fresh Mediterranean salad with feta and olives', 15, 2),
+       ('22222222-0000-0000-0000-000000000008', '99999999-0000-0000-0000-000000000001', 'Beef Bourguignon', 'Classic French braised beef stew in red wine', 180,
         6),
-       ('22222222-0000-0000-0000-000000000009', 'Margherita Pizza',
+       ('22222222-0000-0000-0000-000000000009', '99999999-0000-0000-0000-000000000001', 'Margherita Pizza',
         'Simple Neapolitan pizza with fresh basil and mozzarella', 40, 2),
-       ('22222222-0000-0000-0000-000000000010', 'Chocolate Lava Cake',
+       ('22222222-0000-0000-0000-000000000010', '99999999-0000-0000-0000-000000000001', 'Chocolate Lava Cake',
         'Decadent warm chocolate cake with a molten center', 25, 4);
 
 -- ---------------------------------------------------------
@@ -210,3 +210,23 @@ VALUES
     ('22222222-0000-0000-0000-000000000010', 2, 'Fold in flour'),
     ('22222222-0000-0000-0000-000000000010', 3, 'Pour into ramekins'),
     ('22222222-0000-0000-0000-000000000010', 4, 'Bake for 12 minutes and serve immediately');
+
+-- ---------------------------------------------------------
+-- USER
+-- ---------------------------------------------------------
+INSERT INTO users (user_id, email, display_name)
+VALUES (
+           '99999999-0000-0000-0000-000000000001',
+           'seeduser@cookbook.com',
+           'Seed User'
+       );
+
+-- ---------------------------------------------------------
+-- SOCIAL CONNECTION
+-- ---------------------------------------------------------
+INSERT INTO social_connections (user_id, provider, provider_id)
+VALUES (
+           '99999999-0000-0000-0000-000000000001',
+           'seed',
+           'seed-user-1'
+       );

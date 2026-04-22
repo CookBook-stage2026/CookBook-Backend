@@ -3,6 +3,8 @@ package cookbook.stage.backend.domain.recipe;
 import cookbook.stage.backend.domain.ingredient.Ingredient;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.ingredient.Unit;
+import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.repository.jpa.recipe.RecipeDetails;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -21,12 +23,22 @@ class RecipeTest {
             new RecipeIngredient(new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM), 200.0)
     );
     private static final int VALID_SERVINGS = 2;
+    private static final UserId USER_ID = UserId.create();
 
     @Test
     void constructor_shouldCreateRecipe_whenValidParameters() {
         // Act
-        Recipe recipe = new Recipe(VALID_ID, VALID_NAME, VALID_DESCRIPTION, VALID_DURATION,
-                VALID_STEPS, VALID_INGREDIENTS, VALID_SERVINGS);
+        Recipe recipe = new Recipe(
+                VALID_ID,
+                new RecipeDetails(
+                        VALID_NAME,
+                        VALID_DESCRIPTION,
+                        VALID_DURATION,
+                        VALID_SERVINGS,
+                        VALID_STEPS,
+                        VALID_INGREDIENTS
+                ),
+                USER_ID);
 
         // Assert
         assertThat(recipe.getId()).isEqualTo(VALID_ID);
@@ -40,19 +52,36 @@ class RecipeTest {
 
     @Test
     void constructor_shouldSetServingsToOne_whenServingsIsNegative() {
-        // Act
-        Recipe recipe = new Recipe(VALID_ID, VALID_NAME, VALID_DESCRIPTION, VALID_DURATION,
-                VALID_STEPS, VALID_INGREDIENTS, -1);
-
-        // Assert
-        assertThat(recipe.getServings()).isEqualTo(1);
+        // Act & Assert
+        assertThatThrownBy(() -> new Recipe(
+                VALID_ID,
+                new RecipeDetails(
+                        VALID_NAME,
+                        VALID_DESCRIPTION,
+                        VALID_DURATION,
+                        -1,
+                        VALID_STEPS,
+                        VALID_INGREDIENTS
+                ),
+                USER_ID))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Servings must be greater than 0");
     }
 
     @Test
     void constructor_shouldThrowException_whenNameIsBlank() {
         // Act & Assert
-        assertThatThrownBy(() -> new Recipe(VALID_ID, "", VALID_DESCRIPTION, VALID_DURATION,
-                VALID_STEPS, VALID_INGREDIENTS, VALID_SERVINGS))
+        assertThatThrownBy(() -> new Recipe(
+                VALID_ID,
+                new RecipeDetails(
+                        "",
+                        VALID_DESCRIPTION,
+                        VALID_DURATION,
+                        VALID_SERVINGS,
+                        VALID_STEPS,
+                        VALID_INGREDIENTS
+                ),
+                USER_ID))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("A recipe must have a name");
     }
@@ -60,8 +89,17 @@ class RecipeTest {
     @Test
     void constructor_shouldThrowException_whenDescriptionIsBlank() {
         // Act & Assert
-        assertThatThrownBy(() -> new Recipe(VALID_ID, VALID_NAME, "", VALID_DURATION,
-                VALID_STEPS, VALID_INGREDIENTS, VALID_SERVINGS))
+        assertThatThrownBy(() -> new Recipe(
+                VALID_ID,
+                new RecipeDetails(
+                        VALID_NAME,
+                        "",
+                        VALID_DURATION,
+                        VALID_SERVINGS,
+                        VALID_STEPS,
+                        VALID_INGREDIENTS
+                ),
+                USER_ID))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("A recipe must have a description");
     }
@@ -69,8 +107,17 @@ class RecipeTest {
     @Test
     void constructor_shouldThrowException_whenDurationIsNegative() {
         // Act & Assert
-        assertThatThrownBy(() -> new Recipe(VALID_ID, VALID_NAME, VALID_DESCRIPTION, -1,
-                VALID_STEPS, VALID_INGREDIENTS, VALID_SERVINGS))
+        assertThatThrownBy(() -> new Recipe(
+                VALID_ID,
+                new RecipeDetails(
+                        VALID_NAME,
+                        VALID_DESCRIPTION,
+                        -1,
+                        VALID_SERVINGS,
+                        VALID_STEPS,
+                        VALID_INGREDIENTS
+                ),
+                USER_ID))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Duration must be greater than 0");
     }
@@ -78,8 +125,17 @@ class RecipeTest {
     @Test
     void constructor_shouldThrowException_whenIngredientsIsNull() {
         // Act & Assert
-        assertThatThrownBy(() -> new Recipe(VALID_ID, VALID_NAME, VALID_DESCRIPTION, VALID_DURATION,
-                VALID_STEPS, null, VALID_SERVINGS))
+        assertThatThrownBy(() -> new Recipe(
+                VALID_ID,
+                new RecipeDetails(
+                        VALID_NAME,
+                        VALID_DESCRIPTION,
+                        VALID_DURATION,
+                        VALID_SERVINGS,
+                        VALID_STEPS,
+                        null
+                ),
+                USER_ID))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("A recipe must have at least one ingredient");
     }

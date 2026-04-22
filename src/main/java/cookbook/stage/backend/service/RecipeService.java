@@ -8,6 +8,9 @@ import cookbook.stage.backend.domain.recipe.RecipeId;
 import cookbook.stage.backend.domain.recipe.RecipeIngredient;
 import cookbook.stage.backend.domain.recipe.RecipeRepository;
 import cookbook.stage.backend.domain.recipe.RecipeSummary;
+import cookbook.stage.backend.domain.user.User;
+import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.repository.jpa.recipe.RecipeDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,15 +24,21 @@ import java.util.Map;
 public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final IngredientService ingredientService;
+    private final UserService userService;
 
-    public RecipeService(RecipeRepository recipeRepository, IngredientService ingredientService) {
+    public RecipeService(RecipeRepository recipeRepository, IngredientService ingredientService,
+                         UserService userService) {
         this.recipeRepository = recipeRepository;
         this.ingredientService = ingredientService;
+        this.userService = userService;
     }
 
     @Transactional
-    public Recipe createRecipe(String name, String description, int durationInMinutes,
-                               List<String> steps, Map<IngredientId, Double> ingredientQuantities, int servings) {
+    public Recipe createRecipe(String name, String description, int durationInMinutes, List<String> steps,
+                               Map<IngredientId, Double> ingredientQuantities, int servings, UserId userId) {
+        User user = userService.findById(userId)
+                .orElseThrow(userId::notFound);
+
         List<IngredientId> ingredientIds = ingredientQuantities.keySet().stream()
                 .toList();
 
@@ -47,15 +56,26 @@ public class RecipeService {
                 .toList();
 
         return recipeRepository.save(new Recipe(
-                RecipeId.create(), name, description, durationInMinutes, steps, recipeIngredients, servings
+                RecipeId.create(),
+                new RecipeDetails(
+                        name,
+                        description,
+                        durationInMinutes,
+                        servings,
+                        steps,
+                        recipeIngredients
+                ),
+                user.getId()
         ));
     }
 
-    public Recipe findById(RecipeId id) {
-        return recipeRepository.findById(id).orElseThrow(id::notFound);
+    public Recipe findById(RecipeId id, UserId userId) {
+        return recipeRepository.findById(id, userId)
+                .orElseThrow(id::notFound);
     }
 
-    public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, Pageable pageable) {
-        return recipeRepository.findAllSummariesWithFilter(ingredientIds, pageable);
+    public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds,
+                                                          Pageable pageable, UserId userId) {
+        return recipeRepository.findAllSummariesWithFilter(ingredientIds, pageable, userId);
     }
 }

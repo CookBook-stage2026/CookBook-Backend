@@ -1,5 +1,8 @@
 package cookbook.stage.backend.domain.recipe;
 
+import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.repository.jpa.recipe.RecipeDetails;
+
 import java.util.List;
 
 // Will not convert to record class or add final since other issues include editing the Recipe class.
@@ -11,35 +14,25 @@ public class Recipe {
     private int servings;
     private final List<String> steps;
     private final List<RecipeIngredient> ingredients;
+    private final UserId creator;
 
-    public Recipe(RecipeId id, String name, String description, int durationInMinutes,
-                  List<String> steps, List<RecipeIngredient> ingredients, int servings) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("A recipe must have a name");
+    public Recipe(RecipeId id, RecipeDetails details, UserId creator) {
+        if (id == null) {
+            throw new IllegalArgumentException("A recipe must have an id");
         }
-        if (description == null || description.isBlank()) {
-            throw new IllegalArgumentException("A recipe must have a description");
-        }
-        if (durationInMinutes <= 0) {
-            throw new IllegalArgumentException("Duration must be greater than 0");
-        }
-        if (steps == null || steps.isEmpty()) {
-            throw new IllegalArgumentException("A recipe must have at least one step");
-        }
-        if (ingredients == null || ingredients.isEmpty()) {
-            throw new IllegalArgumentException("A recipe must have at least one ingredient");
-        }
-        if (servings <= 0) {
-            servings = 1;
+
+        if (creator == null) {
+            throw new IllegalArgumentException("A recipe must have a creator");
         }
 
         this.id = id;
-        this.name = name;
-        this.description = description;
-        this.durationInMinutes = durationInMinutes;
-        this.steps = steps;
-        this.ingredients = ingredients;
-        this.servings = servings;
+        this.name = details.name();
+        this.description = details.description();
+        this.durationInMinutes = details.durationInMinutes();
+        this.servings = details.servings();
+        this.steps = details.steps();
+        this.ingredients = details.ingredients();
+        this.creator = creator;
     }
 
     public RecipeId getId() {
@@ -68,5 +61,9 @@ public class Recipe {
 
     public int getServings() {
         return servings;
+    }
+
+    public UserId getCreator() {
+        return creator;
     }
 }
