@@ -1,17 +1,16 @@
-package cookbook.stage.backend.auth.shared;
+package cookbook.stage.backend.util;
 
-import cookbook.stage.backend.auth.application.AuthService;
-import cookbook.stage.backend.auth.application.OAuth2UserInfo;
-import cookbook.stage.backend.shared.domain.OAuth2Exception;
-import cookbook.stage.backend.shared.infrastructure.security.CookieUtils;
-import cookbook.stage.backend.shared.infrastructure.security.JwtService;
-import cookbook.stage.backend.user.shared.User;
-import cookbook.stage.backend.user.shared.UserApi;
+import cookbook.stage.backend.domain.auth.OAuth2UserInfo;
+import cookbook.stage.backend.domain.exception.OAuth2Exception;
+import cookbook.stage.backend.domain.user.User;
+import cookbook.stage.backend.repository.CookieAuthorizationRequestRepository;
+import cookbook.stage.backend.service.AuthService;
+import cookbook.stage.backend.service.JwtService;
+import cookbook.stage.backend.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.modulith.NamedInterface;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -21,10 +20,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-@NamedInterface
 public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final UserApi userApi;
+    private final UserService userService;
     private final JwtService jwtService;
     private final CookieAuthorizationRequestRepository cookieRepo;
     private final CookieUtils cookieUtils;
@@ -36,11 +34,11 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     private long jwtTokenExpiration;
     private static final long TO_SECONDS = 1000;
 
-    public OAuth2AuthenticationSuccessHandler(UserApi userApi,
+    public OAuth2AuthenticationSuccessHandler(UserService userService,
                                               JwtService jwtService,
                                               CookieAuthorizationRequestRepository cookieRepo,
                                               CookieUtils cookieUtils, AuthService authService) {
-        this.userApi = userApi;
+        this.userService = userService;
         this.jwtService = jwtService;
         this.cookieRepo = cookieRepo;
         this.cookieUtils = cookieUtils;
@@ -60,8 +58,8 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
         OAuth2UserInfo userInfo = authService.getUserFromToken(token);
 
-        User user = userApi.findBySocialConnection(userInfo.provider(), userInfo.providerId())
-                .orElseGet(() -> userApi.autoSaveAfterLogin(
+        User user = userService.findBySocialConnection(userInfo.provider(), userInfo.providerId())
+                .orElseGet(() -> userService.autoSaveAfterLogin(
                         userInfo.email(), userInfo.name(), userInfo.provider(), userInfo.providerId()
                 ));
 

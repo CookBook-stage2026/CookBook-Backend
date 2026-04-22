@@ -1,6 +1,6 @@
 package cookbook.stage.backend.auth.shared.cookieAuthorizationRequestRepository;
 
-import cookbook.stage.backend.auth.shared.CookieAuthorizationRequestRepository;
+import cookbook.stage.backend.repository.CookieAuthorizationRequestRepository;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

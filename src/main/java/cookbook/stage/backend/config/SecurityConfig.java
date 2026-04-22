@@ -1,7 +1,7 @@
-package cookbook.stage.backend.shared.infrastructure.security;
+package cookbook.stage.backend.config;
 
-import cookbook.stage.backend.auth.shared.CookieAuthorizationRequestRepository;
-import cookbook.stage.backend.auth.shared.OAuth2AuthenticationSuccessHandler;
+import cookbook.stage.backend.repository.CookieAuthorizationRequestRepository;
+import cookbook.stage.backend.util.OAuth2AuthenticationSuccessHandler;
 import io.jsonwebtoken.io.Decoders;
 import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Value;

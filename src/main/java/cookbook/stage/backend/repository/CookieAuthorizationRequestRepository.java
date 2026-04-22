@@ -1,7 +1,7 @@
-package cookbook.stage.backend.auth.shared;
+package cookbook.stage.backend.repository;
 
-import cookbook.stage.backend.shared.domain.OAuth2Exception;
-import cookbook.stage.backend.shared.infrastructure.security.CookieUtils;
+import cookbook.stage.backend.domain.exception.OAuth2Exception;
+import cookbook.stage.backend.util.CookieUtils;
 import io.jsonwebtoken.io.Decoders;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

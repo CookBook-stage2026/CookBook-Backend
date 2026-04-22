@@ -1,6 +1,6 @@
 package cookbook.stage.backend.shared.infrastructure.security.cookieUtils;
 
-import cookbook.stage.backend.shared.infrastructure.security.CookieUtils;
+import cookbook.stage.backend.util.CookieUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,4 +1,4 @@
-package cookbook.stage.backend.user.infrastructure.jpa;
+package cookbook.stage.backend.repository.jpa.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

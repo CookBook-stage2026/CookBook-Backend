@@ -1,6 +1,6 @@
-package cookbook.stage.backend.user.infrastructure.jpa;
+package cookbook.stage.backend.repository.jpa.user;
 
-import cookbook.stage.backend.user.domain.SocialConnection;
+import cookbook.stage.backend.domain.user.SocialConnection;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 

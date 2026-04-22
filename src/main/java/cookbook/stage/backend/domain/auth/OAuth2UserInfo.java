@@ -1,4 +1,4 @@
-package cookbook.stage.backend.auth.application;
+package cookbook.stage.backend.domain.auth;
 
 public record OAuth2UserInfo(
         String provider,

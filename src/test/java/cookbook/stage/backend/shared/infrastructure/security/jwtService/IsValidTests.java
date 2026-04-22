@@ -1,8 +1,8 @@
 package cookbook.stage.backend.shared.infrastructure.security.jwtService;
 
-import cookbook.stage.backend.shared.infrastructure.security.JwtService;
-import cookbook.stage.backend.user.shared.User;
-import cookbook.stage.backend.user.shared.UserId;
+import cookbook.stage.backend.domain.user.User;
+import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

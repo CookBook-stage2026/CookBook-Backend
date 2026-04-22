@@ -1,6 +1,4 @@
-package cookbook.stage.backend.user.shared;
-
-import cookbook.stage.backend.user.domain.SocialConnection;
+package cookbook.stage.backend.domain.user;
 
 import java.util.List;
 

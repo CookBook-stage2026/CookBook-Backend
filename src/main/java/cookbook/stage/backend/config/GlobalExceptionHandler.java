@@ -2,7 +2,7 @@ package cookbook.stage.backend.config;
 
 import cookbook.stage.backend.domain.exception.DataIntegrityException;
 import cookbook.stage.backend.domain.exception.NotFoundException;
-import cookbook.stage.backend.shared.domain.OAuth2Exception;
+import cookbook.stage.backend.domain.exception.OAuth2Exception;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

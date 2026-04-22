@@ -1,9 +1,9 @@
 package cookbook.stage.backend.auth.shared.oAuth2AuthenticationSuccessHandler;
 
-import cookbook.stage.backend.auth.shared.CookieAuthorizationRequestRepository;
-import cookbook.stage.backend.auth.shared.OAuth2AuthenticationSuccessHandler;
-import cookbook.stage.backend.user.shared.UserApi;
-import cookbook.stage.backend.shared.domain.OAuth2Exception;
+import cookbook.stage.backend.domain.exception.OAuth2Exception;
+import cookbook.stage.backend.repository.CookieAuthorizationRequestRepository;
+import cookbook.stage.backend.service.UserService;
+import cookbook.stage.backend.util.OAuth2AuthenticationSuccessHandler;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ class OnAuthenticationSuccessTests {
     private OAuth2AuthenticationSuccessHandler successHandler;
 
     @Autowired
-    private UserApi userApi;
+    private UserService userService;
     private static final int RANDOM_ID = 9999;
 
     @Value("${frontend.url:http://localhost:4200/}")
@@ -44,7 +44,7 @@ class OnAuthenticationSuccessTests {
     @Test
     void onAuthenticationSuccess_ExistingUser_SetsCookieAndRedirects() throws IOException {
         // Arrange
-        userApi.autoSaveAfterLogin(
+        userService.autoSaveAfterLogin(
                 "existing@example.com", "Existing User", "google", "google-123");
 
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -100,7 +100,7 @@ class OnAuthenticationSuccessTests {
         successHandler.onAuthenticationSuccess(request, response, token);
 
         // Assert
-        assertThat(userApi.findBySocialConnection("github", "9999")).isPresent();
+        assertThat(userService.findBySocialConnection("github", "9999")).isPresent();
 
         assertThat(response.getRedirectedUrl()).isEqualTo(frontendUrl + "auth/callback");
 

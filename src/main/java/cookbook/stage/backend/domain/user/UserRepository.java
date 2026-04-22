@@ -1,7 +1,4 @@
-package cookbook.stage.backend.user.domain;
-
-import cookbook.stage.backend.user.shared.User;
-import cookbook.stage.backend.user.shared.UserId;
+package cookbook.stage.backend.domain.user;
 
 import java.util.Optional;
 

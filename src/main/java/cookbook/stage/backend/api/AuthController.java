@@ -1,4 +1,4 @@
-package cookbook.stage.backend.auth.api;
+package cookbook.stage.backend.api;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

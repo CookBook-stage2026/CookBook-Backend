@@ -1,4 +1,4 @@
-package cookbook.stage.backend.user.domain;
+package cookbook.stage.backend.domain.user;
 
 import java.util.UUID;
 

@@ -1,5 +1,6 @@
-package cookbook.stage.backend.shared.infrastructure.security;
+package cookbook.stage.backend.util;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
@@ -7,7 +8,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 
-import jakarta.servlet.http.Cookie;
 import java.util.Optional;
 
 @Component

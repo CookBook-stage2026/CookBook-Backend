@@ -1,6 +1,6 @@
-package cookbook.stage.backend.shared.infrastructure.security;
+package cookbook.stage.backend.service;
 
-import cookbook.stage.backend.user.shared.User;
+import cookbook.stage.backend.domain.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

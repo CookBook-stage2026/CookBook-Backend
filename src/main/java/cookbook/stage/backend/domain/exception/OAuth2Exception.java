@@ -1,4 +1,4 @@
-package cookbook.stage.backend.shared.domain;
+package cookbook.stage.backend.domain.exception;
 
 public class OAuth2Exception extends RuntimeException {
     public OAuth2Exception(String message, Exception e) {

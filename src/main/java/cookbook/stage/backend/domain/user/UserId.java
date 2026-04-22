@@ -1,6 +1,7 @@
-package cookbook.stage.backend.user.shared;
+package cookbook.stage.backend.domain.user;
 
-import cookbook.stage.backend.shared.domain.NotFoundException;
+
+import cookbook.stage.backend.domain.exception.NotFoundException;
 
 import java.util.Objects;
 import java.util.UUID;

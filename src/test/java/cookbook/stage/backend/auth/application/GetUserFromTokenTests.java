@@ -1,5 +1,7 @@
 package cookbook.stage.backend.auth.application;
 
+import cookbook.stage.backend.domain.auth.OAuth2UserInfo;
+import cookbook.stage.backend.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;

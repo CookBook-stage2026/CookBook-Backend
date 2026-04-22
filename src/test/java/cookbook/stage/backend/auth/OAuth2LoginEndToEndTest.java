@@ -2,9 +2,9 @@ package cookbook.stage.backend.auth;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import cookbook.stage.backend.auth.shared.CookieAuthorizationRequestRepository;
-import cookbook.stage.backend.user.shared.User;
-import cookbook.stage.backend.user.shared.UserApi;
+import cookbook.stage.backend.domain.user.User;
+import cookbook.stage.backend.repository.CookieAuthorizationRequestRepository;
+import cookbook.stage.backend.service.UserService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,9 +36,7 @@ import java.util.Optional;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -60,7 +58,7 @@ class OAuth2LoginEndToEndTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private UserApi userApi;
+    private UserService userApi;
 
     @BeforeAll
     static void startWireMock() {

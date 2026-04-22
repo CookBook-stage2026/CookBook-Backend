@@ -1,15 +1,8 @@
-package cookbook.stage.backend.user.infrastructure.jpa;
+package cookbook.stage.backend.repository.jpa.user;
 
-import cookbook.stage.backend.user.shared.User;
-import cookbook.stage.backend.user.shared.UserId;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.UniqueConstraint;
+import cookbook.stage.backend.domain.user.User;
+import cookbook.stage.backend.domain.user.UserId;
+import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,7 @@
-package cookbook.stage.backend.auth.application;
+package cookbook.stage.backend.service;
 
-import cookbook.stage.backend.shared.domain.OAuth2Exception;
+import cookbook.stage.backend.domain.auth.OAuth2UserInfo;
+import cookbook.stage.backend.domain.exception.OAuth2Exception;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Service;
 

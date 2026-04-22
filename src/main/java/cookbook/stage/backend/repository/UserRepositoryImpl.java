@@ -1,10 +1,10 @@
-package cookbook.stage.backend.user.infrastructure;
+package cookbook.stage.backend.repository;
 
-import cookbook.stage.backend.user.domain.UserRepository;
-import cookbook.stage.backend.user.infrastructure.jpa.JpaUserEntity;
-import cookbook.stage.backend.user.infrastructure.jpa.JpaUserRepository;
-import cookbook.stage.backend.user.shared.User;
-import cookbook.stage.backend.user.shared.UserId;
+import cookbook.stage.backend.domain.user.User;
+import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.domain.user.UserRepository;
+import cookbook.stage.backend.repository.jpa.user.JpaUserEntity;
+import cookbook.stage.backend.repository.jpa.user.JpaUserRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
