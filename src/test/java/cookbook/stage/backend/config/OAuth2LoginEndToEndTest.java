@@ -1,4 +1,4 @@
-package cookbook.stage.backend.auth;
+package cookbook.stage.backend.config;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;

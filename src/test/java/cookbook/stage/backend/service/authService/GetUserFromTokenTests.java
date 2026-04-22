@@ -1,4 +1,4 @@
-package cookbook.stage.backend.auth.application;
+package cookbook.stage.backend.service.authService;
 
 import cookbook.stage.backend.domain.auth.OAuth2UserInfo;
 import cookbook.stage.backend.service.AuthService;

@@ -1,4 +1,4 @@
-package cookbook.stage.backend.auth.shared.oAuth2AuthenticationSuccessHandler;
+package cookbook.stage.backend.util.oAuth2AuthenticationSuccessHandler;
 
 import cookbook.stage.backend.domain.exception.OAuth2Exception;
 import cookbook.stage.backend.repository.CookieAuthorizationRequestRepository;

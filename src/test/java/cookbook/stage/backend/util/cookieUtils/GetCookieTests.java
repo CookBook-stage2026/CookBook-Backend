@@ -1,4 +1,4 @@
-package cookbook.stage.backend.shared.infrastructure.security.cookieUtils;
+package cookbook.stage.backend.util.cookieUtils;
 
 import cookbook.stage.backend.util.CookieUtils;
 import jakarta.servlet.http.Cookie;

@@ -1,4 +1,4 @@
-package cookbook.stage.backend.shared.infrastructure.security.jwtService;
+package cookbook.stage.backend.service.jwtService;
 
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;

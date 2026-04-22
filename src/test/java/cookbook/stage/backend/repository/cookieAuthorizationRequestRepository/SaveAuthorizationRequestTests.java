@@ -1,4 +1,4 @@
-package cookbook.stage.backend.auth.shared.cookieAuthorizationRequestRepository;
+package cookbook.stage.backend.repository.cookieAuthorizationRequestRepository;
 
 import cookbook.stage.backend.repository.CookieAuthorizationRequestRepository;
 import jakarta.servlet.http.Cookie;
