@@ -55,7 +55,7 @@ public class RecipeService {
         return recipeRepository.findById(id).orElseThrow(id::notFound);
     }
 
-    public Page<RecipeSummary> findAllSummaries(Pageable pageable) {
-        return recipeRepository.findAllSummaries(pageable);
+    public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, Pageable pageable) {
+        return recipeRepository.findAllSummariesWithFilter(ingredientIds, pageable);
     }
 }

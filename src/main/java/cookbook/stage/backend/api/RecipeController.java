@@ -4,10 +4,10 @@ import cookbook.stage.backend.api.input.CreateRecipeDto;
 import cookbook.stage.backend.api.input.CreateRecipeIngredientDto;
 import cookbook.stage.backend.api.result.RecipeDto;
 import cookbook.stage.backend.api.result.RecipeSummaryDto;
-import cookbook.stage.backend.service.RecipeService;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.recipe.Recipe;
 import cookbook.stage.backend.domain.recipe.RecipeId;
+import cookbook.stage.backend.service.RecipeService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -77,20 +78,27 @@ public class RecipeController {
     }
 
     /**
-     * Gets all recipes with pagination
+     * Gets all recipes with pagination and optional filtering
      *
-     * @param page current page (default 0)
-     * @param size size of page (default 20)
+     * @param ingredientIds Optional list of ingredient IDs to filter recipes by
+     * @param page          current page (default 0)
+     * @param size          size of page (default 20)
      * @return List of recipes
      */
     @GetMapping
     public Page<RecipeSummaryDto> getAllRecipes(
+            @RequestParam(required = false) List<UUID> ingredientIds,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
+        List<IngredientId> ingredients = (ingredientIds == null) ? List.of()
+                : ingredientIds.stream()
+                  .map(IngredientId::new)
+                  .toList();
+
         Pageable pageable = PageRequest.of(page, size);
 
-        return recipeService.findAllSummaries(pageable)
+        return recipeService.findAllSummariesWithFilter(ingredients, pageable)
                 .map(RecipeSummaryDto::fromDomain);
     }
 }

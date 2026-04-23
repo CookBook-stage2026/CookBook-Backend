@@ -21,12 +21,12 @@ public class JpaRecipeIngredientEntity {
     @Column(name = "base_quantity", nullable = false)
     private double baseQuantity;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @MapsId("recipeId")
     @JoinColumn(name = "recipe_id", nullable = false)
     private JpaRecipeEntity recipe;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("ingredientId")
     @JoinColumn(name = "ingredient_id", nullable = false)
     private JpaIngredientEntity ingredient;

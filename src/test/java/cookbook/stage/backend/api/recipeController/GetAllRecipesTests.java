@@ -18,10 +18,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -51,6 +53,7 @@ class GetAllRecipesTests {
     private IngredientRepository ingredientRepository;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
     @BeforeEach
     void clearDatabase() {
         JdbcTestUtils.deleteFromTables(jdbcTemplate,
@@ -135,10 +138,54 @@ class GetAllRecipesTests {
                 .andExpect(status().isBadRequest());
     }
 
+    @Transactional
+    @Test
+    void getAllRecipes_shouldFilterByIngredients_whenIngredientIdsProvided() throws Exception {
+        // Arrange
+        Ingredient flour = createAndSaveIngredient("Flour");
+        Ingredient sugar = createAndSaveIngredient("Sugar");
+        Ingredient salt = createAndSaveIngredient("Salt");
+
+        Recipe recipe1 = recipeRepository.save(buildRecipeWithIngredients(List.of(flour, sugar)));
+        Recipe recipe2 = recipeRepository.save(buildRecipeWithIngredients(List.of(flour, sugar, salt)));
+        recipeRepository.save(buildRecipeWithIngredients(List.of(flour)));
+        recipeRepository.save(buildRecipeWithIngredients(List.of(salt)));
+
+        // Act & Assert
+        performGetAllRecipesWithIngredients(List.of(flour.id().id(), sugar.id().id()), DEFAULT_PAGE, DEFAULT_PAGE_SIZE)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[*].id", hasItems(
+                        recipe1.getId().id().toString(),
+                        recipe2.getId().id().toString()
+                )))
+                .andExpect(jsonPath("$.page.totalElements").value(2));
+    }
+
+    @Test
+    void getAllRecipes_shouldReturnEmptyResults_whenNoRecipesMatchIngredientFilter() throws Exception {
+        // Arrange
+        Ingredient flour = createAndSaveIngredient("Flour");
+
+        recipeRepository.save(buildRecipeWithIngredients(List.of(flour)));
+
+        // Act & Assert
+        performGetAllRecipesWithIngredients(List.of(UUID.randomUUID()), DEFAULT_PAGE, DEFAULT_PAGE_SIZE)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.page.totalElements").value(0));
+    }
+
     private Recipe buildRecipe() {
-        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()),
-                "Flour " + UUID.randomUUID(), Unit.GRAM);
-        ingredientRepository.save(ingredient);
+        Ingredient ingredient = createAndSaveIngredient("Flour " + UUID.randomUUID());
+
+        return buildRecipeWithIngredients(List.of(ingredient));
+    }
+
+    private Recipe buildRecipeWithIngredients(List<Ingredient> ingredients) {
+        List<RecipeIngredient> recipeIngredients = ingredients.stream()
+                .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY))
+                .toList();
 
         return new Recipe(
                 RecipeId.create(),
@@ -146,9 +193,14 @@ class GetAllRecipesTests {
                 DEFAULT_RECIPE_DESCRIPTION,
                 DEFAULT_DURATION_IN_MINUTES,
                 DEFAULT_STEPS,
-                List.of(new RecipeIngredient(ingredient, DEFAULT_QUANTITY)),
+                recipeIngredients,
                 DEFAULT_SERVINGS
         );
+    }
+
+    private Ingredient createAndSaveIngredient(String name) {
+        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), name, Unit.GRAM);
+        return ingredientRepository.save(ingredient);
     }
 
     private ResultActions performGetAllRecipes() throws Exception {
@@ -162,6 +214,21 @@ class GetAllRecipesTests {
                         .with(user("testuser"))
                         .param("page", String.valueOf(page))
                         .param("size", String.valueOf(size)))
+                .andDo(print());
+    }
+
+    private ResultActions performGetAllRecipesWithIngredients(List<UUID> ingredientIds, int page, int size)
+            throws Exception {
+        var request = get("/api/recipes")
+                .with(user("testuser"))
+                .param("page", String.valueOf(page))
+                .param("size", String.valueOf(size));
+
+        for (UUID id : ingredientIds) {
+            request.param("ingredientIds", id.toString());
+        }
+
+        return mockMvc.perform(request)
                 .andDo(print());
     }
 }
