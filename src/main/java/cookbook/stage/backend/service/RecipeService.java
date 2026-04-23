@@ -68,7 +68,7 @@ public class RecipeService {
 
     public Recipe findById(RecipeId id, UserId userId) {
         return recipeRepository.findById(id, userId)
-                .orElseThrow(() -> new AccessDeniedException("Recipe with id " + id.toString() + " is not accessible"));
+                .orElseThrow(id::notFound);
     }
 
     public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, Pageable pageable,

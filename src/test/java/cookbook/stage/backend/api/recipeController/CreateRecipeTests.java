@@ -211,7 +211,7 @@ class CreateRecipeTests {
     }
 
     private User createUser() {
-        return userRepository.save(new User(USER_ID, USER_NAME, USER_EMAIL, List.of()));
+        return userRepository.saveUser(new User(USER_ID, USER_NAME, USER_EMAIL, List.of()));
     }
 
     private ResultActions performCreateRecipeWithValidJwt(CreateRecipeDto dto) throws Exception {
