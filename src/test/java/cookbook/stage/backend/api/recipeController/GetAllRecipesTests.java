@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -151,12 +152,14 @@ class GetAllRecipesTests {
     }
 
     private ResultActions performGetAllRecipes() throws Exception {
-        return mockMvc.perform(get("/api/recipes"))
+        return mockMvc.perform(get("/api/recipes")
+                        .with(user("testuser")))
                 .andDo(print());
     }
 
     private ResultActions performGetAllRecipes(int page, int size) throws Exception {
         return mockMvc.perform(get("/api/recipes")
+                        .with(user("testuser"))
                         .param("page", String.valueOf(page))
                         .param("size", String.valueOf(size)))
                 .andDo(print());

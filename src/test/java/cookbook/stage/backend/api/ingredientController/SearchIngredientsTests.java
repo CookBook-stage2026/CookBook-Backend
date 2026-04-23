@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -50,6 +51,7 @@ class SearchIngredientsTests {
 
         // Act & Assert
         mockMvc.perform(get("/api/ingredients/search")
+                        .with(user("testuser"))
                         .param("query", "Flour")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -66,6 +68,7 @@ class SearchIngredientsTests {
 
         // Act & Assert
         mockMvc.perform(get("/api/ingredients/search")
+                        .with(user("testuser"))
                         .param("query", "Pepper")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -82,6 +85,7 @@ class SearchIngredientsTests {
 
         // Act & Assert - Page 0, Size 2
         mockMvc.perform(get("/api/ingredients/search")
+                        .with(user("testuser"))
                         .param("query", "Apple")
                         .param("page", "0")
                         .param("size", "2")
@@ -92,6 +96,7 @@ class SearchIngredientsTests {
 
         // Act & Assert - Page 1, Size 2
         mockMvc.perform(get("/api/ingredients/search")
+                        .with(user("testuser"))
                         .param("query", "Apple")
                         .param("page", "1")
                         .param("size", "2")
@@ -110,6 +115,7 @@ class SearchIngredientsTests {
 
         // Act & Assert
         mockMvc.perform(get("/api/ingredients/search")
+                        .with(user("testuser"))
                         .param("query", "Tomato")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -124,6 +130,7 @@ class SearchIngredientsTests {
 
         // Act & Assert
         mockMvc.perform(get("/api/ingredients/search")
+                        .with(user("testuser"))
                         .param("query", "flour")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())

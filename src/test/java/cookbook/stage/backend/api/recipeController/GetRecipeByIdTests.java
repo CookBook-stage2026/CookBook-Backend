@@ -24,11 +24,12 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -132,7 +133,8 @@ class GetRecipeByIdTests {
     }
 
     private ResultActions performGetRecipeById(UUID id) throws Exception {
-        return mockMvc.perform(get("/api/recipes/{id}", id))
+        return mockMvc.perform(get("/api/recipes/{id}", id)
+                        .with(user("testuser")))
                 .andDo(print());
     }
 }

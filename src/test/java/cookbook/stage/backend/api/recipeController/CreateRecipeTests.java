@@ -1,11 +1,11 @@
 package cookbook.stage.backend.api.recipeController;
 
-import cookbook.stage.backend.domain.ingredient.Ingredient;
-import cookbook.stage.backend.domain.ingredient.IngredientRepository;
-import cookbook.stage.backend.domain.ingredient.Unit;
-import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.api.input.CreateRecipeDto;
 import cookbook.stage.backend.api.input.CreateRecipeIngredientDto;
+import cookbook.stage.backend.domain.ingredient.Ingredient;
+import cookbook.stage.backend.domain.ingredient.IngredientId;
+import cookbook.stage.backend.domain.ingredient.IngredientRepository;
+import cookbook.stage.backend.domain.ingredient.Unit;
 import cookbook.stage.backend.domain.recipe.RecipeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -25,14 +26,17 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 @AutoConfigureMockMvc
 @SpringBootTest
+@WithMockUser
 class CreateRecipeTests {
 
     private static final String DEFAULT_RECIPE_NAME = "Test Name";
@@ -157,6 +161,8 @@ class CreateRecipeTests {
 
     private ResultActions performCreateRecipe(CreateRecipeDto dto) throws Exception {
         return mockMvc.perform(post("/api/recipes")
+                        .with(user("testuser"))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(dto)))
                 .andDo(print());
