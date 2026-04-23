@@ -1,6 +1,7 @@
 package cookbook.stage.backend.repository.jpa.recipe;
 
 import cookbook.stage.backend.domain.recipe.Recipe;
+import cookbook.stage.backend.domain.recipe.RecipeDetails;
 import cookbook.stage.backend.domain.recipe.RecipeId;
 import cookbook.stage.backend.domain.recipe.RecipeIngredient;
 import cookbook.stage.backend.domain.recipe.RecipeSummary;
@@ -53,20 +54,20 @@ public class JpaRecipeEntity {
     private List<JpaRecipeIngredientEntity> ingredients = new ArrayList<>();
 
     @Column(nullable = false)
-    private UUID creatorId;
+    private UUID userId;
 
     protected JpaRecipeEntity() {
     }
 
     public JpaRecipeEntity(UUID id, String name, String description, int durationInMinutes,
-                           List<String> steps, int servings, UserId creatorId) {
+                           List<String> steps, int servings, UserId userId) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.durationInMinutes = durationInMinutes;
         this.steps = steps;
         this.servings = servings;
-        this.creatorId = creatorId.id();
+        this.userId = userId.id();
     }
 
     public static JpaRecipeEntity fromDomain(Recipe recipe) {
@@ -77,7 +78,7 @@ public class JpaRecipeEntity {
                 recipe.getDurationInMinutes(),
                 recipe.getSteps(),
                 recipe.getServings(),
-                recipe.getCreator()
+                recipe.getUserId()
         );
         recipe.getIngredients().forEach(entity::addIngredient);
         return entity;
@@ -95,10 +96,10 @@ public class JpaRecipeEntity {
                         description,
                         durationInMinutes,
                         servings,
-                        steps,
-                        domainIngredients
+                        steps
                 ),
-                new UserId(creatorId)
+                domainIngredients,
+                new UserId(userId)
         );
     }
 

@@ -11,7 +11,7 @@ import cookbook.stage.backend.domain.recipe.RecipeRepository;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.domain.user.UserRepository;
-import cookbook.stage.backend.repository.jpa.recipe.RecipeDetails;
+import cookbook.stage.backend.domain.recipe.RecipeDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -253,9 +253,9 @@ class GetAllRecipesTests {
                         DEFAULT_RECIPE_DESCRIPTION,
                         DEFAULT_DURATION_IN_MINUTES,
                         DEFAULT_SERVINGS,
-                        DEFAULT_STEPS,
-                        recipeIngredients
+                        DEFAULT_STEPS
                 ),
+                recipeIngredients,
                 user.getId()
         );
     }

@@ -4,13 +4,13 @@ import cookbook.stage.backend.domain.exception.DataIntegrityException;
 import cookbook.stage.backend.domain.ingredient.Ingredient;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.recipe.Recipe;
+import cookbook.stage.backend.domain.recipe.RecipeDetails;
 import cookbook.stage.backend.domain.recipe.RecipeId;
 import cookbook.stage.backend.domain.recipe.RecipeIngredient;
 import cookbook.stage.backend.domain.recipe.RecipeRepository;
 import cookbook.stage.backend.domain.recipe.RecipeSummary;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
-import cookbook.stage.backend.repository.jpa.recipe.RecipeDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -34,8 +34,8 @@ public class RecipeService {
     }
 
     @Transactional
-    public Recipe createRecipe(String name, String description, int durationInMinutes, List<String> steps,
-                               Map<IngredientId, Double> ingredientQuantities, int servings, UserId userId) {
+    public Recipe createRecipe(RecipeDetails recipeDetails,
+                               Map<IngredientId, Double> ingredientQuantities, UserId userId) {
         User user = userService.findById(userId)
                 .orElseThrow(userId::notFound);
 
@@ -57,14 +57,8 @@ public class RecipeService {
 
         return recipeRepository.save(new Recipe(
                 RecipeId.create(),
-                new RecipeDetails(
-                        name,
-                        description,
-                        durationInMinutes,
-                        servings,
-                        steps,
-                        recipeIngredients
-                ),
+                recipeDetails,
+                recipeIngredients,
                 user.getId()
         ));
     }

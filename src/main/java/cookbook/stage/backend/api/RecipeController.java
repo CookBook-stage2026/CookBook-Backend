@@ -6,6 +6,7 @@ import cookbook.stage.backend.api.result.RecipeDto;
 import cookbook.stage.backend.api.result.RecipeSummaryDto;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.recipe.Recipe;
+import cookbook.stage.backend.domain.recipe.RecipeDetails;
 import cookbook.stage.backend.domain.recipe.RecipeId;
 import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.service.RecipeService;
@@ -57,13 +58,15 @@ public class RecipeController {
                 );
 
         Recipe recipe = recipeService.createRecipe(
-                createRecipeDto.name(),
-                createRecipeDto.description(),
-                createRecipeDto.durationInMinutes(),
-                createRecipeDto.steps(),
+                new RecipeDetails(
+                        createRecipeDto.name(),
+                        createRecipeDto.description(),
+                        createRecipeDto.durationInMinutes(),
+                        createRecipeDto.servings(),
+                        createRecipeDto.steps()
+                ),
                 ingredientQuantities,
-                createRecipeDto.servings(),
-                new UserId(UUID.fromString(jwt.getSubject()))
+                UserId.fromJwt(jwt)
         );
 
         return RecipeDto.fromDomain(recipe);
@@ -80,7 +83,7 @@ public class RecipeController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID id
     ) {
-        Recipe recipe = recipeService.findById(new RecipeId(id), new UserId(UUID.fromString(jwt.getSubject())));
+        Recipe recipe = recipeService.findById(new RecipeId(id), UserId.fromJwt(jwt));
 
         return RecipeDto.fromDomain(recipe);
     }
@@ -107,8 +110,7 @@ public class RecipeController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return recipeService.findAllSummariesWithFilter(ingredients, pageable,
-                        new UserId(UUID.fromString(jwt.getSubject())))
+        return recipeService.findAllSummariesWithFilter(ingredients, pageable, UserId.fromJwt(jwt))
                 .map(RecipeSummaryDto::fromDomain);
     }
 }

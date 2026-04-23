@@ -1,6 +1,4 @@
-package cookbook.stage.backend.repository.jpa.recipe;
-
-import cookbook.stage.backend.domain.recipe.RecipeIngredient;
+package cookbook.stage.backend.domain.recipe;
 
 import java.util.List;
 
@@ -9,8 +7,7 @@ public record RecipeDetails(
         String description,
         int durationInMinutes,
         int servings,
-        List<String> steps,
-        List<RecipeIngredient> ingredients
+        List<String> steps
 ) {
     public RecipeDetails {
         if (name == null || name.isBlank()) {
@@ -33,11 +30,6 @@ public record RecipeDetails(
             throw new IllegalArgumentException("A recipe must have at least one step");
         }
 
-        if (ingredients == null || ingredients.isEmpty()) {
-            throw new IllegalArgumentException("A recipe must have at least one ingredient");
-        }
-
         steps = List.copyOf(steps);
-        ingredients = List.copyOf(ingredients);
     }
 }

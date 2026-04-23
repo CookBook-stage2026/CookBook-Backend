@@ -1,7 +1,6 @@
 package cookbook.stage.backend.domain.recipe;
 
 import cookbook.stage.backend.domain.user.UserId;
-import cookbook.stage.backend.repository.jpa.recipe.RecipeDetails;
 
 import java.util.List;
 
@@ -14,14 +13,18 @@ public class Recipe {
     private int servings;
     private final List<String> steps;
     private final List<RecipeIngredient> ingredients;
-    private final UserId creator;
+    private final UserId userId;
 
-    public Recipe(RecipeId id, RecipeDetails details, UserId creator) {
+    public Recipe(RecipeId id, RecipeDetails details, List<RecipeIngredient> ingredients, UserId userId) {
         if (id == null) {
             throw new IllegalArgumentException("A recipe must have an id");
         }
 
-        if (creator == null) {
+        if (ingredients == null || ingredients.isEmpty()) {
+            throw new IllegalArgumentException("A recipe must have at least one ingredient");
+        }
+
+        if (userId == null) {
             throw new IllegalArgumentException("A recipe must have a creator");
         }
 
@@ -31,8 +34,8 @@ public class Recipe {
         this.durationInMinutes = details.durationInMinutes();
         this.servings = details.servings();
         this.steps = details.steps();
-        this.ingredients = details.ingredients();
-        this.creator = creator;
+        this.ingredients = List.copyOf(ingredients);
+        this.userId = userId;
     }
 
     public RecipeId getId() {
@@ -63,7 +66,7 @@ public class Recipe {
         return servings;
     }
 
-    public UserId getCreator() {
-        return creator;
+    public UserId getUserId() {
+        return userId;
     }
 }

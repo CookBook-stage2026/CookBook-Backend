@@ -4,7 +4,6 @@ import cookbook.stage.backend.domain.ingredient.Ingredient;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.ingredient.Unit;
 import cookbook.stage.backend.domain.user.UserId;
-import cookbook.stage.backend.repository.jpa.recipe.RecipeDetails;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -35,9 +34,9 @@ class RecipeTest {
                         VALID_DESCRIPTION,
                         VALID_DURATION,
                         VALID_SERVINGS,
-                        VALID_STEPS,
-                        VALID_INGREDIENTS
+                        VALID_STEPS
                 ),
+                VALID_INGREDIENTS,
                 USER_ID);
 
         // Assert
@@ -60,9 +59,9 @@ class RecipeTest {
                         VALID_DESCRIPTION,
                         VALID_DURATION,
                         -1,
-                        VALID_STEPS,
-                        VALID_INGREDIENTS
+                        VALID_STEPS
                 ),
+                VALID_INGREDIENTS,
                 USER_ID))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Servings must be greater than 0");
@@ -78,9 +77,9 @@ class RecipeTest {
                         VALID_DESCRIPTION,
                         VALID_DURATION,
                         VALID_SERVINGS,
-                        VALID_STEPS,
-                        VALID_INGREDIENTS
+                        VALID_STEPS
                 ),
+                VALID_INGREDIENTS,
                 USER_ID))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("A recipe must have a name");
@@ -96,9 +95,9 @@ class RecipeTest {
                         "",
                         VALID_DURATION,
                         VALID_SERVINGS,
-                        VALID_STEPS,
-                        VALID_INGREDIENTS
+                        VALID_STEPS
                 ),
+                VALID_INGREDIENTS,
                 USER_ID))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("A recipe must have a description");
@@ -114,9 +113,9 @@ class RecipeTest {
                         VALID_DESCRIPTION,
                         -1,
                         VALID_SERVINGS,
-                        VALID_STEPS,
-                        VALID_INGREDIENTS
+                        VALID_STEPS
                 ),
+                VALID_INGREDIENTS,
                 USER_ID))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Duration must be greater than 0");
@@ -132,9 +131,9 @@ class RecipeTest {
                         VALID_DESCRIPTION,
                         VALID_DURATION,
                         VALID_SERVINGS,
-                        VALID_STEPS,
-                        null
+                        VALID_STEPS
                 ),
+                null,
                 USER_ID))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("A recipe must have at least one ingredient");

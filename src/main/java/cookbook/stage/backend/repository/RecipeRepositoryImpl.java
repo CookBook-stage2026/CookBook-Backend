@@ -34,7 +34,7 @@ public class RecipeRepositoryImpl implements RecipeRepository {
 
     @Override
     public Optional<Recipe> findById(RecipeId id, UserId userId) {
-        return jpaRecipeRepository.findByIdAndCreatorId(id.id(), userId.id())
+        return jpaRecipeRepository.findByIdAndUserId(id.id(), userId.id())
                 .map(JpaRecipeEntity::toDomain);
     }
 
@@ -42,7 +42,7 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds,
                                                           Pageable pageable, UserId userId) {
         if (ingredientIds == null || ingredientIds.isEmpty()) {
-            return jpaRecipeRepository.findByCreatorId(userId.id(), pageable)
+            return jpaRecipeRepository.findByUserId(userId.id(), pageable)
                     .map(JpaRecipeEntity::toSummary);
         }
 
