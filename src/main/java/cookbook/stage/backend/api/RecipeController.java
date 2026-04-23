@@ -9,7 +9,6 @@ import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.recipe.Recipe;
 import cookbook.stage.backend.domain.recipe.RecipeDetails;
 import cookbook.stage.backend.domain.recipe.RecipeId;
-import cookbook.stage.backend.domain.recipe.RecipeSummary;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.service.RecipeService;
@@ -39,7 +38,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/recipes")
 public class RecipeController {
     private final RecipeService recipeService;
-    // To fix circular dependency issue
     private final UserService userService;
 
     public RecipeController(RecipeService recipeService, UserService userService) {
@@ -149,7 +147,12 @@ public class RecipeController {
     }
 
     /**
+     * Searches recipes by name
      *
+     * @param page  current page (default 0)
+     * @param size  current page size (default 10)
+     * @param query letters that have to be in the recipe name
+     * @return list of summaries of recipes that contain the query
      */
     @GetMapping("/search")
     public List<RecipeSummaryDto> searchRecipeSummaries(
@@ -158,6 +161,10 @@ public class RecipeController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam String query
     ) {
-        return null;
+        Pageable pageable = PageRequest.of(page, size);
+
+        return recipeService.searchSummariesByName(pageable,
+                new UserId(UUID.fromString(jwt.getSubject())),
+                query).stream().map(RecipeSummaryDto::fromDomain).toList();
     }
 }

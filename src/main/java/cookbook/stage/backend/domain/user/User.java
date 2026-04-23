@@ -2,11 +2,9 @@ package cookbook.stage.backend.domain.user;
 
 import cookbook.stage.backend.domain.recipe.Recipe;
 
-import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class User {
 
@@ -29,34 +27,6 @@ public class User {
         this.email = email;
         this.displayName = displayName;
         this.socialConnections = socialConnections;
-    }
-
-    public void assignRecipeToDay(int year, int weekNumber, DayOfWeek day, Recipe recipe) {
-        WeekSchedule schedule = getOrCreateWeekSchedule(year, weekNumber);
-        schedule.assignRecipe(day, recipe);
-    }
-
-    public void skipDay(int year, int weekNumber, DayOfWeek day) {
-        findWeekSchedule(year, weekNumber).ifPresent(schedule -> schedule.skipDay(day));
-    }
-
-    public Optional<WeekSchedule> findWeekSchedule(int year, int weekNumber) {
-        return weekSchedules.stream()
-                .filter(s -> s.year() == year && s.weekNumber() == weekNumber)
-                .findFirst();
-    }
-
-    private WeekSchedule getOrCreateWeekSchedule(int year, int weekNumber) {
-        return findWeekSchedule(year, weekNumber).orElseGet(() -> {
-            WeekSchedule newSchedule = new WeekSchedule(
-                    WeekScheduleId.create(),
-                    year,
-                    weekNumber,
-                    new java.util.EnumMap<>(DayOfWeek.class)
-            );
-            weekSchedules.add(newSchedule);
-            return newSchedule;
-        });
     }
 
     public UserId getId() {

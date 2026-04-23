@@ -3,12 +3,12 @@ package cookbook.stage.backend.repository.jpa.user;
 import cookbook.stage.backend.domain.recipe.Recipe;
 import cookbook.stage.backend.domain.user.WeekSchedule;
 import cookbook.stage.backend.domain.user.WeekScheduleId;
-import cookbook.stage.backend.repository.jpa.recipe.JpaRecipeEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
@@ -18,13 +18,12 @@ import java.util.Map;
 import java.util.UUID;
 
 @Entity
+@Table(name = "week_schedules")
 public class JpaWeekScheduleEntity {
 
     @Id
     private UUID id;
     private UUID userId;
-    private int year;
-    private int weekNumber;
 
     @OneToMany(
             mappedBy = "weekScheduleId",
@@ -38,15 +37,13 @@ public class JpaWeekScheduleEntity {
     }
 
     public WeekSchedule toDomain(Map<DayOfWeek, Recipe> resolvedRecipes) {
-        return new WeekSchedule(new WeekScheduleId(id), year, weekNumber, resolvedRecipes);
+        return new WeekSchedule(new WeekScheduleId(id), resolvedRecipes);
     }
 
     public static JpaWeekScheduleEntity fromDomain(WeekSchedule schedule, UUID userId) {
         JpaWeekScheduleEntity entity = new JpaWeekScheduleEntity();
         entity.id = schedule.id().id();
         entity.userId = userId;
-        entity.year = schedule.year();
-        entity.weekNumber = schedule.weekNumber();
         entity.daySchedules = schedule.dailyRecipes().entrySet().stream()
                 .map(entry -> JpaDayScheduleEntity.fromDomain(
                         entity.id,
@@ -60,7 +57,7 @@ public class JpaWeekScheduleEntity {
     public WeekSchedule toDomain() {
         Map<DayOfWeek, Recipe> resolvedRecipes = new EnumMap<>(DayOfWeek.class);
         daySchedules.forEach(d -> resolvedRecipes.put(d.getDayOfWeek(), d.getRecipe().toDomain()));
-        return new WeekSchedule(new WeekScheduleId(id), year, weekNumber, resolvedRecipes);
+        return new WeekSchedule(new WeekScheduleId(id), resolvedRecipes);
     }
 
     public UUID getId() {
@@ -69,14 +66,6 @@ public class JpaWeekScheduleEntity {
 
     public UUID getUserId() {
         return userId;
-    }
-
-    public int getYear() {
-        return year;
-    }
-
-    public int getWeekNumber() {
-        return weekNumber;
     }
 
     public List<JpaDayScheduleEntity> getDaySchedules() {
