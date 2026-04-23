@@ -19,5 +19,7 @@ public interface RecipeRepository {
 
     List<RecipeSummary> querySummaries(Pageable pageable, UserId userId, String query);
 
+    Page<RecipeSummary> searchSummariesByName(Pageable pageable, UserId userId, String query);
+
     long count();
 }
