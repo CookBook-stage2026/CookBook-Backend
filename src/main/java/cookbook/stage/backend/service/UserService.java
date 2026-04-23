@@ -45,8 +45,7 @@ public class UserService {
         return userRepository.saveUser(user);
     }
 
-    public WeekSchedule saveWeekSchedule(int year, int weekNumber,
-                                         Map<DayOfWeek, RecipeId> dailyRecipeIds,
+    public WeekSchedule saveWeekSchedule(Map<DayOfWeek, RecipeId> dailyRecipeIds,
                                          UserId userId) {
         Map<DayOfWeek, Recipe> dailyRecipes = new EnumMap<>(DayOfWeek.class);
 
@@ -58,8 +57,6 @@ public class UserService {
         return userRepository.saveWeekSchedule(
                 new WeekSchedule(
                         new WeekScheduleId(UUID.randomUUID()),
-                        year,
-                        weekNumber,
                         dailyRecipes
                 ),
                 userId

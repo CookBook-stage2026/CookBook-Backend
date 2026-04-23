@@ -8,13 +8,12 @@ import java.util.Map;
 import java.util.UUID;
 
 public record WeekScheduleDto(UUID id,
-                              int year,
-                              int weekNumber,
-                              Map<DayOfWeek, RecipeSummaryDto> dailyRecipes) {
+                               Map<DayOfWeek, RecipeSummaryDto> dailyRecipes) {
     public static WeekScheduleDto fromDomain(WeekSchedule schedule) {
         Map<DayOfWeek, RecipeSummaryDto> dailyRecipes = new EnumMap<>(DayOfWeek.class);
 
-        schedule.dailyRecipes().forEach((day, recipe) -> dailyRecipes.put(day, RecipeSummaryDto.fromDomain(recipe.summarize())));
-        return new WeekScheduleDto(schedule.id().id(), schedule.year(), schedule.weekNumber(), dailyRecipes);
+        schedule.dailyRecipes().forEach((day, recipe) ->
+                dailyRecipes.put(day, RecipeSummaryDto.fromDomain(recipe.summarize())));
+        return new WeekScheduleDto(schedule.id().id(), dailyRecipes);
     }
 }

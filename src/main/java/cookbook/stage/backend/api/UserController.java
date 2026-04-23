@@ -40,7 +40,7 @@ public class UserController {
         Map<DayOfWeek, RecipeId> dailyRecipeIds = new EnumMap<>(DayOfWeek.class);
 
         dto.dailyRecipeIds().forEach((day, recipeId) -> dailyRecipeIds.put(day, new RecipeId(recipeId)));
-        var newSchedule = service.saveWeekSchedule(dto.year(), dto.weekNumber(),
+        var newSchedule = service.saveWeekSchedule(
                 dailyRecipeIds,
                 new UserId(UUID.fromString(jwt.getSubject())));
         return WeekScheduleDto.fromDomain(newSchedule);

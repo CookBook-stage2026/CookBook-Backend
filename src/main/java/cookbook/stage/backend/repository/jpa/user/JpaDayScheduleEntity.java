@@ -8,11 +8,13 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 import java.time.DayOfWeek;
 import java.util.UUID;
 
 @Entity
+@Table(name = "day_schedules")
 public class JpaDayScheduleEntity {
 
     @Id

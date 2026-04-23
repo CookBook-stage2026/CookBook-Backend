@@ -55,8 +55,9 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public Page<RecipeSummary> searchSummariesByName(Pageable pageable, UserId userId, String query) {
-        return null;
+    public List<RecipeSummary> searchSummariesByName(Pageable pageable, UserId userId, String query) {
+        return jpaRecipeRepository.searchByNamePrioritizingStartsWith(query, userId.id(), pageable)
+                .stream().map(JpaRecipeEntity::toSummary).toList();
     }
 
     @Override

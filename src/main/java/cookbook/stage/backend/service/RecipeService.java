@@ -13,7 +13,6 @@ import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,7 +69,7 @@ public class RecipeService {
         return recipeRepository.findAllSummariesWithFilter(ingredientIds, pageable, userId);
     }
 
-    public Page<RecipeSummary> searchSummariesByName(Pageable pageable, UserId userId, String query) {
-        return null;
+    public List<RecipeSummary> searchSummariesByName(Pageable pageable, UserId userId, String query) {
+        return recipeRepository.searchSummariesByName(pageable, userId, query);
     }
 }

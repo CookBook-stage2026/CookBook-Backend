@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,4 +38,18 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
             @Param("userId") UUID userId,
             Pageable pageable
     );
+
+    @Query("""
+            SELECT r FROM JpaRecipeEntity r
+            WHERE (
+                LOWER(r.name) LIKE LOWER(CONCAT(:name, '%'))
+                OR LOWER(r.name) LIKE LOWER(CONCAT('%', :name, '%'))
+            )
+            AND r.creatorId = :userId
+            ORDER BY
+                CASE WHEN LOWER(r.name) LIKE LOWER(CONCAT(:name, '%')) THEN 0 ELSE 1 END,
+                r.name
+            """)
+    List<JpaRecipeEntity> searchByNamePrioritizingStartsWith(
+            @RequestParam("name") String name, @RequestParam("userId") UUID userId, Pageable pageable);
 }
