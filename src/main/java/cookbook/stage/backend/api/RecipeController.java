@@ -104,13 +104,36 @@ public class RecipeController {
             @Valid @RequestBody RecipeSearchRequest request
     ) {
         List<IngredientId> ingredients = request.ingredientIds().stream()
-                  .map(IngredientId::new)
-                  .toList();
+                .map(IngredientId::new)
+                .toList();
 
         Pageable pageable = PageRequest.of(request.page(), request.size());
         UserId userId = new UserId(UUID.fromString(jwt.getSubject()));
 
-        return recipeService.findAllSummariesWithFilter(ingredients, pageable, request.shouldApplyPreferences(), userId)
+        return recipeService.findAllSummariesWithFilter(ingredients, pageable,
+                         request.shouldApplyPreferences(), userId)
                 .map(RecipeSummaryDto::fromDomain);
+    }
+
+    /**
+     * Searches recipes by name
+     *
+     * @param page  current page (default 0)
+     * @param size  current page size (default 10)
+     * @param query letters that have to be in the recipe name
+     * @return list of summaries of recipes that contain the query
+     */
+    @GetMapping("/search")
+    public List<RecipeSummaryDto> searchRecipeSummaries(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam String query
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return recipeService.searchSummariesByName(pageable,
+                new UserId(UUID.fromString(jwt.getSubject())),
+                query).stream().map(RecipeSummaryDto::fromDomain).toList();
     }
 }

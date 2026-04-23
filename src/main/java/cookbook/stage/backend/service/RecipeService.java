@@ -14,7 +14,6 @@ import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.domain.user.UserPreferences;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,14 +61,13 @@ public class RecipeService {
         return recipeRepository.save(new Recipe(
                 RecipeId.create(),
                 recipeDetails,
-                recipeIngredients,
-                user.getId()
+                recipeIngredients, user.getId()
         ));
     }
 
     public Recipe findById(RecipeId id, UserId userId) {
         return recipeRepository.findById(id, userId)
-                .orElseThrow(() -> new AccessDeniedException("Recipe with id " + id.toString() + " is not accessible"));
+                .orElseThrow(id::notFound);
     }
 
     public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, Pageable pageable,
@@ -83,5 +81,9 @@ public class RecipeService {
         }
 
         return recipeRepository.findAllSummariesWithFilter(ingredientIds, UserPreferences.empty(), userId, pageable);
+    }
+
+    public List<RecipeSummary> searchSummariesByName(Pageable pageable, UserId userId, String query) {
+        return recipeRepository.searchSummariesByName(pageable, userId, query);
     }
 }

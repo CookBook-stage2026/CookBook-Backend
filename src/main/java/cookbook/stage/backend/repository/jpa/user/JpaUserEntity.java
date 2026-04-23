@@ -45,7 +45,7 @@ public class JpaUserEntity {
     )
     private List<JpaSocialConnectionEntity> socialConnections = new ArrayList<>();
 
-    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "creatorId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JpaRecipeEntity> recipes = new ArrayList<>();
 
     @ElementCollection
@@ -68,12 +68,11 @@ public class JpaUserEntity {
     }
 
     public JpaUserEntity(UUID userId, String email, String displayName,
-                         List<JpaSocialConnectionEntity> socialConnections, List<JpaRecipeEntity> recipes) {
+                         List<JpaSocialConnectionEntity> socialConnections) {
         this.id = userId;
         this.email = email;
         this.displayName = displayName;
         this.socialConnections = socialConnections;
-        this.recipes = recipes;
     }
 
     public User toDomain() {
@@ -92,10 +91,6 @@ public class JpaUserEntity {
                 user.getDisplayName(),
                 user.getSocialConnections().stream()
                         .map(JpaSocialConnectionEntity::fromDomain)
-                        .toList()
-        ,
-                user.getRecipes().stream()
-                        .map(JpaRecipeEntity::fromDomain)
                         .toList()
         );
     }
