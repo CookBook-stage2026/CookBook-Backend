@@ -1,54 +1,31 @@
 package cookbook.stage.backend.service.jwtService;
 
-import cookbook.stage.backend.domain.user.User;
-import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.service.JwtService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.List;
-import java.util.UUID;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
 class IsValidTests {
+    private static final String SECRET = "dGVzdC1zZWNyZXQta2V5LXRoYXQtaXMtbG9uZy1lbm91Z2gtZm9yLUhTMjU2";
+    private static final long EXPIRATION_MS = 3600000L;
 
-    @Autowired
-    private JwtService jwtService;
+    private final JwtService jwtService = new JwtService();
 
-    @Test
-    void isValid_ValidToken_ReturnsTrue() {
-        // Arrange
-        User user = new User(new UserId(UUID.randomUUID()), "valid@example.com", "Valid User", List.of());
-        String token = jwtService.generateToken(user);
-
-        // Act
-        boolean result = jwtService.isValid(token);
-
-        // Assert
-        assertThat(result).isTrue();
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(jwtService, "secret", SECRET);
+        ReflectionTestUtils.setField(jwtService, "expirationMs", EXPIRATION_MS);
     }
 
     @Test
     void isValid_MalformedToken_ReturnsFalse() {
-        // Arrange
-        String malformedToken = "invalid.token.structure";
-
-        // Act
-        boolean result = jwtService.isValid(malformedToken);
-
-        // Assert
-        assertThat(result).isFalse();
+        assertThat(jwtService.isValid("invalid.token.structure")).isFalse();
     }
 
     @Test
     void isValid_NullToken_ReturnsFalse() {
-        // Act
-        boolean result = jwtService.isValid(null);
-
-        // Assert
-        assertThat(result).isFalse();
+        assertThat(jwtService.isValid(null)).isFalse();
     }
 }

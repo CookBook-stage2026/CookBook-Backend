@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -43,10 +42,6 @@ public class JwtService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-    }
-
-    public UUID extractUserId(String token) {
-        return UUID.fromString(extractClaims(token).getSubject());
     }
 
     public boolean isValid(String token) {
