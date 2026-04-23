@@ -55,6 +55,11 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
+    public Page<RecipeSummary> searchSummariesByName(Pageable pageable, UserId userId, String query) {
+        return null;
+    }
+
+    @Override
     public long count() {
         return jpaRecipeRepository.count();
     }

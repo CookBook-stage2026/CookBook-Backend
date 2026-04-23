@@ -3,19 +3,25 @@ package cookbook.stage.backend.repository;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.domain.user.UserRepository;
+import cookbook.stage.backend.domain.user.WeekSchedule;
 import cookbook.stage.backend.repository.jpa.user.JpaUserEntity;
 import cookbook.stage.backend.repository.jpa.user.JpaUserRepository;
+import cookbook.stage.backend.repository.jpa.user.JpaWeekScheduleEntity;
+import cookbook.stage.backend.repository.jpa.user.JpaWeekScheduleRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {
     private final JpaUserRepository jpaUserRepository;
+    private final JpaWeekScheduleRepository jpaWeekScheduleRepository;
 
-    public UserRepositoryImpl(JpaUserRepository jpaUserRepository) {
+    public UserRepositoryImpl(JpaUserRepository jpaUserRepository, JpaWeekScheduleRepository jpaWeekScheduleRepository) {
         this.jpaUserRepository = jpaUserRepository;
+        this.jpaWeekScheduleRepository = jpaWeekScheduleRepository;
     }
 
     @Override
@@ -36,7 +42,21 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User save(User user) {
+    public User saveUser(User user) {
         return jpaUserRepository.save(JpaUserEntity.fromDomain(user)).toDomain();
+    }
+
+    @Override
+    public List<WeekSchedule> findWeekScheduleByUserId(UserId userId) {
+        return jpaWeekScheduleRepository.findByUserId(userId.id())
+                .stream()
+                .map(JpaWeekScheduleEntity::toDomain)
+                .toList();
+    }
+
+    @Override
+    public WeekSchedule saveWeekSchedule(WeekSchedule schedule, UserId userId) {
+        JpaWeekScheduleEntity entity = JpaWeekScheduleEntity.fromDomain(schedule, userId.id());
+        return jpaWeekScheduleRepository.save(entity).toDomain();
     }
 }

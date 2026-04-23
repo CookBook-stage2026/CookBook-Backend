@@ -38,6 +38,10 @@ public class Recipe {
         this.userId = userId;
     }
 
+    public RecipeSummary summarize() {
+        return new RecipeSummary(id, name, description, durationInMinutes);
+    }
+
     public RecipeId getId() {
         return id;
     }

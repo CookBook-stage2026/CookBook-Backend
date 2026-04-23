@@ -25,13 +25,10 @@ import java.util.Map;
 public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final IngredientService ingredientService;
-    private final UserService userService;
 
-    public RecipeService(RecipeRepository recipeRepository, IngredientService ingredientService,
-                         UserService userService) {
+    public RecipeService(RecipeRepository recipeRepository, IngredientService ingredientService) {
         this.recipeRepository = recipeRepository;
         this.ingredientService = ingredientService;
-        this.userService = userService;
     }
 
     @Transactional
@@ -59,8 +56,7 @@ public class RecipeService {
         return recipeRepository.save(new Recipe(
                 RecipeId.create(),
                 recipeDetails,
-                recipeIngredients,
-                user.getId()
+                recipeIngredients, user.getId()
         ));
     }
 
@@ -72,5 +68,9 @@ public class RecipeService {
     public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds,
                                                           Pageable pageable, UserId userId) {
         return recipeRepository.findAllSummariesWithFilter(ingredientIds, pageable, userId);
+    }
+
+    public Page<RecipeSummary> searchSummariesByName(Pageable pageable, UserId userId, String query) {
+        return null;
     }
 }
