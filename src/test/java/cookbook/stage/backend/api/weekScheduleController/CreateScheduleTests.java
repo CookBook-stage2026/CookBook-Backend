@@ -1,5 +1,6 @@
-package cookbook.stage.backend.api.userController;
+package cookbook.stage.backend.api.weekScheduleController;
 
+import cookbook.stage.backend.api.input.CreateDayScheduleDto;
 import cookbook.stage.backend.api.input.CreateWeekScheduleDto;
 import cookbook.stage.backend.domain.ingredient.Ingredient;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
@@ -32,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -42,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SpringBootTest
-class UserControllerCreateScheduleTests {
+class CreateScheduleTests {
 
     @Autowired
     private MockMvc mockMvc;
@@ -68,178 +71,224 @@ class UserControllerCreateScheduleTests {
     private static final int DEFAULT_DURATION_IN_MINUTES = 30;
     private static final String DEFAULT_RECIPE_DESCRIPTION = "test recipe";
     private static final int DEFAULT_QUANTITY = 5;
-    private static final int AMOUNT_OF_RECIPES_NORMAL_SCHEDULE = 3;
-    private static final int AMOUNT_OF_RECIPES_UPDATED_SCHEDULE = 2;
 
     @BeforeEach
     void clearDatabase() {
         JdbcTestUtils.deleteFromTables(jdbcTemplate,
-                "recipe_ingredients", "recipe_steps", "week_schedules", "recipes", "ingredients", "users");
+                "recipe_ingredients", "recipe_steps", "day_schedules", "week_schedules",
+                "recipes", "ingredients", "users");
     }
 
     @Test
     void createSchedule_ValidFullWeekSchedule_ShouldCreateAndReturn() throws Exception {
-        // Arrange
         var user = createUser();
         var recipes = seedRecipesForAllDays(user.getId());
 
-        Map<DayOfWeek, UUID> scheduleData = new EnumMap<>(DayOfWeek.class);
+        List<CreateDayScheduleDto> days = new ArrayList<>();
         for (DayOfWeek day : DayOfWeek.values()) {
-            scheduleData.put(day, recipes.get(day).getId().id());
+            days.add(new CreateDayScheduleDto(recipes.get(day).getId().id(), day));
         }
 
-        // Act & Assert
         mockMvc.perform(post("/api/user/schedule")
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(scheduleData))))
+                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(days))))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.dailyRecipes.MONDAY.name").value("Monday Recipe"))
-                .andExpect(jsonPath("$.dailyRecipes.TUESDAY.name").value("Tuesday Recipe"))
-                .andExpect(jsonPath("$.dailyRecipes.WEDNESDAY.name").value("Wednesday Recipe"))
-                .andExpect(jsonPath("$.dailyRecipes.THURSDAY.name").value("Thursday Recipe"))
-                .andExpect(jsonPath("$.dailyRecipes.FRIDAY.name").value("Friday Recipe"))
-                .andExpect(jsonPath("$.dailyRecipes.SATURDAY.name").value("Saturday Recipe"))
-                .andExpect(jsonPath("$.dailyRecipes.SUNDAY.name").value("Sunday Recipe"));
+                .andExpect(jsonPath("$.days", hasSize(7)))
+                .andExpect(jsonPath("$.days[*].day", containsInAnyOrder(
+                        "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY",
+                        "FRIDAY", "SATURDAY", "SUNDAY")))
+                .andExpect(jsonPath("$.days[?(@.day=='MONDAY')].recipeSummary.name").value("Monday Recipe"))
+                .andExpect(jsonPath("$.days[?(@.day=='TUESDAY')].recipeSummary.name").value("Tuesday Recipe"))
+                .andExpect(jsonPath("$.days[?(@.day=='WEDNESDAY')].recipeSummary.name").value("Wednesday Recipe"))
+                .andExpect(jsonPath("$.days[?(@.day=='THURSDAY')].recipeSummary.name").value("Thursday Recipe"))
+                .andExpect(jsonPath("$.days[?(@.day=='FRIDAY')].recipeSummary.name").value("Friday Recipe"))
+                .andExpect(jsonPath("$.days[?(@.day=='SATURDAY')].recipeSummary.name").value("Saturday Recipe"))
+                .andExpect(jsonPath("$.days[?(@.day=='SUNDAY')].recipeSummary.name").value("Sunday Recipe"));
     }
 
     @Test
     void createSchedule_PartialWeekSchedule_ShouldCreateAndReturn() throws Exception {
-        // Arrange
         var user = createUser();
         var recipe = seedRecipe("Monday Recipe", user.getId());
 
-        Map<DayOfWeek, UUID> scheduleData = new EnumMap<>(DayOfWeek.class);
-        scheduleData.put(DayOfWeek.MONDAY, recipe.getId().id());
-        scheduleData.put(DayOfWeek.WEDNESDAY, recipe.getId().id());
-        scheduleData.put(DayOfWeek.FRIDAY, recipe.getId().id());
+        List<CreateDayScheduleDto> days = List.of(
+                new CreateDayScheduleDto(recipe.getId().id(), DayOfWeek.MONDAY),
+                new CreateDayScheduleDto(recipe.getId().id(), DayOfWeek.WEDNESDAY),
+                new CreateDayScheduleDto(recipe.getId().id(), DayOfWeek.FRIDAY)
+        );
 
-        // Act & Assert
         mockMvc.perform(post("/api/user/schedule")
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(scheduleData))))
+                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(days))))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.dailyRecipes.MONDAY.name").value("Monday Recipe"))
-                .andExpect(jsonPath("$.dailyRecipes.WEDNESDAY.name").value("Monday Recipe"))
-                .andExpect(jsonPath("$.dailyRecipes.FRIDAY.name").value("Monday Recipe"))
-                .andExpect(jsonPath("$.dailyRecipes.size()").value(AMOUNT_OF_RECIPES_NORMAL_SCHEDULE));
+                .andExpect(jsonPath("$.days", hasSize(3)))
+                .andExpect(jsonPath("$.days[*].recipeSummary.name",
+                        containsInAnyOrder("Monday Recipe", "Monday Recipe", "Monday Recipe")))
+                .andExpect(jsonPath("$.days[*].day",
+                        containsInAnyOrder("MONDAY", "WEDNESDAY", "FRIDAY")));
     }
 
     @Test
     void createSchedule_SingleDaySchedule_ShouldCreateAndReturn() throws Exception {
-        // Arrange
         var user = createUser();
         var recipe = seedRecipe("Single Day Recipe", user.getId());
 
-        Map<DayOfWeek, UUID> scheduleData = new EnumMap<>(DayOfWeek.class);
-        scheduleData.put(DayOfWeek.TUESDAY, recipe.getId().id());
+        List<CreateDayScheduleDto> days = List.of(
+                new CreateDayScheduleDto(recipe.getId().id(), DayOfWeek.TUESDAY)
+        );
 
-        // Act & Assert
         mockMvc.perform(post("/api/user/schedule")
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(scheduleData))))
+                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(days))))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.dailyRecipes.TUESDAY.name").value("Single Day Recipe"))
-                .andExpect(jsonPath("$.dailyRecipes.size()").value(1));
+                .andExpect(jsonPath("$.days", hasSize(1)))
+                .andExpect(jsonPath("$.days[0].recipeSummary.name").value("Single Day Recipe"))
+                .andExpect(jsonPath("$.days[0].day").value("TUESDAY"));
     }
 
     @Test
-    void createSchedule_EmptySchedule_ShouldCreateAndReturn() throws Exception {
-        // Arrange
+    void createSchedule_EmptySchedule_ShouldReturnOk() throws Exception {
         createUser();
-        Map<DayOfWeek, UUID> scheduleData = new EnumMap<>(DayOfWeek.class);
+        List<CreateDayScheduleDto> days = List.of();
 
-        // Act & Assert
         mockMvc.perform(post("/api/user/schedule")
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(scheduleData))))
+                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(days))))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
-    void createSchedule_NonExistentRecipe_ShouldReturnNotFound() throws Exception {
-        // Arrange
-        UUID nonExistentRecipeId = UUID.randomUUID();
+    void createSchedule_NullDaysList_ShouldReturnBadRequest() throws Exception {
+        createUser();
 
-        Map<DayOfWeek, UUID> scheduleData = new EnumMap<>(DayOfWeek.class);
-        scheduleData.put(DayOfWeek.MONDAY, nonExistentRecipeId);
-
-        // Act & Assert
         mockMvc.perform(post("/api/user/schedule")
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(scheduleData))))
+                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(null))))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createSchedule_NonExistentRecipe_ShouldReturnNotFound() throws Exception {
+        UUID nonExistentRecipeId = UUID.randomUUID();
+
+        List<CreateDayScheduleDto> days = List.of(
+                new CreateDayScheduleDto(nonExistentRecipeId, DayOfWeek.MONDAY)
+        );
+
+        mockMvc.perform(post("/api/user/schedule")
+                        .with(validJwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(days))))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void createSchedule_UnauthenticatedUser_ShouldReturnUnauthorized() throws Exception {
-        // Arrange
-        Map<DayOfWeek, UUID> scheduleData = new EnumMap<>(DayOfWeek.class);
-        scheduleData.put(DayOfWeek.MONDAY, UUID.randomUUID());
+        List<CreateDayScheduleDto> days = List.of(
+                new CreateDayScheduleDto(UUID.randomUUID(), DayOfWeek.MONDAY)
+        );
 
-        // Act & Assert
         mockMvc.perform(post("/api/user/schedule")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(scheduleData))))
+                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(days))))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void createSchedule_ReplaceExistingSchedule_ShouldUpdateAndReturn() throws Exception {
-        // Arrange
         var user = createUser();
         var recipe1 = seedRecipe("Original Recipe", user.getId());
         var recipe2 = seedRecipe("Updated Recipe", user.getId());
 
-        Map<DayOfWeek, UUID> initialSchedule = new EnumMap<>(DayOfWeek.class);
-        initialSchedule.put(DayOfWeek.MONDAY, recipe1.getId().id());
+        List<CreateDayScheduleDto> initialDays = List.of(
+                new CreateDayScheduleDto(recipe1.getId().id(), DayOfWeek.MONDAY)
+        );
 
         mockMvc.perform(post("/api/user/schedule")
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(initialSchedule))))
+                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(initialDays))))
                 .andExpect(status().isOk());
 
-        // Act & Assert
-        Map<DayOfWeek, UUID> updatedSchedule = new EnumMap<>(DayOfWeek.class);
-        updatedSchedule.put(DayOfWeek.MONDAY, recipe2.getId().id());
-        updatedSchedule.put(DayOfWeek.TUESDAY, recipe2.getId().id());
+        List<CreateDayScheduleDto> updatedDays = List.of(
+                new CreateDayScheduleDto(recipe2.getId().id(), DayOfWeek.MONDAY),
+                new CreateDayScheduleDto(recipe2.getId().id(), DayOfWeek.TUESDAY)
+        );
 
         mockMvc.perform(post("/api/user/schedule")
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(updatedSchedule))))
+                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(updatedDays))))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.dailyRecipes.MONDAY.name").value("Updated Recipe"))
-                .andExpect(jsonPath("$.dailyRecipes.TUESDAY.name").value("Updated Recipe"))
-                .andExpect(jsonPath("$.dailyRecipes.size()").value(AMOUNT_OF_RECIPES_UPDATED_SCHEDULE));
+                .andExpect(jsonPath("$.days", hasSize(2)))
+                .andExpect(jsonPath("$.days[?(@.day=='MONDAY')].recipeSummary.name").value("Updated Recipe"))
+                .andExpect(jsonPath("$.days[?(@.day=='TUESDAY')].recipeSummary.name").value("Updated Recipe"));
+    }
+
+    @Test
+    void createSchedule_DuplicateDays_ShouldReturnBadRequest() throws Exception {
+        var user = createUser();
+        var recipe = seedRecipe("Test Recipe", user.getId());
+
+        List<CreateDayScheduleDto> days = List.of(
+                new CreateDayScheduleDto(recipe.getId().id(), DayOfWeek.MONDAY),
+                new CreateDayScheduleDto(recipe.getId().id(), DayOfWeek.MONDAY)
+        );
+
+        mockMvc.perform(post("/api/user/schedule")
+                        .with(validJwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(days))))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createSchedule_InvalidDayScheduleDto_ShouldReturnBadRequest() throws Exception {
+        createUser();
+
+        List<CreateDayScheduleDto> days = List.of(
+                new CreateDayScheduleDto(null, DayOfWeek.MONDAY)
+        );
+
+        mockMvc.perform(post("/api/user/schedule")
+                        .with(validJwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new CreateWeekScheduleDto(days))))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
     private User createUser() {
-        return userRepository.saveUser(new User(USER_ID, USER_NAME, USER_EMAIL, List.of()));
+        return userRepository.save(new User(USER_ID, USER_NAME, USER_EMAIL, List.of()));
     }
 
     private Recipe seedRecipe(String name, UserId userId) {

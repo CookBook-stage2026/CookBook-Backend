@@ -255,7 +255,7 @@ class SearchRecipeSummariesTests {
     }
 
     private User createUser() {
-        return userRepository.saveUser(new User(USER_ID, USER_NAME, USER_EMAIL, List.of()));
+        return userRepository.save(new User(USER_ID, USER_NAME, USER_EMAIL, List.of()));
     }
 
     private void seedRecipe(String name, UserId userId) {
