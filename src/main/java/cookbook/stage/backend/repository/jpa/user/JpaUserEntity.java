@@ -93,8 +93,7 @@ public class JpaUserEntity {
                 user.getDisplayName(),
                 user.getSocialConnections().stream()
                         .map(JpaSocialConnectionEntity::fromDomain)
-                        .toList()
-        ,
+                        .toList(),
                 user.getRecipes().stream()
                         .map(JpaRecipeEntity::fromDomain)
                         .toList()

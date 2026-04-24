@@ -19,7 +19,8 @@ public class UserRepositoryImpl implements UserRepository {
     private final JpaUserRepository jpaUserRepository;
     private final JpaWeekScheduleRepository jpaWeekScheduleRepository;
 
-    public UserRepositoryImpl(JpaUserRepository jpaUserRepository, JpaWeekScheduleRepository jpaWeekScheduleRepository) {
+    public UserRepositoryImpl(JpaUserRepository jpaUserRepository,
+                              JpaWeekScheduleRepository jpaWeekScheduleRepository) {
         this.jpaUserRepository = jpaUserRepository;
         this.jpaWeekScheduleRepository = jpaWeekScheduleRepository;
     }
