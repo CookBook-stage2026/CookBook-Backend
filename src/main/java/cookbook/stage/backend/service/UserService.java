@@ -9,6 +9,7 @@ import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.domain.user.UserRepository;
 import cookbook.stage.backend.domain.user.WeekSchedule;
 import cookbook.stage.backend.domain.user.WeekScheduleId;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -23,7 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final RecipeService recipeService;
 
-    public UserService(UserRepository userRepository, RecipeService recipeService) {
+    public UserService(UserRepository userRepository, @Lazy RecipeService recipeService) {
         this.userRepository = userRepository;
         this.recipeService = recipeService;
     }

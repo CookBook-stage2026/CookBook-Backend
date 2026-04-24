@@ -8,10 +8,8 @@ import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.recipe.Recipe;
 import cookbook.stage.backend.domain.recipe.RecipeDetails;
 import cookbook.stage.backend.domain.recipe.RecipeId;
-import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.service.RecipeService;
-import cookbook.stage.backend.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,11 +35,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/recipes")
 public class RecipeController {
     private final RecipeService recipeService;
-    private final UserService userService;
 
-    public RecipeController(RecipeService recipeService, UserService userService) {
+    public RecipeController(RecipeService recipeService) {
         this.recipeService = recipeService;
-        this.userService = userService;
     }
 
     /**
@@ -56,10 +52,6 @@ public class RecipeController {
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CreateRecipeDto createRecipeDto
     ) {
-        UserId userId = new UserId(UUID.fromString(jwt.getSubject()));
-        User user = userService.findById(userId)
-                .orElseThrow(userId::notFound);
-
         Map<IngredientId, Double> ingredientQuantities = createRecipeDto.ingredients().stream()
                 .collect(Collectors.toMap(
                         dto -> new IngredientId(dto.ingredientId()), CreateRecipeIngredientDto::baseQuantity)

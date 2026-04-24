@@ -24,10 +24,12 @@ import java.util.Map;
 public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final IngredientService ingredientService;
+    private final UserService userService;
 
-    public RecipeService(RecipeRepository recipeRepository, IngredientService ingredientService) {
+    public RecipeService(RecipeRepository recipeRepository, IngredientService ingredientService, UserService userService) {
         this.recipeRepository = recipeRepository;
         this.ingredientService = ingredientService;
+        this.userService = userService;
     }
 
     @Transactional

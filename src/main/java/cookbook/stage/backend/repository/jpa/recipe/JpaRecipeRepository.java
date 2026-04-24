@@ -45,7 +45,7 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
                 LOWER(r.name) LIKE LOWER(CONCAT(:name, '%'))
                 OR LOWER(r.name) LIKE LOWER(CONCAT('%', :name, '%'))
             )
-            AND r.creatorId = :userId
+            AND r.userId = :userId
             ORDER BY
                 CASE WHEN LOWER(r.name) LIKE LOWER(CONCAT(:name, '%')) THEN 0 ELSE 1 END,
                 r.name

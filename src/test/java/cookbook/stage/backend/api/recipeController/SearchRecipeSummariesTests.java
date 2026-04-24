@@ -5,13 +5,13 @@ import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.ingredient.IngredientRepository;
 import cookbook.stage.backend.domain.ingredient.Unit;
 import cookbook.stage.backend.domain.recipe.Recipe;
+import cookbook.stage.backend.domain.recipe.RecipeDetails;
 import cookbook.stage.backend.domain.recipe.RecipeId;
 import cookbook.stage.backend.domain.recipe.RecipeIngredient;
 import cookbook.stage.backend.domain.recipe.RecipeRepository;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.domain.user.UserRepository;
-import cookbook.stage.backend.repository.jpa.recipe.RecipeDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -271,7 +271,7 @@ class SearchRecipeSummariesTests {
 
         Recipe recipe = new Recipe(new RecipeId(UUID.randomUUID()), new RecipeDetails(name, DEFAULT_RECIPE_DESCRIPTION,
                 DEFAULT_DURATION_IN_MINUTES,
-                2, steps, recipeIngredients), userId);
+                2, steps), recipeIngredients, userId);
         recipeRepository.save(recipe);
     }
 

@@ -2,15 +2,12 @@ package cookbook.stage.backend.repository.jpa.user;
 
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
-import cookbook.stage.backend.repository.jpa.recipe.JpaRecipeEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -39,19 +36,15 @@ public class JpaUserEntity {
     )
     private List<JpaSocialConnectionEntity> socialConnections = new ArrayList<>();
 
-    @OneToMany(mappedBy = "creatorId", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<JpaRecipeEntity> recipes = new ArrayList<>();
-
     protected JpaUserEntity() {
     }
 
     public JpaUserEntity(UUID userId, String email, String displayName,
-                         List<JpaSocialConnectionEntity> socialConnections, List<JpaRecipeEntity> recipes) {
+                         List<JpaSocialConnectionEntity> socialConnections) {
         this.id = userId;
         this.email = email;
         this.displayName = displayName;
         this.socialConnections = socialConnections;
-        this.recipes = recipes;
     }
 
     public User toDomain() {
@@ -70,9 +63,6 @@ public class JpaUserEntity {
                 user.getDisplayName(),
                 user.getSocialConnections().stream()
                         .map(JpaSocialConnectionEntity::fromDomain)
-                        .toList(),
-                user.getRecipes().stream()
-                        .map(JpaRecipeEntity::fromDomain)
                         .toList()
         );
     }
