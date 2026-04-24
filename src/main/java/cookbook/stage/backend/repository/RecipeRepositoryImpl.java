@@ -6,8 +6,8 @@ import cookbook.stage.backend.domain.recipe.Recipe;
 import cookbook.stage.backend.domain.recipe.RecipeId;
 import cookbook.stage.backend.domain.recipe.RecipeRepository;
 import cookbook.stage.backend.domain.recipe.RecipeSummary;
-import cookbook.stage.backend.domain.user.UserPreferences;
 import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.domain.user.UserPreferences;
 import cookbook.stage.backend.repository.jpa.recipe.JpaRecipeEntity;
 import cookbook.stage.backend.repository.jpa.recipe.JpaRecipeRepository;
 import org.springframework.data.domain.Page;
@@ -43,17 +43,17 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     @Override
     public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, UserPreferences preferences,
                                                           UserId userId, Pageable pageable) {
-        List<UUID> ingredientUuids = ingredientIds == null ? List.of() : ingredientIds.stream()
-                                                                         .map(IngredientId::id)
-                                                                         .toList();
+        List<UUID> ingredientUuids = ingredientIds.stream()
+                          .map(IngredientId::id)
+                          .toList();
 
         List<UUID> excludedIngredientUuids = preferences.excludedIngredientIds().stream()
-                .map(IngredientId::id)
-                .toList();
+                          .map(IngredientId::id)
+                          .toList();
 
         List<Category> excludedCategories = preferences.excludedCategories();
 
-        return jpaRecipeRepository.findAllSummariesWithFilter(
+        return jpaRecipeRepository.findAllSummariesWithFilterByCreatorId(
                 ingredientUuids,
                 excludedIngredientUuids,
                 excludedCategories,

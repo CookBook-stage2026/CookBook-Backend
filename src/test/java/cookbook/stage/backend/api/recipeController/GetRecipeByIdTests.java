@@ -1,5 +1,6 @@
 package cookbook.stage.backend.api.recipeController;
 
+import cookbook.stage.backend.domain.ingredient.Category;
 import cookbook.stage.backend.domain.ingredient.Ingredient;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.ingredient.IngredientRepository;
@@ -167,7 +168,7 @@ class GetRecipeByIdTests {
     }
 
     private Ingredient saveIngredient(String name, Unit unit) {
-        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), name, unit);
+        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), name, unit, Category.GRAIN);
         ingredientRepository.save(ingredient);
         return ingredient;
     }

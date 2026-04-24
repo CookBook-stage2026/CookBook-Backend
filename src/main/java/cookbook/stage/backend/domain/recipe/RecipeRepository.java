@@ -15,7 +15,7 @@ public interface RecipeRepository {
     Optional<Recipe> findById(RecipeId id, UserId userId);
 
     Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, UserPreferences preferences,
-                                                   Pageable pageable);
+                                                   UserId userId, Pageable pageable);
 
     long count();
 }

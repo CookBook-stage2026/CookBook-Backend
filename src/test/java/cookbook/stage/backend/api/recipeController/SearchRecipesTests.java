@@ -1,17 +1,20 @@
 package cookbook.stage.backend.api.recipeController;
 
+import cookbook.stage.backend.api.input.RecipeSearchRequest;
+import cookbook.stage.backend.domain.ingredient.Category;
 import cookbook.stage.backend.domain.ingredient.Ingredient;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.ingredient.IngredientRepository;
 import cookbook.stage.backend.domain.ingredient.Unit;
 import cookbook.stage.backend.domain.recipe.Recipe;
+import cookbook.stage.backend.domain.recipe.RecipeDetails;
 import cookbook.stage.backend.domain.recipe.RecipeId;
 import cookbook.stage.backend.domain.recipe.RecipeIngredient;
 import cookbook.stage.backend.domain.recipe.RecipeRepository;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.domain.user.UserPreferences;
 import cookbook.stage.backend.domain.user.UserRepository;
-import cookbook.stage.backend.domain.recipe.RecipeDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,7 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +35,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -39,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SpringBootTest
-class GetAllRecipesTests {
+class SearchRecipesTests {
 
     private static final String DEFAULT_RECIPE_NAME = "Test Name";
     private static final String DEFAULT_RECIPE_DESCRIPTION = "Test Description";
@@ -55,6 +59,9 @@ class GetAllRecipesTests {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private JsonMapper mapper;
 
     @Autowired
     private RecipeRepository recipeRepository;
@@ -75,7 +82,7 @@ class GetAllRecipesTests {
     }
 
     @Test
-    void getAllRecipes_shouldReturnAllRecipes_whenRecipesExist() throws Exception {
+    void searchRecipes_shouldReturnAllRecipes_whenRecipesExist() throws Exception {
         // Arrange
         User user = createUser();
 
@@ -83,25 +90,26 @@ class GetAllRecipesTests {
         Recipe recipe2 = recipeRepository.save(buildRecipe(user));
 
         // Act & Assert
-        performGetAllRecipes()
+        performSearch(defaultRequest())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[0].name").value(DEFAULT_RECIPE_NAME))
-                .andExpect(jsonPath("$.content[0].description").value(DEFAULT_RECIPE_DESCRIPTION))
-                .andExpect(jsonPath("$.content[0].durationInMinutes").value(DEFAULT_DURATION_IN_MINUTES))
-                .andExpect(jsonPath("$.content[0].id").value(recipe1.getId().id().toString()))
-                .andExpect(jsonPath("$.content[1].id").value(recipe2.getId().id().toString()))
+                .andExpect(jsonPath("$.content[*].id", hasItems(
+                        recipe1.getId().id().toString(),
+                        recipe2.getId().id().toString()
+                )))
                 .andExpect(jsonPath("$.page.totalElements").value(2))
                 .andExpect(jsonPath("$.page.totalPages").value(1))
                 .andExpect(jsonPath("$.page.number").value(0));
     }
 
     @Test
-    void getAllRecipes_shouldReturnEmptyList_whenNoRecipesExist() throws Exception {
+    void searchRecipes_shouldReturnEmptyList_whenNoRecipesExist() throws Exception {
+        // Arrange
         createUser();
 
-        performGetAllRecipes()
+        // Act & Assert
+        performSearch(defaultRequest())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(0)))
@@ -110,7 +118,7 @@ class GetAllRecipesTests {
     }
 
     @Test
-    void getAllRecipes_shouldReturnPagedResults_whenPageSizeIsSmall() throws Exception {
+    void searchRecipes_shouldReturnPagedResults_whenPageSizeIsSmall() throws Exception {
         // Arrange
         User user = createUser();
 
@@ -130,7 +138,7 @@ class GetAllRecipesTests {
         long totalElements = recipeRepository.count();
 
         // Act & Assert
-        performGetAllRecipes(firstPageIndex, pageSize)
+        performSearch(new RecipeSearchRequest(List.of(), null, firstPageIndex, pageSize))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(expectedFirstPageCount)))
                 .andExpect(jsonPath("$.page.totalElements").value(totalElements))
@@ -138,8 +146,7 @@ class GetAllRecipesTests {
                 .andExpect(jsonPath("$.page.number").value(firstPageIndex))
                 .andExpect(jsonPath("$.page.size").value(pageSize));
 
-        // Act & Assert
-        performGetAllRecipes(secondPageIndex, pageSize)
+        performSearch(new RecipeSearchRequest(List.of(), null, secondPageIndex, pageSize))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(expectedSecondPageCount)))
                 .andExpect(jsonPath("$.page.number").value(secondPageIndex))
@@ -147,44 +154,27 @@ class GetAllRecipesTests {
     }
 
     @Test
-    void getAllRecipes_shouldReturn400_whenPageIsNegative() throws Exception {
-        // Arrange
-        createUser();
-
-        // Act & Assert
-        performGetAllRecipes(-1, DEFAULT_PAGE_SIZE)
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void getAllRecipes_shouldReturn400_whenSizeIsNegative() throws Exception {
-        // Arrange
-        createUser();
-
-        // Act & Assert
-        performGetAllRecipes(DEFAULT_PAGE, -1)
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void getAllRecipes_shouldReturn401_whenNotAuthenticated() throws Exception {
+    void searchRecipes_shouldReturn401_whenNotAuthenticated() throws Exception {
         // Arrange
         User user = createUser();
         recipeRepository.save(buildRecipe(user));
 
         // Act & Assert
-        mockMvc.perform(get("/api/recipes"))
+        mockMvc.perform(post("/api/recipes/search")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(defaultRequest())))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void getAllRecipes_shouldReturnEmptyList_whenNoRecipesOfLoggedInUserExist() throws Exception {
+    void searchRecipes_shouldReturnEmptyList_whenNoRecipesOfLoggedInUserExist() throws Exception {
         // Arrange
         createUser();
         recipeRepository.save(buildRecipe(new User("email", "name", List.of())));
 
         // Act & Assert
-        performGetAllRecipes()
+        performSearch(defaultRequest())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(0)))
@@ -193,11 +183,11 @@ class GetAllRecipesTests {
     }
 
     @Test
-    void getAllRecipes_shouldFilterByIngredients_whenIngredientIdsProvided() throws Exception {
+    void searchRecipes_shouldFilterByIngredients_whenIngredientIdsProvided() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour");
-        Ingredient sugar = createAndSaveIngredient("Sugar");
-        Ingredient salt = createAndSaveIngredient("Salt");
+        Ingredient flour = createAndSaveIngredient("Flour", Category.GRAIN);
+        Ingredient sugar = createAndSaveIngredient("Sugar", Category.GRAIN);
+        Ingredient salt = createAndSaveIngredient("Salt", Category.GRAIN);
 
         User user = createUser();
 
@@ -206,8 +196,11 @@ class GetAllRecipesTests {
         recipeRepository.save(buildRecipeWithIngredients(List.of(flour), user));
         recipeRepository.save(buildRecipeWithIngredients(List.of(salt), user));
 
+        RecipeSearchRequest dto = new RecipeSearchRequest(List.of(flour.id().id(), sugar.id().id()),
+                null, null, null);
+
         // Act & Assert
-        performGetAllRecipesWithIngredients(List.of(flour.id().id(), sugar.id().id()), DEFAULT_PAGE, DEFAULT_PAGE_SIZE)
+        performSearch(dto)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[*].id", hasItems(
@@ -218,26 +211,60 @@ class GetAllRecipesTests {
     }
 
     @Test
-    void getAllRecipes_shouldReturnEmptyResults_whenNoRecipesMatchIngredientFilter() throws Exception {
+    void searchRecipes_shouldReturnEmptyResults_whenNoRecipesMatchIngredientFilter() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour");
-
+        Ingredient flour = createAndSaveIngredient("Flour", Category.GRAIN);
         User user = createUser();
-
         recipeRepository.save(buildRecipeWithIngredients(List.of(flour), user));
 
         // Act & Assert
-        performGetAllRecipesWithIngredients(List.of(UUID.randomUUID()), DEFAULT_PAGE, DEFAULT_PAGE_SIZE)
+        performSearch(new RecipeSearchRequest(List.of(UUID.randomUUID()), null, DEFAULT_PAGE, DEFAULT_PAGE_SIZE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)))
                 .andExpect(jsonPath("$.page.totalElements").value(0));
     }
 
-    private Recipe buildRecipe(User user) {
-        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()),
-                "Flour " + UUID.randomUUID(), Unit.GRAM);
-        ingredientRepository.save(ingredient);
+    @Test
+    void searchRecipes_shouldExcludeRecipesConflictingWithPreferences_whenPreferencesAreSet() throws Exception {
+        // Arrange
+        Ingredient flour = createAndSaveIngredient("Flour", Category.GRAIN);
+        Ingredient sugar = createAndSaveIngredient("Sugar", Category.GRAIN);
+        Ingredient milk = createAndSaveIngredient("Milk", Category.DAIRY);
+        User user = createUser();
 
+        userRepository.updatePreferences(USER_ID, new UserPreferences(
+                List.of(Category.DAIRY),
+                List.of(flour.id())
+        ));
+
+        recipeRepository.save(buildRecipeWithIngredients(List.of(flour), user));
+        recipeRepository.save(buildRecipeWithIngredients(List.of(milk), user));
+        Recipe expected = recipeRepository.save(buildRecipeWithIngredients(List.of(sugar), user));
+
+        // Act & Assert
+        performSearch(defaultRequest())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id").value(expected.getId().id().toString()))
+                .andExpect(jsonPath("$.page.totalElements").value(1));
+    }
+
+    private RecipeSearchRequest defaultRequest() {
+        return new RecipeSearchRequest(List.of(), null, DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
+    }
+
+    private ResultActions performSearch(RecipeSearchRequest request) throws Exception {
+        return mockMvc.perform(post("/api/recipes/search")
+                        .with(validJwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request)))
+                .andDo(print());
+    }
+
+    private Recipe buildRecipe(User user) {
+        Ingredient ingredient = createAndSaveIngredient("Ingredient", Category.GRAIN);
+        ingredientRepository.save(ingredient);
         return buildRecipeWithIngredients(List.of(ingredient), user);
     }
 
@@ -260,25 +287,9 @@ class GetAllRecipesTests {
         );
     }
 
-    private Ingredient createAndSaveIngredient(String name) {
-        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), name, Unit.GRAM);
+    private Ingredient createAndSaveIngredient(String name, Category category) {
+        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), name, Unit.GRAM, category);
         return ingredientRepository.save(ingredient);
-    }
-
-    private ResultActions performGetAllRecipes() throws Exception {
-        return mockMvc.perform(get("/api/recipes")
-                        .with(validJwt())
-                        .with(csrf()))
-                .andDo(print());
-    }
-
-    private ResultActions performGetAllRecipes(int page, int size) throws Exception {
-        return mockMvc.perform(get("/api/recipes")
-                        .with(validJwt())
-                        .with(csrf())
-                        .param("page", String.valueOf(page))
-                        .param("size", String.valueOf(size)))
-                .andDo(print());
     }
 
     private User createUser() {
@@ -290,21 +301,5 @@ class GetAllRecipesTests {
                 .subject(USER_ID.id().toString())
                 .claim("email", USER_EMAIL)
                 .claim("name", USER_NAME));
-    }
-
-    private ResultActions performGetAllRecipesWithIngredients(List<UUID> ingredientIds, int page, int size)
-            throws Exception {
-        var request = get("/api/recipes")
-                .with(validJwt())
-                .with(csrf())
-                .param("page", String.valueOf(page))
-                .param("size", String.valueOf(size));
-
-        for (UUID id : ingredientIds) {
-            request.param("ingredientIds", id.toString());
-        }
-
-        return mockMvc.perform(request)
-                .andDo(print());
     }
 }

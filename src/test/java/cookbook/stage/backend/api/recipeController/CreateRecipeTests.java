@@ -3,6 +3,7 @@ package cookbook.stage.backend.api.recipeController;
 import cookbook.stage.backend.api.input.CreateRecipeDto;
 import cookbook.stage.backend.api.input.CreateRecipeIngredientDto;
 import cookbook.stage.backend.api.result.RecipeDto;
+import cookbook.stage.backend.domain.ingredient.Category;
 import cookbook.stage.backend.domain.ingredient.Ingredient;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.ingredient.IngredientRepository;
@@ -84,9 +85,9 @@ class CreateRecipeTests {
     void createRecipe_shouldReturnRecipe_whenRequestIsValid() throws Exception {
         // Arrange
         Ingredient flour = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()),
-                "Flour", Unit.GRAM));
+                "Flour", Unit.GRAM, Category.GRAIN));
         Ingredient eggs = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()),
-                "Eggs", Unit.PIECE));
+                "Eggs", Unit.PIECE, Category.EGG));
 
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
                 new CreateRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY),
@@ -148,7 +149,7 @@ class CreateRecipeTests {
     void createRecipe_shouldReturn400_whenQuantityIsNegative() throws Exception {
         // Arrange
         Ingredient flour = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()),
-                "Flour", Unit.GRAM));
+                "Flour", Unit.GRAM, Category.GRAIN));
 
         CreateRecipeDto dto = new CreateRecipeDto(
                 DEFAULT_RECIPE_NAME,
@@ -184,7 +185,7 @@ class CreateRecipeTests {
     void createRecipe_shouldReturn401_whenNotAuthenticated() throws Exception {
         // Arrange
         Ingredient flour = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()),
-                "Flour", Unit.GRAM));
+                "Flour", Unit.GRAM, Category.GRAIN));
 
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
                 new CreateRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY)

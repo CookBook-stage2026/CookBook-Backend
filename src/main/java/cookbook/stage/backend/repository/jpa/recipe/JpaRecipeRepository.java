@@ -22,8 +22,6 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
     @EntityGraph(attributePaths = {"steps", "ingredients", "ingredients.ingredient"})
     Optional<JpaRecipeEntity> findByIdAndUserId(UUID id, UUID userId);
 
-    Page<JpaRecipeEntity> findByUserId(UUID userId, Pageable pageable);
-
     @Query("""
                 SELECT r FROM JpaRecipeEntity r
                 JOIN r.ingredients i
@@ -37,7 +35,7 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
     Page<JpaRecipeEntity> findAllSummariesWithFilterByCreatorId(
             @Param("ingredientIds") List<UUID> ingredientIds,
             @Param("excludedIngredientIds") List<UUID> excludedIngredientIds,
-            @Param("excludedCategoryIds") List<Category> excludedCategories,
+            @Param("excludedCategories") List<Category> excludedCategories,
             @Param("userId") UUID userId,
             Pageable pageable
     );

@@ -9,10 +9,9 @@ import cookbook.stage.backend.domain.recipe.RecipeId;
 import cookbook.stage.backend.domain.recipe.RecipeIngredient;
 import cookbook.stage.backend.domain.recipe.RecipeRepository;
 import cookbook.stage.backend.domain.recipe.RecipeSummary;
-import cookbook.stage.backend.domain.user.UserId;
-import cookbook.stage.backend.domain.user.UserPreferences;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.domain.user.UserPreferences;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -80,6 +79,6 @@ public class RecipeService {
             return recipeRepository.findAllSummariesWithFilter(ingredientIds, preferences, userId, pageable);
         }
 
-        return recipeRepository.findAllSummariesWithFilter(ingredientIds, null, userId, pageable);
+        return recipeRepository.findAllSummariesWithFilter(ingredientIds, UserPreferences.empty(), userId, pageable);
     }
 }
