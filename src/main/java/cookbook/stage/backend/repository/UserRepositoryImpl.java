@@ -1,7 +1,9 @@
 package cookbook.stage.backend.repository;
 
+import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.domain.user.UserPreferences;
 import cookbook.stage.backend.domain.user.UserRepository;
 import cookbook.stage.backend.repository.jpa.user.JpaUserEntity;
 import cookbook.stage.backend.repository.jpa.user.JpaUserRepository;
@@ -38,5 +40,25 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User save(User user) {
         return jpaUserRepository.save(JpaUserEntity.fromDomain(user)).toDomain();
+    }
+
+    @Override
+    public UserPreferences findPreferences(UserId userId) {
+        JpaUserEntity entity = jpaUserRepository.findById(userId.id())
+                .orElseThrow(userId::notFound);
+        return new UserPreferences(
+                entity.getExcludedCategories(),
+                entity.getExcludedIngredientIds().stream()
+                        .map(IngredientId::new)
+                        .toList());
+    }
+
+    @Override
+    public void updatePreferences(UserId userId, UserPreferences preferences) {
+        JpaUserEntity entity = jpaUserRepository.findById(userId.id())
+                .orElseThrow(userId::notFound);
+        entity.setExcludedCategories(preferences.excludedCategories());
+        entity.setExcludedIngredientIds(preferences.excludedIngredientIds().stream().map(IngredientId::id).toList());
+        jpaUserRepository.save(entity);
     }
 }

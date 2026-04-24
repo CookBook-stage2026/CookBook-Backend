@@ -9,6 +9,8 @@ import cookbook.stage.backend.domain.recipe.RecipeId;
 import cookbook.stage.backend.domain.recipe.RecipeIngredient;
 import cookbook.stage.backend.domain.recipe.RecipeRepository;
 import cookbook.stage.backend.domain.recipe.RecipeSummary;
+import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.domain.user.UserPreferences;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
 import org.springframework.data.domain.Page;
@@ -68,8 +70,16 @@ public class RecipeService {
                 .orElseThrow(id::notFound);
     }
 
-    public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds,
-                                                          Pageable pageable, UserId userId) {
-        return recipeRepository.findAllSummariesWithFilter(ingredientIds, pageable, userId);
+    public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, Pageable pageable,
+                                                          boolean applyPreferences, UserId userId) {
+        userService.findById(userId)
+                .orElseThrow(userId::notFound);
+
+        if (applyPreferences) {
+            UserPreferences preferences = userService.findPreferences(userId);
+            return recipeRepository.findAllSummariesWithFilter(ingredientIds, preferences, userId, pageable);
+        }
+
+        return recipeRepository.findAllSummariesWithFilter(ingredientIds, null, userId, pageable);
     }
 }

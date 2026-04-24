@@ -3,7 +3,8 @@ package cookbook.stage.backend.domain.ingredient;
 public record Ingredient(
         IngredientId id,
         String name,
-        Unit unit
+        Unit unit,
+        Category category
 ) {
     public Ingredient {
         if (id == null) {
@@ -14,6 +15,9 @@ public record Ingredient(
         }
         if (unit == null) {
             throw new IllegalArgumentException("Ingredient unit cannot be null!");
+        }
+        if (category == null) {
+            throw new IllegalArgumentException("Ingredient category cannot be null!");
         }
     }
 }

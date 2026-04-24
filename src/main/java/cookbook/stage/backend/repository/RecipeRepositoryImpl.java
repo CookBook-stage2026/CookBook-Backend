@@ -1,10 +1,12 @@
 package cookbook.stage.backend.repository;
 
+import cookbook.stage.backend.domain.ingredient.Category;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.recipe.Recipe;
 import cookbook.stage.backend.domain.recipe.RecipeId;
 import cookbook.stage.backend.domain.recipe.RecipeRepository;
 import cookbook.stage.backend.domain.recipe.RecipeSummary;
+import cookbook.stage.backend.domain.user.UserPreferences;
 import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.repository.jpa.recipe.JpaRecipeEntity;
 import cookbook.stage.backend.repository.jpa.recipe.JpaRecipeRepository;
@@ -39,19 +41,25 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds,
-                                                          Pageable pageable, UserId userId) {
-        if (ingredientIds == null || ingredientIds.isEmpty()) {
-            return jpaRecipeRepository.findByUserId(userId.id(), pageable)
-                    .map(JpaRecipeEntity::toSummary);
-        }
+    public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, UserPreferences preferences,
+                                                          UserId userId, Pageable pageable) {
+        List<UUID> ingredientUuids = ingredientIds == null ? List.of() : ingredientIds.stream()
+                                                                         .map(IngredientId::id)
+                                                                         .toList();
 
-        List<UUID> uuids = ingredientIds.stream()
+        List<UUID> excludedIngredientUuids = preferences.excludedIngredientIds().stream()
                 .map(IngredientId::id)
                 .toList();
 
-        return jpaRecipeRepository.findByIngredientsAndCreatorId(uuids, uuids.size(), userId.id(), pageable)
-                .map(JpaRecipeEntity::toSummary);
+        List<Category> excludedCategories = preferences.excludedCategories();
+
+        return jpaRecipeRepository.findAllSummariesWithFilter(
+                ingredientUuids,
+                excludedIngredientUuids,
+                excludedCategories,
+                userId.id(),
+                pageable
+        ).map(JpaRecipeEntity::toSummary);
     }
 
     @Override

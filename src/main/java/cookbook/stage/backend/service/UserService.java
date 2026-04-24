@@ -4,6 +4,7 @@ import cookbook.stage.backend.domain.exception.NotFoundException;
 import cookbook.stage.backend.domain.user.SocialConnection;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.domain.user.UserPreferences;
 import cookbook.stage.backend.domain.user.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -33,5 +34,13 @@ public class UserService {
         User user = new User(email, name, new ArrayList<>());
         user.getSocialConnections().add(new SocialConnection(provider, providerId));
         return userRepository.save(user);
+    }
+
+    public UserPreferences findPreferences(UserId userId) {
+        return userRepository.findPreferences(userId);
+    }
+
+    public void updatePreferences(UserId userId, UserPreferences preferences) {
+        userRepository.updatePreferences(userId, preferences);
     }
 }

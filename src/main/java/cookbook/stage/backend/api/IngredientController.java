@@ -28,7 +28,8 @@ public class IngredientController {
     /**
      * Searches ingredients by name, with pagination (case-insensitive, substring match).
      *
-     * @param request search parameters including query, excluded ids, and pagination
+     * @param request Search criteria containing optional query, already selected ids to exclude,
+     *                page (default 0) and size (default 10)
      * @return list of ingredients matching the query
      */
     @PostMapping("/search")

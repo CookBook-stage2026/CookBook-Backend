@@ -1,5 +1,6 @@
 package cookbook.stage.backend.repository.jpa.user;
 
+import cookbook.stage.backend.domain.ingredient.Category;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
 import jakarta.persistence.CollectionTable;
@@ -36,6 +37,22 @@ public class JpaUserEntity {
     )
     private List<JpaSocialConnectionEntity> socialConnections = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(
+            name = "user_excluded_categories",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Column(name = "category")
+    private List<Category> excludedCategories = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(
+            name = "user_excluded_ingredients",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Column(name = "ingredient")
+    private List<UUID> excludedIngredientIds = new ArrayList<>();
+
     protected JpaUserEntity() {
     }
 
@@ -65,5 +82,21 @@ public class JpaUserEntity {
                         .map(JpaSocialConnectionEntity::fromDomain)
                         .toList()
         );
+    }
+
+    public List<Category> getExcludedCategories() {
+        return excludedCategories;
+    }
+
+    public List<UUID> getExcludedIngredientIds() {
+        return excludedIngredientIds;
+    }
+
+    public void setExcludedCategories(List<Category> excludedCategories) {
+        this.excludedCategories = List.copyOf(excludedCategories);
+    }
+
+    public void setExcludedIngredientIds(List<UUID> excludedIngredientIds) {
+        this.excludedIngredientIds = List.copyOf(excludedIngredientIds);
     }
 }
