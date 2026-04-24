@@ -28,11 +28,15 @@ class OnAuthenticationSuccessTests {
 
     @Test
     void onAuthenticationSuccess_NullOAuth2User_ThrowsOAuth2Exception() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
         OAuth2AuthenticationToken tokenMock = mock(OAuth2AuthenticationToken.class);
         when(tokenMock.getPrincipal()).thenReturn(null);
 
-        assertThatThrownBy(() -> successHandler.onAuthenticationSuccess(
-                new MockHttpServletRequest(), new MockHttpServletResponse(), tokenMock))
+        assertThatThrownBy(() ->
+                successHandler.onAuthenticationSuccess(request, response, tokenMock)
+        )
                 .isInstanceOf(OAuth2Exception.class)
                 .hasMessageContaining("OAuth2 authentication failed");
     }
