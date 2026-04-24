@@ -10,7 +10,10 @@ import cookbook.stage.backend.repository.jpa.user.JpaUserRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {
@@ -43,22 +46,23 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public UserPreferences findPreferences(UserId userId) {
-        JpaUserEntity entity = jpaUserRepository.findById(userId.id())
+    public void updatePreferences(UserId userId, UserPreferences preferences) {
+        JpaUserEntity entity = jpaUserRepository.findWithPreferencesById(userId.id())
                 .orElseThrow(userId::notFound);
-        return new UserPreferences(
-                entity.getExcludedCategories(),
-                entity.getExcludedIngredientIds().stream()
-                        .map(IngredientId::new)
-                        .toList());
+        entity.setExcludedCategories(new HashSet<>(preferences.excludedCategories()));
+        entity.setExcludedIngredientIds(preferences.excludedIngredientIds().stream()
+                .map(IngredientId::id)
+                .collect(Collectors.toCollection(HashSet::new)));
+        jpaUserRepository.save(entity);
     }
 
     @Override
-    public void updatePreferences(UserId userId, UserPreferences preferences) {
-        JpaUserEntity entity = jpaUserRepository.findById(userId.id())
+    public UserPreferences findPreferences(UserId userId) {
+        JpaUserEntity entity = jpaUserRepository.findWithPreferencesById(userId.id())
                 .orElseThrow(userId::notFound);
-        entity.setExcludedCategories(preferences.excludedCategories());
-        entity.setExcludedIngredientIds(preferences.excludedIngredientIds().stream().map(IngredientId::id).toList());
-        jpaUserRepository.save(entity);
+        return new UserPreferences(
+                new ArrayList<>(entity.getExcludedCategories()),
+                entity.getExcludedIngredientIds().stream().map(IngredientId::new).toList()
+        );
     }
 }

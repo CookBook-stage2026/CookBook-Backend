@@ -1,5 +1,6 @@
 package cookbook.stage.backend.repository.jpa.user;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +20,7 @@ public interface JpaUserRepository extends JpaRepository<JpaUserEntity, UUID> {
             @Param("provider") String provider,
             @Param("providerId") String providerId
     );
+
+    @EntityGraph(attributePaths = {"excludedCategories", "excludedIngredientIds"})
+    Optional<JpaUserEntity> findWithPreferencesById(UUID id);
 }

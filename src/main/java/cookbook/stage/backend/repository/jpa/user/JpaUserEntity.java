@@ -13,7 +13,9 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -43,7 +45,7 @@ public class JpaUserEntity {
             joinColumns = @JoinColumn(name = "user_id")
     )
     @Column(name = "category")
-    private List<Category> excludedCategories = new ArrayList<>();
+    private Set<Category> excludedCategories = new HashSet<>();
 
     @ElementCollection
     @CollectionTable(
@@ -51,7 +53,7 @@ public class JpaUserEntity {
             joinColumns = @JoinColumn(name = "user_id")
     )
     @Column(name = "ingredient")
-    private List<UUID> excludedIngredientIds = new ArrayList<>();
+    private Set<UUID> excludedIngredientIds = new HashSet<>();
 
     protected JpaUserEntity() {
     }
@@ -84,19 +86,21 @@ public class JpaUserEntity {
         );
     }
 
-    public List<Category> getExcludedCategories() {
+    public Set<Category> getExcludedCategories() {
         return excludedCategories;
     }
 
-    public List<UUID> getExcludedIngredientIds() {
+    public Set<UUID> getExcludedIngredientIds() {
         return excludedIngredientIds;
     }
 
-    public void setExcludedCategories(List<Category> excludedCategories) {
-        this.excludedCategories = List.copyOf(excludedCategories);
+    public void setExcludedCategories(Set<Category> excludedCategories) {
+        this.excludedCategories.clear();
+        this.excludedCategories.addAll(excludedCategories);
     }
 
-    public void setExcludedIngredientIds(List<UUID> excludedIngredientIds) {
-        this.excludedIngredientIds = List.copyOf(excludedIngredientIds);
+    public void setExcludedIngredientIds(Set<UUID> excludedIngredientIds) {
+        this.excludedIngredientIds.clear();
+        this.excludedIngredientIds.addAll(excludedIngredientIds);
     }
 }

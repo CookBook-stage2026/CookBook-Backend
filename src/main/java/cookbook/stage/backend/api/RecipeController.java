@@ -43,6 +43,7 @@ public class RecipeController {
     /**
      * Adds a new recipe to the database
      *
+     * @param jwt The JWT token of the authenticated user
      * @param createRecipeDto The new recipe, without an id
      * @return The created recipe with its generated id
      */
@@ -75,6 +76,7 @@ public class RecipeController {
     /**
      * Gets a recipe by id
      *
+     * @param jwt The JWT token of the authenticated user
      * @param id The id of the requested recipe
      * @return Recipe
      */
@@ -91,6 +93,7 @@ public class RecipeController {
     /**
      * Searches recipes with pagination and optional filtering
      *
+     * @param jwt The JWT token of the authenticated user
      * @param request Search criteria containing optional ingredient filter, preference filtering (default true),
      *                page (default 0) and size (default 20)
      * @return Page of recipe summaries
