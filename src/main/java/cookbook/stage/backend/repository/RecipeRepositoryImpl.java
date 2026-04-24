@@ -47,8 +47,8 @@ public class RecipeRepositoryImpl implements RecipeRepository {
                           .map(IngredientId::id)
                           .toList();
 
-        List<UUID> excludedIngredientUuids = preferences.excludedIngredientIds().stream()
-                          .map(IngredientId::id)
+        List<UUID> excludedIngredientUuids = preferences.excludedIngredients().stream()
+                          .map(i -> i.id().id())
                           .toList();
 
         List<Category> excludedCategories = preferences.excludedCategories();

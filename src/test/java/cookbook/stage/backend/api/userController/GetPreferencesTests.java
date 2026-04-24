@@ -1,7 +1,10 @@
 package cookbook.stage.backend.api.userController;
 
 import cookbook.stage.backend.domain.ingredient.Category;
+import cookbook.stage.backend.domain.ingredient.Ingredient;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
+import cookbook.stage.backend.domain.ingredient.IngredientRepository;
+import cookbook.stage.backend.domain.ingredient.Unit;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.domain.user.UserPreferences;
@@ -18,7 +21,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.List;
-import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -42,29 +44,35 @@ class GetPreferencesTests {
     private UserRepository userRepository;
 
     @Autowired
+    private IngredientRepository ingredientRepository;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void clearDatabase() {
         JdbcTestUtils.deleteFromTables(jdbcTemplate,
-                "user_excluded_categories", "user_excluded_ingredients", "users");
+                "user_excluded_categories", "user_excluded_ingredients", "users", "ingredients");
     }
 
     @Test
     void getPreferences_shouldReturnPreferences_whenPreferencesAreSet() throws Exception {
         // Arrange
         createUser();
-        UUID excludedIngredientId = UUID.randomUUID();
+
+        Ingredient ingredient = ingredientRepository.save(
+                new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM, Category.EGG));
+
         userRepository.updatePreferences(USER_ID, new UserPreferences(
                 List.of(Category.DAIRY),
-                List.of(new IngredientId(excludedIngredientId))
+                List.of(ingredient)
         ));
 
         // Act & Assert
         performGetPreferences()
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.excludedCategories[0]").value(Category.DAIRY.name()))
-                .andExpect(jsonPath("$.excludedIngredientIds[0]").value(excludedIngredientId.toString()));
+                .andExpect(jsonPath("$.excludedIngredients[0].id").value(ingredient.id().id().toString()));
     }
 
     @Test
@@ -77,8 +85,8 @@ class GetPreferencesTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.excludedCategories").isArray())
                 .andExpect(jsonPath("$.excludedCategories").isEmpty())
-                .andExpect(jsonPath("$.excludedIngredientIds").isArray())
-                .andExpect(jsonPath("$.excludedIngredientIds").isEmpty());
+                .andExpect(jsonPath("$.excludedIngredients").isArray())
+                .andExpect(jsonPath("$.excludedIngredients").isEmpty());
     }
 
     @Test

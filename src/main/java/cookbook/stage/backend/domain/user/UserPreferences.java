@@ -1,17 +1,17 @@
 package cookbook.stage.backend.domain.user;
 
 import cookbook.stage.backend.domain.ingredient.Category;
-import cookbook.stage.backend.domain.ingredient.IngredientId;
+import cookbook.stage.backend.domain.ingredient.Ingredient;
 
 import java.util.List;
 
 public record UserPreferences(
         List<Category> excludedCategories,
-        List<IngredientId> excludedIngredientIds
+        List<Ingredient> excludedIngredients
 ) {
     public UserPreferences {
         excludedCategories = excludedCategories == null ? List.of() : excludedCategories;
-        excludedIngredientIds = excludedIngredientIds == null ? List.of() : excludedIngredientIds;
+        excludedIngredients = excludedIngredients == null ? List.of() : excludedIngredients;
     }
 
     public static UserPreferences empty() {

@@ -37,10 +37,7 @@ public class UserController {
             @AuthenticationPrincipal Jwt jwt
     ) {
         UserPreferences preferences = userService.findPreferences(UserId.fromJwt(jwt));
-        return new UserPreferencesDto(
-                preferences.excludedCategories(),
-
-        );
+        return UserPreferencesDto.fromDomain(preferences);
     }
 
     /**
@@ -57,10 +54,8 @@ public class UserController {
     ) {
         userService.updatePreferences(
                 UserId.fromJwt(jwt),
-                new UserPreferences(
-                        request.excludedCategories(),
-                        request.excludedIngredientIds().stream().map(IngredientId::new).toList()
-                )
+                request.excludedCategories(),
+                request.excludedIngredientIds().stream().map(IngredientId::new).toList()
         );
     }
 }

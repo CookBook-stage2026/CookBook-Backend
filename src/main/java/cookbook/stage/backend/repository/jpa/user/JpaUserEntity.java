@@ -3,12 +3,15 @@ package cookbook.stage.backend.repository.jpa.user;
 import cookbook.stage.backend.domain.ingredient.Category;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.repository.jpa.ingredient.JpaIngredientEntity;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -45,15 +48,15 @@ public class JpaUserEntity {
             joinColumns = @JoinColumn(name = "user_id")
     )
     @Column(name = "category")
-    private Set<Category> excludedCategories = new HashSet<>();
+    private final Set<Category> excludedCategories = new HashSet<>();
 
-    @ElementCollection
-    @CollectionTable(
+    @ManyToMany()
+    @JoinTable(
             name = "user_excluded_ingredients",
-            joinColumns = @JoinColumn(name = "user_id")
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "ingredient_id")
     )
-    @Column(name = "ingredient")
-    private Set<UUID> excludedIngredientIds = new HashSet<>();
+    private final Set<JpaIngredientEntity> excludedIngredients = new HashSet<>();
 
     protected JpaUserEntity() {
     }
@@ -90,8 +93,8 @@ public class JpaUserEntity {
         return excludedCategories;
     }
 
-    public Set<UUID> getExcludedIngredientIds() {
-        return excludedIngredientIds;
+    public Set<JpaIngredientEntity> getExcludedIngredients() {
+        return excludedIngredients;
     }
 
     public void setExcludedCategories(Set<Category> excludedCategories) {
@@ -99,8 +102,8 @@ public class JpaUserEntity {
         this.excludedCategories.addAll(excludedCategories);
     }
 
-    public void setExcludedIngredientIds(Set<UUID> excludedIngredientIds) {
-        this.excludedIngredientIds.clear();
-        this.excludedIngredientIds.addAll(excludedIngredientIds);
+    public void setExcludedIngredients(Set<JpaIngredientEntity> excludedIngredients) {
+        this.excludedIngredients.clear();
+        this.excludedIngredients.addAll(excludedIngredients);
     }
 }

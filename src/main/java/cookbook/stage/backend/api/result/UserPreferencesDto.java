@@ -1,12 +1,20 @@
 package cookbook.stage.backend.api.result;
 
 import cookbook.stage.backend.domain.ingredient.Category;
+import cookbook.stage.backend.domain.user.UserPreferences;
 
 import java.util.List;
-import java.util.UUID;
 
 public record UserPreferencesDto(
         List<Category> excludedCategories,
-        List<UUID> excludedIngredientIds
+        List<IngredientSummaryDto> excludedIngredients
 ) {
+    public static UserPreferencesDto fromDomain(UserPreferences preferences) {
+        return new UserPreferencesDto(
+                preferences.excludedCategories(),
+                preferences.excludedIngredients().stream()
+                        .map(IngredientSummaryDto::fromDomain)
+                        .toList()
+        );
+    }
 }

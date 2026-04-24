@@ -2,7 +2,10 @@ package cookbook.stage.backend.api.userController;
 
 import cookbook.stage.backend.api.input.UpdateUserPreferencesRequest;
 import cookbook.stage.backend.domain.ingredient.Category;
+import cookbook.stage.backend.domain.ingredient.Ingredient;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
+import cookbook.stage.backend.domain.ingredient.IngredientRepository;
+import cookbook.stage.backend.domain.ingredient.Unit;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.domain.user.UserPreferences;
@@ -21,7 +24,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -45,6 +47,9 @@ class UpdatePreferencesTests {
     private UserRepository userRepository;
 
     @Autowired
+    private IngredientRepository ingredientRepository;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -53,17 +58,20 @@ class UpdatePreferencesTests {
     @BeforeEach
     void clearDatabase() {
         JdbcTestUtils.deleteFromTables(jdbcTemplate,
-                "user_excluded_categories", "user_excluded_ingredients", "users");
+                "user_excluded_categories", "user_excluded_ingredients", "users", "ingredients");
     }
 
     @Test
     void updatePreferences_shouldReturn204_whenPreferencesAreUpdated() throws Exception {
         // Arrange
         createUser();
-        UUID excludedIngredientId = UUID.randomUUID();
+
+        Ingredient ingredient = ingredientRepository.save(
+                new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM, Category.EGG));
+
         UpdateUserPreferencesRequest request = new UpdateUserPreferencesRequest(
                 List.of(Category.DAIRY),
-                List.of(excludedIngredientId)
+                List.of(ingredient.id().id())
         );
 
         // Act & Assert
@@ -75,11 +83,11 @@ class UpdatePreferencesTests {
         assertThat(preferences.excludedCategories())
                 .containsExactly(Category.DAIRY);
 
-        assertThat(preferences.excludedIngredientIds())
+        assertThat(preferences.excludedIngredients())
                 .hasSize(1)
                 .first()
-                .extracting(IngredientId::id)
-                .isEqualTo(excludedIngredientId);
+                .extracting(i -> i.id().id())
+                .isEqualTo(ingredient.id().id());
     }
 
     @Test
@@ -100,7 +108,7 @@ class UpdatePreferencesTests {
         UserPreferences preferences = userRepository.findPreferences(USER_ID);
 
         assertThat(preferences.excludedCategories()).isEmpty();
-        assertThat(preferences.excludedIngredientIds()).isEmpty();
+        assertThat(preferences.excludedIngredients()).isEmpty();
     }
 
     @Test

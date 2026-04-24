@@ -1,6 +1,9 @@
 package cookbook.stage.backend.service;
 
 import cookbook.stage.backend.domain.exception.NotFoundException;
+import cookbook.stage.backend.domain.ingredient.Category;
+import cookbook.stage.backend.domain.ingredient.Ingredient;
+import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.user.SocialConnection;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
@@ -10,15 +13,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
+    private final IngredientService ingredientService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, IngredientService ingredientService) {
         this.userRepository = userRepository;
+        this.ingredientService = ingredientService;
     }
 
     public Optional<User> findById(UserId id) {
@@ -44,7 +50,8 @@ public class UserService {
     }
 
     @Transactional
-    public void updatePreferences(UserId userId, UserPreferences preferences) {
-        userRepository.updatePreferences(userId, preferences);
+    public void updatePreferences(UserId userId, List<Category> categories, List<IngredientId> ingredientIds) {
+        List<Ingredient> ingredients = ingredientService.getIngredientsByIds(ingredientIds);
+        userRepository.updatePreferences(userId, new UserPreferences(categories, ingredients));
     }
 }

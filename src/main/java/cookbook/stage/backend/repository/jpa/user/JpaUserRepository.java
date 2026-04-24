@@ -21,6 +21,6 @@ public interface JpaUserRepository extends JpaRepository<JpaUserEntity, UUID> {
             @Param("providerId") String providerId
     );
 
-    @EntityGraph(attributePaths = {"excludedCategories", "excludedIngredientIds"})
+    @EntityGraph(attributePaths = {"excludedCategories", "excludedIngredients"})
     Optional<JpaUserEntity> findWithPreferencesById(UUID id);
 }

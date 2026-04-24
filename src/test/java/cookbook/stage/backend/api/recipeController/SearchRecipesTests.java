@@ -234,7 +234,7 @@ class SearchRecipesTests {
 
         userRepository.updatePreferences(USER_ID, new UserPreferences(
                 List.of(Category.DAIRY),
-                List.of(flour.id())
+                List.of(flour)
         ));
 
         recipeRepository.save(buildRecipeWithIngredients(List.of(flour), user));

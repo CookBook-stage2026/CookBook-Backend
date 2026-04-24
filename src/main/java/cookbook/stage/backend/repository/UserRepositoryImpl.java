@@ -1,10 +1,10 @@
 package cookbook.stage.backend.repository;
 
-import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.domain.user.UserPreferences;
 import cookbook.stage.backend.domain.user.UserRepository;
+import cookbook.stage.backend.repository.jpa.ingredient.JpaIngredientEntity;
 import cookbook.stage.backend.repository.jpa.user.JpaUserEntity;
 import cookbook.stage.backend.repository.jpa.user.JpaUserRepository;
 import org.springframework.stereotype.Repository;
@@ -50,8 +50,8 @@ public class UserRepositoryImpl implements UserRepository {
         JpaUserEntity entity = jpaUserRepository.findWithPreferencesById(userId.id())
                 .orElseThrow(userId::notFound);
         entity.setExcludedCategories(new HashSet<>(preferences.excludedCategories()));
-        entity.setExcludedIngredientIds(preferences.excludedIngredientIds().stream()
-                .map(IngredientId::id)
+        entity.setExcludedIngredients(preferences.excludedIngredients().stream()
+                .map(JpaIngredientEntity::fromDomain)
                 .collect(Collectors.toCollection(HashSet::new)));
         jpaUserRepository.save(entity);
     }
@@ -62,7 +62,9 @@ public class UserRepositoryImpl implements UserRepository {
                 .orElseThrow(userId::notFound);
         return new UserPreferences(
                 new ArrayList<>(entity.getExcludedCategories()),
-                entity.getExcludedIngredientIds().stream().map(IngredientId::new).toList()
+                entity.getExcludedIngredients().stream()
+                        .map(JpaIngredientEntity::toDomain)
+                        .toList()
         );
     }
 }
