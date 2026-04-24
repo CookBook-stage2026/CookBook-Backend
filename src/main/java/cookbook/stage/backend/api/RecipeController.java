@@ -6,13 +6,17 @@ import cookbook.stage.backend.api.result.RecipeDto;
 import cookbook.stage.backend.api.result.RecipeSummaryDto;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.recipe.Recipe;
+import cookbook.stage.backend.domain.recipe.RecipeDetails;
 import cookbook.stage.backend.domain.recipe.RecipeId;
+import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.service.RecipeService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,19 +48,25 @@ public class RecipeController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RecipeDto createRecipe(@Valid @RequestBody CreateRecipeDto createRecipeDto) {
+    public RecipeDto createRecipe(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody CreateRecipeDto createRecipeDto
+    ) {
         Map<IngredientId, Double> ingredientQuantities = createRecipeDto.ingredients().stream()
                 .collect(Collectors.toMap(
                         dto -> new IngredientId(dto.ingredientId()), CreateRecipeIngredientDto::baseQuantity)
                 );
 
         Recipe recipe = recipeService.createRecipe(
-                createRecipeDto.name(),
-                createRecipeDto.description(),
-                createRecipeDto.durationInMinutes(),
-                createRecipeDto.steps(),
+                new RecipeDetails(
+                        createRecipeDto.name(),
+                        createRecipeDto.description(),
+                        createRecipeDto.durationInMinutes(),
+                        createRecipeDto.servings(),
+                        createRecipeDto.steps()
+                ),
                 ingredientQuantities,
-                createRecipeDto.servings()
+                UserId.fromJwt(jwt)
         );
 
         return RecipeDto.fromDomain(recipe);
@@ -70,9 +80,10 @@ public class RecipeController {
      */
     @GetMapping("/{id}")
     public RecipeDto getRecipeById(
+            @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID id
     ) {
-        Recipe recipe = recipeService.findById(new RecipeId(id));
+        Recipe recipe = recipeService.findById(new RecipeId(id), UserId.fromJwt(jwt));
 
         return RecipeDto.fromDomain(recipe);
     }
@@ -87,6 +98,7 @@ public class RecipeController {
      */
     @GetMapping
     public Page<RecipeSummaryDto> getAllRecipes(
+            @AuthenticationPrincipal Jwt jwt,
             @RequestParam(required = false) List<UUID> ingredientIds,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
@@ -98,7 +110,7 @@ public class RecipeController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return recipeService.findAllSummariesWithFilter(ingredients, pageable)
+        return recipeService.findAllSummariesWithFilter(ingredients, pageable, UserId.fromJwt(jwt))
                 .map(RecipeSummaryDto::fromDomain);
     }
 }

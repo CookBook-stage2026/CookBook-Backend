@@ -1,9 +1,11 @@
 package cookbook.stage.backend.repository.jpa.recipe;
 
 import cookbook.stage.backend.domain.recipe.Recipe;
+import cookbook.stage.backend.domain.recipe.RecipeDetails;
 import cookbook.stage.backend.domain.recipe.RecipeId;
 import cookbook.stage.backend.domain.recipe.RecipeIngredient;
 import cookbook.stage.backend.domain.recipe.RecipeSummary;
+import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.repository.jpa.ingredient.JpaIngredientEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -51,17 +53,21 @@ public class JpaRecipeEntity {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JpaRecipeIngredientEntity> ingredients = new ArrayList<>();
 
+    @Column(nullable = false)
+    private UUID userId;
+
     protected JpaRecipeEntity() {
     }
 
     public JpaRecipeEntity(UUID id, String name, String description, int durationInMinutes,
-                           List<String> steps, int servings) {
+                           List<String> steps, int servings, UserId userId) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.durationInMinutes = durationInMinutes;
         this.steps = steps;
         this.servings = servings;
+        this.userId = userId.id();
     }
 
     public static JpaRecipeEntity fromDomain(Recipe recipe) {
@@ -71,7 +77,8 @@ public class JpaRecipeEntity {
                 recipe.getDescription(),
                 recipe.getDurationInMinutes(),
                 recipe.getSteps(),
-                recipe.getServings()
+                recipe.getServings(),
+                recipe.getUserId()
         );
         recipe.getIngredients().forEach(entity::addIngredient);
         return entity;
@@ -84,12 +91,15 @@ public class JpaRecipeEntity {
 
         return new Recipe(
                 new RecipeId(id),
-                name,
-                description,
-                durationInMinutes,
-                steps,
+                new RecipeDetails(
+                        name,
+                        description,
+                        durationInMinutes,
+                        servings,
+                        steps
+                ),
                 domainIngredients,
-                servings
+                new UserId(userId)
         );
     }
 
@@ -103,7 +113,6 @@ public class JpaRecipeEntity {
     }
 
     public void addIngredient(RecipeIngredient recipeIngredient) {
-        // This jpaIngredient is only used as reference, it should not be stored in db again
         JpaIngredientEntity jpaIngredient = JpaIngredientEntity.fromDomain(recipeIngredient.ingredient());
 
         JpaRecipeIngredientEntity entity = new JpaRecipeIngredientEntity(this, recipeIngredient, jpaIngredient);

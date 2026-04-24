@@ -4,6 +4,7 @@ import cookbook.stage.backend.domain.ingredient.Ingredient;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.ingredient.Unit;
 import cookbook.stage.backend.domain.recipe.RecipeIngredient;
+import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.repository.jpa.ingredient.JpaIngredientEntity;
 import cookbook.stage.backend.repository.jpa.recipe.JpaRecipeEntity;
 import cookbook.stage.backend.repository.jpa.recipe.JpaRecipeIngredientEntity;
@@ -51,6 +52,13 @@ class JpaRecipeIngredientEntityTest {
     }
 
     private JpaRecipeEntity createJpaRecipeEntity() {
-        return new JpaRecipeEntity(RECIPE_ID, "Name", "Desc", DURATION_TO_COOK_RECIPE, List.of("Step"), 2);
+        return new JpaRecipeEntity(
+                RECIPE_ID,
+                "Name",
+                "Desc",
+                DURATION_TO_COOK_RECIPE,
+                List.of("Step"),
+                2,
+                UserId.create());
     }
 }
