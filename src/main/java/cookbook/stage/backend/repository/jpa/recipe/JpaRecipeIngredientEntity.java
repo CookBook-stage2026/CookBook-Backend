@@ -47,7 +47,7 @@ public class JpaRecipeIngredientEntity {
 
     public RecipeIngredient toDomain() {
         return new RecipeIngredient(
-                ingredient.toDomain(),
+                ingredient.toDomainWithoutCategories(),
                 baseQuantity
         );
     }

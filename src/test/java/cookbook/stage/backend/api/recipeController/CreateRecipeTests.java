@@ -85,9 +85,9 @@ class CreateRecipeTests {
     void createRecipe_shouldReturnRecipe_whenRequestIsValid() throws Exception {
         // Arrange
         Ingredient flour = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()),
-                "Flour", Unit.GRAM, Category.GRAIN));
+                "Flour", Unit.GRAM, List.of(Category.GRAIN)));
         Ingredient eggs = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()),
-                "Eggs", Unit.PIECE, Category.EGG));
+                "Eggs", Unit.PIECE, List.of(Category.EGG)));
 
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
                 new CreateRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY),
@@ -149,7 +149,7 @@ class CreateRecipeTests {
     void createRecipe_shouldReturn400_whenQuantityIsNegative() throws Exception {
         // Arrange
         Ingredient flour = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()),
-                "Flour", Unit.GRAM, Category.GRAIN));
+                "Flour", Unit.GRAM, List.of(Category.GRAIN)));
 
         CreateRecipeDto dto = new CreateRecipeDto(
                 DEFAULT_RECIPE_NAME,
@@ -185,7 +185,7 @@ class CreateRecipeTests {
     void createRecipe_shouldReturn401_whenNotAuthenticated() throws Exception {
         // Arrange
         Ingredient flour = ingredientRepository.save(new Ingredient(new IngredientId(UUID.randomUUID()),
-                "Flour", Unit.GRAM, Category.GRAIN));
+                "Flour", Unit.GRAM, List.of(Category.GRAIN)));
 
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
                 new CreateRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY)

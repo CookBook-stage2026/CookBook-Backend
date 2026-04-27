@@ -7,6 +7,4 @@ public interface UserRepository {
     Optional<User> findBySocialConnection(String provider, String providerId);
     Optional<User> findById(UserId id);
     User save(User user);
-    UserPreferences findPreferences(UserId userId);
-    void updatePreferences(UserId userId, UserPreferences preferences);
 }

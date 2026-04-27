@@ -8,6 +8,7 @@ import cookbook.stage.backend.domain.ingredient.IngredientRepository;
 import cookbook.stage.backend.domain.ingredient.Unit;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.domain.user.UserPreferenceRepository;
 import cookbook.stage.backend.domain.user.UserPreferences;
 import cookbook.stage.backend.domain.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +48,9 @@ class UpdatePreferencesTests {
     private UserRepository userRepository;
 
     @Autowired
+    private UserPreferenceRepository userPreferenceRepository;
+
+    @Autowired
     private IngredientRepository ingredientRepository;
 
     @Autowired
@@ -67,7 +71,7 @@ class UpdatePreferencesTests {
         createUser();
 
         Ingredient ingredient = ingredientRepository.save(
-                new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM, Category.EGG));
+                new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG)));
 
         UpdateUserPreferencesRequest request = new UpdateUserPreferencesRequest(
                 List.of(Category.DAIRY),
@@ -78,7 +82,7 @@ class UpdatePreferencesTests {
         performUpdatePreferences(request)
                 .andExpect(status().isNoContent());
 
-        UserPreferences preferences = userRepository.findPreferences(USER_ID);
+        UserPreferences preferences = userPreferenceRepository.findPreferences(USER_ID);
 
         assertThat(preferences.excludedCategories())
                 .containsExactly(Category.DAIRY);
@@ -94,7 +98,7 @@ class UpdatePreferencesTests {
     void updatePreferences_shouldClearPreferences_whenEmptyListsAreProvided() throws Exception {
         // Arrange
         createUser();
-        userRepository.updatePreferences(USER_ID, new UserPreferences(
+        userPreferenceRepository.updatePreferences(USER_ID, new UserPreferences(
                 List.of(Category.DAIRY),
                 List.of()
         ));
@@ -105,7 +109,7 @@ class UpdatePreferencesTests {
         performUpdatePreferences(request)
                 .andExpect(status().isNoContent());
 
-        UserPreferences preferences = userRepository.findPreferences(USER_ID);
+        UserPreferences preferences = userPreferenceRepository.findPreferences(USER_ID);
 
         assertThat(preferences.excludedCategories()).isEmpty();
         assertThat(preferences.excludedIngredients()).isEmpty();

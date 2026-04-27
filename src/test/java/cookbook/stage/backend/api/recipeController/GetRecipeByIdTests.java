@@ -168,7 +168,7 @@ class GetRecipeByIdTests {
     }
 
     private Ingredient saveIngredient(String name, Unit unit) {
-        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), name, unit, Category.GRAIN);
+        Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit, List.of(Category.GRAIN));
         ingredientRepository.save(ingredient);
         return ingredient;
     }

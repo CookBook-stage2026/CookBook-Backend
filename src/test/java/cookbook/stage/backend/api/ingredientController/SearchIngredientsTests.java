@@ -188,9 +188,9 @@ class SearchIngredientsTests {
     @Test
     void searchIngredients_shouldExcludeSpecifiedIds_whenExcludedIdsProvided() throws Exception {
         // Arrange
-        Ingredient flour = new Ingredient(IngredientId.create(), "Flour", Unit.GRAM, Category.GRAIN);
-        Ingredient sugar = new Ingredient(IngredientId.create(), "Sugar", Unit.GRAM, Category.SWEETENER);
-        Ingredient salt = new Ingredient(IngredientId.create(), "Salt", Unit.GRAM, Category.ADDITIVE);
+        Ingredient flour = new Ingredient(IngredientId.create(), "Flour", Unit.GRAM, List.of(Category.GRAIN));
+        Ingredient sugar = new Ingredient(IngredientId.create(), "Sugar", Unit.GRAM, List.of(Category.SWEETENER));
+        Ingredient salt = new Ingredient(IngredientId.create(), "Salt", Unit.GRAM, List.of(Category.ADDITIVE));
 
         ingredientRepository.save(flour);
         ingredientRepository.save(sugar);
@@ -213,9 +213,9 @@ class SearchIngredientsTests {
     @Test
     void searchIngredients_shouldExcludeSpecifiedIdsAndUseQuery_whenBothProvided() throws Exception {
         // Arrange
-        Ingredient flour = new Ingredient(new IngredientId(UUID.randomUUID()), "Flour", Unit.GRAM, Category.GRAIN);
-        Ingredient sugar = new Ingredient(new IngredientId(UUID.randomUUID()), "Sugar", Unit.GRAM, Category.SWEETENER);
-        Ingredient salt = new Ingredient(new IngredientId(UUID.randomUUID()), "Salt", Unit.GRAM, Category.ADDITIVE);
+        Ingredient flour = new Ingredient(IngredientId.create(), "Flour", Unit.GRAM, List.of(Category.GRAIN));
+        Ingredient sugar = new Ingredient(IngredientId.create(), "Sugar", Unit.GRAM, List.of(Category.SWEETENER));
+        Ingredient salt = new Ingredient(IngredientId.create(), "Salt", Unit.GRAM, List.of(Category.ADDITIVE));
 
         ingredientRepository.save(flour);
         ingredientRepository.save(sugar);
@@ -266,7 +266,8 @@ class SearchIngredientsTests {
     }
 
     private void seedIngredient(String name) {
-        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), name, Unit.GRAM, Category.DAIRY);
+        Ingredient ingredient = new Ingredient(
+                new IngredientId(UUID.randomUUID()), name, Unit.GRAM, List.of(Category.DAIRY));
         ingredientRepository.save(ingredient);
     }
 }

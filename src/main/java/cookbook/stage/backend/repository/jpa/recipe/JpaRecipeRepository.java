@@ -27,7 +27,13 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
                 JOIN r.ingredients i
                 WHERE (:#{#ingredientIds.size()} = 0 OR i.id.ingredientId IN :ingredientIds)
                     AND (:#{#excludedIngredientIds.size()} = 0 OR i.id.ingredientId NOT IN :excludedIngredientIds)
-                    AND (:#{#excludedCategories.size()} = 0 OR i.ingredient.category NOT IN :excludedCategories)
+                    AND (
+                        :#{#excludedCategories.size()} = 0
+                        OR NOT EXISTS (
+                            SELECT c FROM i.ingredient.categories c
+                            WHERE c IN :excludedCategories
+                        )
+                    )
                     AND r.userId = :userId
                 GROUP BY r.id
                 HAVING :#{#ingredientIds.size()} = 0 OR COUNT(DISTINCT i.id.ingredientId) >= :#{#ingredientIds.size()}

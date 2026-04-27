@@ -1,10 +1,12 @@
 package cookbook.stage.backend.domain.ingredient;
 
+import java.util.List;
+
 public record Ingredient(
         IngredientId id,
         String name,
         Unit unit,
-        Category category
+        List<Category> categories
 ) {
     public Ingredient {
         if (id == null) {
@@ -16,7 +18,7 @@ public record Ingredient(
         if (unit == null) {
             throw new IllegalArgumentException("Ingredient unit cannot be null!");
         }
-        if (category == null) {
+        if (categories == null) {
             throw new IllegalArgumentException("Ingredient category cannot be null!");
         }
     }

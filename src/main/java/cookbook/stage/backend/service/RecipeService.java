@@ -26,12 +26,14 @@ public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final IngredientService ingredientService;
     private final UserService userService;
+    private final UserPreferenceService userPreferenceService;
 
     public RecipeService(RecipeRepository recipeRepository, IngredientService ingredientService,
-                         UserService userService) {
+                         UserService userService, UserPreferenceService userPreferenceService) {
         this.recipeRepository = recipeRepository;
         this.ingredientService = ingredientService;
         this.userService = userService;
+        this.userPreferenceService = userPreferenceService;
     }
 
     @Transactional
@@ -70,12 +72,12 @@ public class RecipeService {
     }
 
     public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, Pageable pageable,
-                                                          boolean applyPreferences, UserId userId) {
+                                                          boolean shouldApplyPreferences, UserId userId) {
         userService.findById(userId)
                 .orElseThrow(userId::notFound);
 
-        if (applyPreferences) {
-            UserPreferences preferences = userService.findPreferences(userId);
+        if (shouldApplyPreferences) {
+            UserPreferences preferences = userPreferenceService.findPreferences(userId);
             return recipeRepository.findAllSummariesWithFilter(ingredientIds, preferences, userId, pageable);
         }
 

@@ -34,6 +34,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -56,6 +57,8 @@ class OAuth2LoginEndToEndTest {
     private static final String MOCK_USER_SUB = "123456789";
     private static final String MOCK_USER_EMAIL = "testuser@gmail.com";
     private static final String MOCK_USER_NAME = "Test User";
+    private static final int DEFAULT_PAGE = 0;
+    private static final int DEFAULT_PAGE_SIZE = 10;
 
     private static WireMockServer wireMockServer;
     private static String mockProviderBaseUrl;
@@ -166,7 +169,7 @@ class OAuth2LoginEndToEndTest {
         var requestBuilder = post("/api/recipes/search")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(
-                        new RecipeSearchRequest(null, null, null, null)))
+                        new RecipeSearchRequest(List.of(), true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE)))
                 .cookie(accessTokenCookie);
 
         mockMvc.perform(requestBuilder)

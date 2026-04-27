@@ -13,6 +13,7 @@ import cookbook.stage.backend.domain.recipe.RecipeIngredient;
 import cookbook.stage.backend.domain.recipe.RecipeRepository;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.domain.user.UserPreferenceRepository;
 import cookbook.stage.backend.domain.user.UserPreferences;
 import cookbook.stage.backend.domain.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,6 +72,9 @@ class SearchRecipesTests {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserPreferenceRepository userPreferenceRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -138,7 +142,7 @@ class SearchRecipesTests {
         long totalElements = recipeRepository.count();
 
         // Act & Assert
-        performSearch(new RecipeSearchRequest(List.of(), null, firstPageIndex, pageSize))
+        performSearch(new RecipeSearchRequest(List.of(), true, firstPageIndex, pageSize))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(expectedFirstPageCount)))
                 .andExpect(jsonPath("$.page.totalElements").value(totalElements))
@@ -146,7 +150,7 @@ class SearchRecipesTests {
                 .andExpect(jsonPath("$.page.number").value(firstPageIndex))
                 .andExpect(jsonPath("$.page.size").value(pageSize));
 
-        performSearch(new RecipeSearchRequest(List.of(), null, secondPageIndex, pageSize))
+        performSearch(new RecipeSearchRequest(List.of(), true, secondPageIndex, pageSize))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(expectedSecondPageCount)))
                 .andExpect(jsonPath("$.page.number").value(secondPageIndex))
@@ -185,9 +189,9 @@ class SearchRecipesTests {
     @Test
     void searchRecipes_shouldFilterByIngredients_whenIngredientIdsProvided() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour", Category.GRAIN);
-        Ingredient sugar = createAndSaveIngredient("Sugar", Category.GRAIN);
-        Ingredient salt = createAndSaveIngredient("Salt", Category.GRAIN);
+        Ingredient flour = createAndSaveIngredient("Flour", List.of(Category.GRAIN));
+        Ingredient sugar = createAndSaveIngredient("Sugar", List.of(Category.GRAIN));
+        Ingredient salt = createAndSaveIngredient("Salt", List.of(Category.GRAIN));
 
         User user = createUser();
 
@@ -197,7 +201,7 @@ class SearchRecipesTests {
         recipeRepository.save(buildRecipeWithIngredients(List.of(salt), user));
 
         RecipeSearchRequest dto = new RecipeSearchRequest(List.of(flour.id().id(), sugar.id().id()),
-                null, null, null);
+                true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
 
         // Act & Assert
         performSearch(dto)
@@ -213,12 +217,12 @@ class SearchRecipesTests {
     @Test
     void searchRecipes_shouldReturnEmptyResults_whenNoRecipesMatchIngredientFilter() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour", Category.GRAIN);
+        Ingredient flour = createAndSaveIngredient("Flour", List.of(Category.GRAIN));
         User user = createUser();
         recipeRepository.save(buildRecipeWithIngredients(List.of(flour), user));
 
         // Act & Assert
-        performSearch(new RecipeSearchRequest(List.of(UUID.randomUUID()), null, DEFAULT_PAGE, DEFAULT_PAGE_SIZE))
+        performSearch(new RecipeSearchRequest(List.of(UUID.randomUUID()), true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)))
                 .andExpect(jsonPath("$.page.totalElements").value(0));
@@ -227,12 +231,12 @@ class SearchRecipesTests {
     @Test
     void searchRecipes_shouldExcludeRecipesConflictingWithPreferences_whenPreferencesAreSet() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour", Category.GRAIN);
-        Ingredient sugar = createAndSaveIngredient("Sugar", Category.GRAIN);
-        Ingredient milk = createAndSaveIngredient("Milk", Category.DAIRY);
+        Ingredient flour = createAndSaveIngredient("Flour", List.of(Category.GRAIN));
+        Ingredient sugar = createAndSaveIngredient("Sugar", List.of(Category.GRAIN));
+        Ingredient milk = createAndSaveIngredient("Milk", List.of(Category.DAIRY));
         User user = createUser();
 
-        userRepository.updatePreferences(USER_ID, new UserPreferences(
+        userPreferenceRepository.updatePreferences(USER_ID, new UserPreferences(
                 List.of(Category.DAIRY),
                 List.of(flour)
         ));
@@ -250,7 +254,7 @@ class SearchRecipesTests {
     }
 
     private RecipeSearchRequest defaultRequest() {
-        return new RecipeSearchRequest(List.of(), null, DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
+        return new RecipeSearchRequest(List.of(), true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
     }
 
     private ResultActions performSearch(RecipeSearchRequest request) throws Exception {
@@ -263,7 +267,7 @@ class SearchRecipesTests {
     }
 
     private Recipe buildRecipe(User user) {
-        Ingredient ingredient = createAndSaveIngredient("Ingredient", Category.GRAIN);
+        Ingredient ingredient = createAndSaveIngredient("Ingredient", List.of(Category.GRAIN));
         ingredientRepository.save(ingredient);
         return buildRecipeWithIngredients(List.of(ingredient), user);
     }
@@ -287,8 +291,8 @@ class SearchRecipesTests {
         );
     }
 
-    private Ingredient createAndSaveIngredient(String name, Category category) {
-        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), name, Unit.GRAM, category);
+    private Ingredient createAndSaveIngredient(String name, List<Category> categories) {
+        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), name, Unit.GRAM, categories);
         return ingredientRepository.save(ingredient);
     }
 

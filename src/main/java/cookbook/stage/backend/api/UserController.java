@@ -5,7 +5,7 @@ import cookbook.stage.backend.api.result.UserPreferencesDto;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.domain.user.UserPreferences;
-import cookbook.stage.backend.service.UserService;
+import cookbook.stage.backend.service.UserPreferenceService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private final UserService userService;
+    private final UserPreferenceService userPreferenceService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public UserController(UserPreferenceService userPreferenceService) {
+        this.userPreferenceService = userPreferenceService;
     }
 
     /**
@@ -36,7 +36,7 @@ public class UserController {
     public UserPreferencesDto getPreferences(
             @AuthenticationPrincipal Jwt jwt
     ) {
-        UserPreferences preferences = userService.findPreferences(UserId.fromJwt(jwt));
+        UserPreferences preferences = userPreferenceService.findPreferences(UserId.fromJwt(jwt));
         return UserPreferencesDto.fromDomain(preferences);
     }
 
@@ -52,7 +52,7 @@ public class UserController {
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody UpdateUserPreferencesRequest request
     ) {
-        userService.updatePreferences(
+        userPreferenceService.updatePreferences(
                 UserId.fromJwt(jwt),
                 request.excludedCategories(),
                 request.excludedIngredientIds().stream().map(IngredientId::new).toList()

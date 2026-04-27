@@ -7,6 +7,7 @@ import cookbook.stage.backend.domain.ingredient.IngredientRepository;
 import cookbook.stage.backend.domain.ingredient.Unit;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.domain.user.UserPreferenceRepository;
 import cookbook.stage.backend.domain.user.UserPreferences;
 import cookbook.stage.backend.domain.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,6 +45,9 @@ class GetPreferencesTests {
     private UserRepository userRepository;
 
     @Autowired
+    private UserPreferenceRepository userPreferenceRepository;
+
+    @Autowired
     private IngredientRepository ingredientRepository;
 
     @Autowired
@@ -61,9 +65,9 @@ class GetPreferencesTests {
         createUser();
 
         Ingredient ingredient = ingredientRepository.save(
-                new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM, Category.EGG));
+                new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG)));
 
-        userRepository.updatePreferences(USER_ID, new UserPreferences(
+        userPreferenceRepository.updatePreferences(USER_ID, new UserPreferences(
                 List.of(Category.DAIRY),
                 List.of(ingredient)
         ));

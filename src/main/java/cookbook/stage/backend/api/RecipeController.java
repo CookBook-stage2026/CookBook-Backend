@@ -110,7 +110,7 @@ public class RecipeController {
         Pageable pageable = PageRequest.of(request.page(), request.size());
         UserId userId = new UserId(UUID.fromString(jwt.getSubject()));
 
-        return recipeService.findAllSummariesWithFilter(ingredients, pageable, request.applyPreferences(), userId)
+        return recipeService.findAllSummariesWithFilter(ingredients, pageable, request.shouldApplyPreferences(), userId)
                 .map(RecipeSummaryDto::fromDomain);
     }
 }
