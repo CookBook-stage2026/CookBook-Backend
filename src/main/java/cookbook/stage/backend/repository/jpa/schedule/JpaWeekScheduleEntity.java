@@ -1,14 +1,14 @@
 package cookbook.stage.backend.repository.jpa.schedule;
 
-import cookbook.stage.backend.domain.week_schedule.WeekSchedule;
-import cookbook.stage.backend.domain.week_schedule.WeekScheduleId;
-import cookbook.stage.backend.repository.jpa.user.JpaUserEntity;
+import cookbook.stage.backend.domain.user.User;
+import cookbook.stage.backend.domain.weekschedule.WeekSchedule;
+import cookbook.stage.backend.domain.weekschedule.WeekScheduleId;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import java.util.ArrayList;
@@ -22,8 +22,8 @@ public class JpaWeekScheduleEntity {
     @Id
     private UUID id;
 
-    @OneToOne
-    private JpaUserEntity user;
+    @Column(name = "user_id")
+    private UUID userId;
 
     @OneToMany(
             mappedBy = "weekSchedule",
@@ -36,21 +36,21 @@ public class JpaWeekScheduleEntity {
     protected JpaWeekScheduleEntity() {
     }
 
-    public JpaWeekScheduleEntity(UUID id, JpaUserEntity user, List<JpaDayScheduleEntity> daySchedules) {
+    public JpaWeekScheduleEntity(UUID id, UUID userId, List<JpaDayScheduleEntity> daySchedules) {
         this.id = id;
-        this.user = user;
+        this.userId = userId;
         this.daySchedules = daySchedules;
     }
 
-    public WeekSchedule toDomain() {
-        return new WeekSchedule(new WeekScheduleId(id), user.toDomain(), daySchedules.stream()
+    public WeekSchedule toDomain(User user) {
+        return new WeekSchedule(new WeekScheduleId(id), user, daySchedules.stream()
                 .map(JpaDayScheduleEntity::toDomain).toList());
     }
 
     public static JpaWeekScheduleEntity fromDomain(WeekSchedule schedule) {
         JpaWeekScheduleEntity entity = new JpaWeekScheduleEntity(
                 schedule.id().id(),
-                JpaUserEntity.fromDomain(schedule.user()),
+                schedule.user().getId().id(),
                 new ArrayList<>()
         );
 
@@ -64,9 +64,5 @@ public class JpaWeekScheduleEntity {
 
     public UUID getId() {
         return id;
-    }
-
-    public JpaUserEntity getUser() {
-        return user;
     }
 }

@@ -1,7 +1,7 @@
 package cookbook.stage.backend.repository.jpa.schedule;
 
-import cookbook.stage.backend.domain.week_schedule.DaySchedule;
-import cookbook.stage.backend.domain.week_schedule.DayScheduleId;
+import cookbook.stage.backend.domain.weekschedule.DaySchedule;
+import cookbook.stage.backend.domain.weekschedule.DayScheduleId;
 import cookbook.stage.backend.repository.jpa.recipe.JpaRecipeEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

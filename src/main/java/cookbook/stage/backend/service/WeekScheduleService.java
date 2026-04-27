@@ -2,16 +2,17 @@ package cookbook.stage.backend.service;
 
 import cookbook.stage.backend.domain.recipe.RecipeId;
 import cookbook.stage.backend.domain.user.UserId;
-import cookbook.stage.backend.domain.week_schedule.DaySchedule;
-import cookbook.stage.backend.domain.week_schedule.DayScheduleId;
-import cookbook.stage.backend.domain.week_schedule.WeekSchedule;
-import cookbook.stage.backend.domain.week_schedule.WeekScheduleId;
-import cookbook.stage.backend.domain.week_schedule.WeekScheduleRepository;
+import cookbook.stage.backend.domain.weekschedule.DaySchedule;
+import cookbook.stage.backend.domain.weekschedule.DayScheduleId;
+import cookbook.stage.backend.domain.weekschedule.WeekSchedule;
+import cookbook.stage.backend.domain.weekschedule.WeekScheduleId;
+import cookbook.stage.backend.domain.weekschedule.WeekScheduleRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 @Service
 public class WeekScheduleService {
@@ -29,14 +30,14 @@ public class WeekScheduleService {
         var user = userService.findById(userId)
                 .orElseThrow(userId::notFound);
 
-        List<DaySchedule> dailyRecipes = new java.util.ArrayList<>();
-        for (int i = 0; i < recipeIds.size(); i++) {
-            RecipeId recipeId = new RecipeId(recipeIds.get(i));
-            DayOfWeek day = days.get(i);
-
-            var recipe = recipeService.findById(recipeId, userId);
-            dailyRecipes.add(new DaySchedule(DayScheduleId.create(), recipe, day));
-        }
+        List<DaySchedule> dailyRecipes = IntStream.range(0, recipeIds.size())
+                .mapToObj(i -> {
+                    RecipeId recipeId = new RecipeId(recipeIds.get(i));
+                    DayOfWeek day = days.get(i);
+                    var recipe = recipeService.findById(recipeId, userId);
+                    return new DaySchedule(DayScheduleId.create(), recipe, day);
+                })
+                .toList();
 
         WeekSchedule weekSchedule = new WeekSchedule(WeekScheduleId.create(), user, dailyRecipes);
         return repo.save(weekSchedule);

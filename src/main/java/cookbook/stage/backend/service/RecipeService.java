@@ -84,6 +84,6 @@ public class RecipeService {
     }
 
     public List<RecipeSummary> searchSummariesByName(Pageable pageable, UserId userId, String query) {
-        return recipeRepository.searchSummariesByName(pageable, userId, query);
+        return recipeRepository.querySummaries(pageable, userId, query);
     }
 }
