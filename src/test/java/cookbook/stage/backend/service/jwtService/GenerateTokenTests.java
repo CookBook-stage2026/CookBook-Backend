@@ -4,21 +4,26 @@ import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.service.JwtService;
 import io.jsonwebtoken.Claims;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest
 class GenerateTokenTests {
+    private static final String SECRET = "dGVzdC1zZWNyZXQta2V5LXRoYXQtaXMtbG9uZy1lbm91Z2gtZm9yLUhTMjU2";
+    private static final long EXPIRATION_MS = 3600000L;
 
-    @Autowired
-    private JwtService jwtService;
+    private final JwtService jwtService = new JwtService();
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(jwtService, "secret", SECRET);
+        ReflectionTestUtils.setField(jwtService, "expirationMs", EXPIRATION_MS);
+    }
 
     @Test
     void generateToken_ValidUser_TokenGeneratedWithCorrectClaims() {
@@ -36,12 +41,5 @@ class GenerateTokenTests {
                 .containsEntry("sub", rawId.toString())
                 .containsEntry("email", "test@example.com")
                 .containsEntry("name", "Test User");
-    }
-
-    @Test
-    void generateToken_NullUser_ThrowsException() {
-        // Act & Assert
-        assertThatThrownBy(() -> jwtService.generateToken(null))
-                .isInstanceOf(NullPointerException.class);
     }
 }

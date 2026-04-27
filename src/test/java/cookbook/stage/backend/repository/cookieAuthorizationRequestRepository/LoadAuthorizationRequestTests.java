@@ -1,10 +1,9 @@
 package cookbook.stage.backend.repository.cookieAuthorizationRequestRepository;
 
 import cookbook.stage.backend.repository.CookieAuthorizationRequestRepository;
+import cookbook.stage.backend.util.CookieUtils;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -12,33 +11,29 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequ
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
 class LoadAuthorizationRequestTests {
 
-    @Autowired
-    private CookieAuthorizationRequestRepository repository;
+    private final CookieAuthorizationRequestRepository repository = new CookieAuthorizationRequestRepository(
+            new CookieUtils(),
+            "dGVzdC1zZWNyZXQta2V5LXRoYXQtaXMtbG9uZy1lbm91Z2gtZm9yLUhTMjU2"
+    );
+
+    private static final OAuth2AuthorizationRequest AUTH_REQUEST = OAuth2AuthorizationRequest.authorizationCode()
+            .clientId("test-client")
+            .authorizationUri("http://example.com/auth")
+            .state("test-state")
+            .build();
 
     @Test
     void loadAuthorizationRequest_ValidCookieAndSignature_ReturnsRequest() {
         // Arrange
-        MockHttpServletRequest saveRequest = new MockHttpServletRequest();
         MockHttpServletResponse saveResponse = new MockHttpServletResponse();
-        OAuth2AuthorizationRequest originalAuthRequest = OAuth2AuthorizationRequest.authorizationCode()
-                .clientId("test-client")
-                .authorizationUri("http://example.com/auth")
-                .state("test-state")
-                .build();
-
-        repository.saveAuthorizationRequest(originalAuthRequest, saveRequest, saveResponse);
-
-        String cookieHeader = saveResponse.getHeader(HttpHeaders.SET_COOKIE);
-        assert cookieHeader != null;
-        String signedCookieValue = extractCookieValue(cookieHeader,
-                CookieAuthorizationRequestRepository.OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
+        repository.saveAuthorizationRequest(AUTH_REQUEST, new MockHttpServletRequest(), saveResponse);
 
         MockHttpServletRequest loadRequest = new MockHttpServletRequest();
-        loadRequest.setCookies(new Cookie(CookieAuthorizationRequestRepository.OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
-                signedCookieValue));
+        loadRequest.setCookies(new Cookie(
+                CookieAuthorizationRequestRepository.OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
+                extractCookieValue(saveResponse)));
 
         // Act
         OAuth2AuthorizationRequest loadedRequest = repository.loadAuthorizationRequest(loadRequest);
@@ -53,26 +48,15 @@ class LoadAuthorizationRequestTests {
     @Test
     void loadAuthorizationRequest_TamperedSignature_ReturnsNull() {
         // Arrange
-        MockHttpServletRequest saveRequest = new MockHttpServletRequest();
         MockHttpServletResponse saveResponse = new MockHttpServletResponse();
-        OAuth2AuthorizationRequest originalAuthRequest = OAuth2AuthorizationRequest.authorizationCode()
-                .clientId("test-client")
-                .authorizationUri("http://example.com/auth")
-                .state("test-state")
-                .build();
+        repository.saveAuthorizationRequest(AUTH_REQUEST, new MockHttpServletRequest(), saveResponse);
 
-        repository.saveAuthorizationRequest(originalAuthRequest, saveRequest, saveResponse);
-        String cookieHeader = saveResponse.getHeader(HttpHeaders.SET_COOKIE);
-        assert cookieHeader != null;
-        String originalCookieValue = extractCookieValue(cookieHeader,
-                CookieAuthorizationRequestRepository.OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
-
-        String[] parts = originalCookieValue.split("\\.");
-        String tamperedCookieValue = parts[0] + ".this-is-an-invalid-signature";
+        String[] parts = extractCookieValue(saveResponse).split("\\.");
+        String tampered = parts[0] + ".invalidsignature";
 
         MockHttpServletRequest loadRequest = new MockHttpServletRequest();
-        loadRequest.setCookies(new Cookie(CookieAuthorizationRequestRepository.OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
-                tamperedCookieValue));
+        loadRequest.setCookies(new Cookie(
+                CookieAuthorizationRequestRepository.OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME, tampered));
 
         // Act
         OAuth2AuthorizationRequest loadedRequest = repository.loadAuthorizationRequest(loadRequest);
@@ -81,8 +65,10 @@ class LoadAuthorizationRequestTests {
         assertThat(loadedRequest).isNull();
     }
 
-    private String extractCookieValue(String header, String cookieName) {
-        String prefix = cookieName + "=";
+    private String extractCookieValue(MockHttpServletResponse response) {
+        String header = response.getHeader(HttpHeaders.SET_COOKIE);
+        String prefix = CookieAuthorizationRequestRepository.OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME + "=";
+        assert header != null;
         int start = header.indexOf(prefix) + prefix.length();
         int end = header.indexOf(";", start);
         return end == -1 ? header.substring(start) : header.substring(start, end);
