@@ -16,11 +16,8 @@ import java.nio.file.AccessDeniedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-    @ExceptionHandler({
-            OAuth2Exception.class,
-            UserNotFoundException.class,
-    })
-    ResponseEntity<Object> handleUnauthorizedException(RuntimeException ex, WebRequest request) {
+    @ExceptionHandler({OAuth2Exception.class, UserNotFoundException.class})
+    ResponseEntity<Object> handleUnauthorizedException(OAuth2Exception ex, WebRequest request) {
         String responseBody = ex.getMessage();
         return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
     }

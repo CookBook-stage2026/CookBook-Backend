@@ -112,4 +112,8 @@ public class JpaUserEntity {
         this.excludedIngredients.clear();
         this.excludedIngredients.addAll(excludedIngredients);
     }
+
+    public UUID getId() {
+        return id;
+    }
 }

@@ -25,8 +25,4 @@ public record WeekSchedule(WeekScheduleId id, User user, List<DaySchedule> daily
             }
         }
     }
-
-    public WeekSchedule(WeekScheduleId id, List<DaySchedule> dailyRecipes) {
-        this(id, null, dailyRecipes);
-    }
 }

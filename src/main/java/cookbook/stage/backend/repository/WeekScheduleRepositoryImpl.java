@@ -19,6 +19,6 @@ public class WeekScheduleRepositoryImpl implements WeekScheduleRepository {
     @Transactional
     public WeekSchedule save(WeekSchedule schedule) {
         JpaWeekScheduleEntity entity = JpaWeekScheduleEntity.fromDomain(schedule);
-        return weekScheduleRepository.save(entity).toDomain(schedule.user());
+        return weekScheduleRepository.save(entity).toDomain();
     }
 }
