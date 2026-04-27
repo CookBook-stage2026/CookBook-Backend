@@ -1,9 +1,12 @@
 package cookbook.stage.backend.api;
 
-import cookbook.stage.backend.api.input.CreateDayScheduleDto;
 import cookbook.stage.backend.api.input.CreateWeekScheduleDto;
 import cookbook.stage.backend.api.result.WeekScheduleDto;
+import cookbook.stage.backend.domain.recipe.RecipeId;
 import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.domain.weekschedule.DaySchedule;
+import cookbook.stage.backend.domain.weekschedule.DayScheduleId;
+import cookbook.stage.backend.service.RecipeService;
 import cookbook.stage.backend.service.WeekScheduleService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,9 +22,11 @@ import java.util.UUID;
 @RequestMapping("/api/schedules")
 public class WeekScheduleController {
     private final WeekScheduleService service;
+    private final RecipeService recipeService;
 
-    public WeekScheduleController(WeekScheduleService service) {
+    public WeekScheduleController(WeekScheduleService service, RecipeService recipeService) {
         this.service = service;
+        this.recipeService = recipeService;
     }
 
     /**
@@ -35,9 +40,16 @@ public class WeekScheduleController {
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CreateWeekScheduleDto dto
     ) {
-        var newSchedule = service.saveWeekSchedule(dto.days().stream().map(CreateDayScheduleDto::recipeId).toList(),
-                dto.days().stream().map(CreateDayScheduleDto::day).toList(),
-                new UserId(UUID.fromString(jwt.getSubject())));
+        UserId userId = new UserId(UUID.fromString(jwt.getSubject()));
+
+        var daySchedules = dto.days().stream()
+                .map(dayDto -> {
+                    var recipe = recipeService.findById(new RecipeId(dayDto.recipeId()), userId);
+                    return new DaySchedule(DayScheduleId.create(), recipe, dayDto.day());
+                })
+                .toList();
+
+        var newSchedule = service.saveWeekSchedule(daySchedules, userId);
 
         return WeekScheduleDto.fromDomain(newSchedule);
     }

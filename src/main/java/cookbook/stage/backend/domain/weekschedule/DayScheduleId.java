@@ -1,4 +1,4 @@
-package cookbook.stage.backend.domain.week_schedule;
+package cookbook.stage.backend.domain.weekschedule;
 
 import cookbook.stage.backend.domain.exception.NotFoundException;
 

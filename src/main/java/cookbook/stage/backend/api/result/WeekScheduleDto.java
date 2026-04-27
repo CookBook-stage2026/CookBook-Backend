@@ -1,6 +1,6 @@
 package cookbook.stage.backend.api.result;
 
-import cookbook.stage.backend.domain.week_schedule.WeekSchedule;
+import cookbook.stage.backend.domain.weekschedule.WeekSchedule;
 
 import java.util.List;
 import java.util.UUID;

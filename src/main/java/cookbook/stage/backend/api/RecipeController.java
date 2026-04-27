@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -98,8 +99,8 @@ public class RecipeController {
      *                page (default 0) and size (default 20)
      * @return Page of recipe summaries
      */
-    @PostMapping("/search")
-    public Page<RecipeSummaryDto> searchRecipes(
+    @PostMapping("/filter")
+    public Page<RecipeSummaryDto> filterRecipes(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody RecipeSearchRequest request
     ) {

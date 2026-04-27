@@ -1,14 +1,15 @@
 package cookbook.stage.backend.repository.jpa.schedule;
 
-import cookbook.stage.backend.domain.week_schedule.WeekSchedule;
-import cookbook.stage.backend.domain.week_schedule.WeekScheduleId;
+import cookbook.stage.backend.domain.weekschedule.WeekSchedule;
+import cookbook.stage.backend.domain.weekschedule.WeekScheduleId;
 import cookbook.stage.backend.repository.jpa.user.JpaUserEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import java.util.ArrayList;
@@ -22,14 +23,15 @@ public class JpaWeekScheduleEntity {
     @Id
     private UUID id;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private JpaUserEntity user;
 
     @OneToMany(
             mappedBy = "weekSchedule",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            fetch = FetchType.LAZY
+            fetch = FetchType.EAGER
     )
     private List<JpaDayScheduleEntity> daySchedules = new ArrayList<>();
 
@@ -38,8 +40,8 @@ public class JpaWeekScheduleEntity {
 
     public JpaWeekScheduleEntity(UUID id, JpaUserEntity user, List<JpaDayScheduleEntity> daySchedules) {
         this.id = id;
-        this.user = user;
         this.daySchedules = daySchedules;
+        this.user = user;
     }
 
     public WeekSchedule toDomain() {
@@ -64,9 +66,5 @@ public class JpaWeekScheduleEntity {
 
     public UUID getId() {
         return id;
-    }
-
-    public JpaUserEntity getUser() {
-        return user;
     }
 }

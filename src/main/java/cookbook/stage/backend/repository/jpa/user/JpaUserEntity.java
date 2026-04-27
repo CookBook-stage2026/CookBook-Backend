@@ -45,7 +45,7 @@ public class JpaUserEntity {
     )
     private List<JpaSocialConnectionEntity> socialConnections = new ArrayList<>();
 
-    @OneToMany(mappedBy = "creatorId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JpaRecipeEntity> recipes = new ArrayList<>();
 
     @ElementCollection
@@ -111,5 +111,9 @@ public class JpaUserEntity {
     public void setExcludedIngredients(Set<JpaIngredientEntity> excludedIngredients) {
         this.excludedIngredients.clear();
         this.excludedIngredients.addAll(excludedIngredients);
+    }
+
+    public UUID getId() {
+        return id;
     }
 }

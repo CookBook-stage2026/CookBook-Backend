@@ -1,6 +1,6 @@
 package cookbook.stage.backend.api.result;
 
-import cookbook.stage.backend.domain.week_schedule.DaySchedule;
+import cookbook.stage.backend.domain.weekschedule.DaySchedule;
 
 import java.time.DayOfWeek;
 import java.util.UUID;

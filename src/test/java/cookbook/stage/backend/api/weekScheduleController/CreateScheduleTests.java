@@ -2,6 +2,7 @@ package cookbook.stage.backend.api.weekScheduleController;
 
 import cookbook.stage.backend.api.input.CreateDayScheduleDto;
 import cookbook.stage.backend.api.input.CreateWeekScheduleDto;
+import cookbook.stage.backend.domain.ingredient.Category;
 import cookbook.stage.backend.domain.ingredient.Ingredient;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.ingredient.IngredientRepository;
@@ -326,7 +327,8 @@ class CreateScheduleTests {
     }
 
     private Ingredient createAndSaveIngredient(String name) {
-        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), name, Unit.GRAM);
+        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), name, Unit.GRAM,
+                List.of(Category.ADDITIVE));
         return ingredientRepository.save(ingredient);
     }
 

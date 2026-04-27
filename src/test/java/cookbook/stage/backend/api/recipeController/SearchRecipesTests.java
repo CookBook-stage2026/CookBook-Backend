@@ -94,7 +94,7 @@ class SearchRecipesTests {
         Recipe recipe2 = recipeRepository.save(buildRecipe(user));
 
         // Act & Assert
-        performSearch(defaultRequest())
+        performFilter(defaultRequest())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(2)))
@@ -113,7 +113,7 @@ class SearchRecipesTests {
         createUser();
 
         // Act & Assert
-        performSearch(defaultRequest())
+        performFilter(defaultRequest())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(0)))
@@ -142,7 +142,7 @@ class SearchRecipesTests {
         long totalElements = recipeRepository.count();
 
         // Act & Assert
-        performSearch(new RecipeSearchRequest(List.of(), true, firstPageIndex, pageSize))
+        performFilter(new RecipeSearchRequest(List.of(), true, firstPageIndex, pageSize))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(expectedFirstPageCount)))
                 .andExpect(jsonPath("$.page.totalElements").value(totalElements))
@@ -150,7 +150,7 @@ class SearchRecipesTests {
                 .andExpect(jsonPath("$.page.number").value(firstPageIndex))
                 .andExpect(jsonPath("$.page.size").value(pageSize));
 
-        performSearch(new RecipeSearchRequest(List.of(), true, secondPageIndex, pageSize))
+        performFilter(new RecipeSearchRequest(List.of(), true, secondPageIndex, pageSize))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(expectedSecondPageCount)))
                 .andExpect(jsonPath("$.page.number").value(secondPageIndex))
@@ -178,7 +178,7 @@ class SearchRecipesTests {
         recipeRepository.save(buildRecipe(new User("email", "name", List.of())));
 
         // Act & Assert
-        performSearch(defaultRequest())
+        performFilter(defaultRequest())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(0)))
@@ -204,7 +204,7 @@ class SearchRecipesTests {
                 true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
 
         // Act & Assert
-        performSearch(dto)
+        performFilter(dto)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[*].id", hasItems(
@@ -222,7 +222,7 @@ class SearchRecipesTests {
         recipeRepository.save(buildRecipeWithIngredients(List.of(flour), user));
 
         // Act & Assert
-        performSearch(new RecipeSearchRequest(List.of(UUID.randomUUID()), true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE))
+        performFilter(new RecipeSearchRequest(List.of(UUID.randomUUID()), true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)))
                 .andExpect(jsonPath("$.page.totalElements").value(0));
@@ -246,7 +246,7 @@ class SearchRecipesTests {
         Recipe expected = recipeRepository.save(buildRecipeWithIngredients(List.of(sugar), user));
 
         // Act & Assert
-        performSearch(defaultRequest())
+        performFilter(defaultRequest())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].id").value(expected.getId().id().toString()))
@@ -257,8 +257,8 @@ class SearchRecipesTests {
         return new RecipeSearchRequest(List.of(), true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
     }
 
-    private ResultActions performSearch(RecipeSearchRequest request) throws Exception {
-        return mockMvc.perform(post("/api/recipes/search")
+    private ResultActions performFilter(RecipeSearchRequest request) throws Exception {
+        return mockMvc.perform(post("/api/recipes/filter")
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)

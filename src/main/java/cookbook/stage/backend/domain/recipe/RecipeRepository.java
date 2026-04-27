@@ -17,7 +17,7 @@ public interface RecipeRepository {
     Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, UserPreferences preferences,
                                                    UserId userId, Pageable pageable);
 
-    List<RecipeSummary> searchSummariesByName(Pageable pageable, UserId userId, String query);
+    List<RecipeSummary> querySummaries(Pageable pageable, UserId userId, String query);
 
     long count();
 }
