@@ -2,6 +2,8 @@ package cookbook.stage.backend.domain.weekschedule;
 
 import cookbook.stage.backend.domain.user.User;
 
+import java.time.DayOfWeek;
+import java.util.HashSet;
 import java.util.List;
 
 public record WeekSchedule(WeekScheduleId id, User user, List<DaySchedule> dailyRecipes) {
@@ -11,6 +13,16 @@ public record WeekSchedule(WeekScheduleId id, User user, List<DaySchedule> daily
         }
         if (user == null) {
             throw new IllegalArgumentException("WeekSchedule must have a user");
+        }
+        validateNoDuplicateDays(dailyRecipes);
+    }
+
+    private static void validateNoDuplicateDays(List<DaySchedule> dailyRecipes) {
+        var uniqueDays = new HashSet<DayOfWeek>();
+        for (var daySchedule : dailyRecipes) {
+            if (daySchedule != null && !uniqueDays.add(daySchedule.day())) {
+                throw new IllegalArgumentException("Duplicate day found: " + daySchedule.day());
+            }
         }
     }
 
