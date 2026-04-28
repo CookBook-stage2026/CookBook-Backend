@@ -59,7 +59,7 @@ public class WeekScheduleController {
      * Gets the week schedule for the logged-in user
      * @return the week schedule for the logged-in user
      */
-    @GetMapping("/user")
+    @GetMapping
     public WeekScheduleDto findForUser(
             @AuthenticationPrincipal Jwt jwt
     ) {

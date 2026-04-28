@@ -88,7 +88,7 @@ class FindForUserTests {
         var recipes = seedRecipesForAllDays(user.getId());
         seedWeekSchedule(user, recipes);
 
-        mockMvc.perform(get("/api/schedules/user")
+        mockMvc.perform(get("/api/schedules")
                         .with(validJwt())
                         .with(csrf()))
                 .andDo(print())
@@ -115,7 +115,7 @@ class FindForUserTests {
         partialSchedule.put(DayOfWeek.FRIDAY, recipe);
         seedWeekSchedule(user, partialSchedule);
 
-        mockMvc.perform(get("/api/schedules/user")
+        mockMvc.perform(get("/api/schedules")
                         .with(validJwt())
                         .with(csrf()))
                 .andDo(print())
@@ -131,7 +131,7 @@ class FindForUserTests {
     void findForUser_NoSchedule_ShouldReturnNotFound() throws Exception {
         createUser();
 
-        mockMvc.perform(get("/api/schedules/user")
+        mockMvc.perform(get("/api/schedules")
                         .with(validJwt())
                         .with(csrf()))
                 .andDo(print())
@@ -140,7 +140,7 @@ class FindForUserTests {
 
     @Test
     void findForUser_UnauthenticatedUser_ShouldReturnUnauthorized() throws Exception {
-        mockMvc.perform(get("/api/schedules/user")
+        mockMvc.perform(get("/api/schedules")
                         .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
