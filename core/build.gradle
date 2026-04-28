@@ -7,6 +7,12 @@ plugins {
 group = 'be.xplore.cookbook'
 version = '0.0.1-SNAPSHOT'
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
 repositories {
     mavenCentral()
 }
@@ -20,6 +26,6 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-test {
+tasks.named('test') {
     useJUnitPlatform()
 }

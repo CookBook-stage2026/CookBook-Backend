@@ -17,24 +17,6 @@ java {
     }
 }
 
-jacoco {
-    toolVersion = "0.8.14"
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
-}
-
-tasks.named('jacocoTestReport') {
-    dependsOn test
-    reports {
-        html.required = false
-        xml.required = true
-        csv.required = false
-    }
-}
-
 repositories {
     mavenCentral()
 }
@@ -56,6 +38,24 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.wiremock:wiremock-standalone:3.13.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+tasks.named('jacocoTestReport') {
+    dependsOn test
+    reports {
+        html.required = false
+        xml.required = true
+        csv.required = false
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.14"
 }
 
 checkstyle {
