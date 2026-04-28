@@ -68,7 +68,7 @@ public class RecipeController {
                         createRecipeDto.steps()
                 ),
                 ingredientQuantities,
-                UserId.fromJwt(jwt)
+                getUserIdFromJwt(jwt)
         );
 
         return RecipeDto.fromDomain(recipe);
@@ -86,7 +86,7 @@ public class RecipeController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID id
     ) {
-        Recipe recipe = recipeService.findById(new RecipeId(id), UserId.fromJwt(jwt));
+        Recipe recipe = recipeService.findById(new RecipeId(id), getUserIdFromJwt(jwt));
 
         return RecipeDto.fromDomain(recipe);
     }
@@ -134,11 +134,11 @@ public class RecipeController {
         Pageable pageable = PageRequest.of(page, size);
 
         return recipeService.searchSummariesByName(pageable,
-                new UserId(UUID.fromString(jwt.getSubject())),
+                getUserIdFromJwt(jwt),
                 query).stream().map(RecipeSummaryDto::fromDomain).toList();
     }
 
-    private UserId fromJwt(Jwt jwt) {
+    private UserId getUserIdFromJwt(Jwt jwt) {
         return new UserId(UUID.fromString(jwt.getSubject()));
     }
 }
