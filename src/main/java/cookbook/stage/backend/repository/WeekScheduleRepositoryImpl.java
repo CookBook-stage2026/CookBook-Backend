@@ -27,7 +27,6 @@ public class WeekScheduleRepositoryImpl implements WeekScheduleRepository {
     @Override
     public WeekSchedule findForUser(UserId userId) {
         var result = weekScheduleRepository.findWeekScheduleByUserId(userId.id());
-        var result2 = weekScheduleRepository.findAll();
         if (result.isPresent()) {
             return result.get().toDomain();
         }
