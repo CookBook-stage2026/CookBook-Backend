@@ -22,13 +22,13 @@ public class IngredientRepositoryImpl implements IngredientRepository {
 
     public Ingredient save(Ingredient ingredient) {
         return this.jpaIngredientRepository.save(JpaIngredientEntity.fromDomain(ingredient))
-                .toDomain();
+                .toDomainWithoutCategories();
     }
 
     @Override
     public Optional<Ingredient> findById(IngredientId id) {
         return jpaIngredientRepository.findById(id.id())
-                .map(JpaIngredientEntity::toDomain);
+                .map(JpaIngredientEntity::toDomainWithoutCategories);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class IngredientRepositoryImpl implements IngredientRepository {
         List<UUID> uuids = ids.stream().map(IngredientId::id).toList();
         return jpaIngredientRepository.findAllById(uuids)
                 .stream()
-                .map(JpaIngredientEntity::toDomain)
+                .map(JpaIngredientEntity::toDomainWithoutCategories)
                 .toList();
     }
 
@@ -50,7 +50,7 @@ public class IngredientRepositoryImpl implements IngredientRepository {
         return this.jpaIngredientRepository
                 .searchByNamePrioritizingStartsWith(searchName, selectedUuids, pageable)
                 .stream()
-                .map(JpaIngredientEntity::toDomain)
+                .map(JpaIngredientEntity::toDomainWithoutCategories)
                 .toList();
     }
 }

@@ -1,6 +1,7 @@
 package cookbook.stage.backend.api.ingredientController;
 
 import cookbook.stage.backend.api.input.IngredientSearchRequest;
+import cookbook.stage.backend.domain.ingredient.Category;
 import cookbook.stage.backend.domain.ingredient.Ingredient;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.ingredient.IngredientRepository;
@@ -187,9 +188,9 @@ class SearchIngredientsTests {
     @Test
     void searchIngredients_shouldExcludeSpecifiedIds_whenExcludedIdsProvided() throws Exception {
         // Arrange
-        Ingredient flour = new Ingredient(IngredientId.create(), "Flour", Unit.GRAM);
-        Ingredient sugar = new Ingredient(IngredientId.create(), "Sugar", Unit.GRAM);
-        Ingredient salt = new Ingredient(IngredientId.create(), "Salt", Unit.GRAM);
+        Ingredient flour = new Ingredient(IngredientId.create(), "Flour", Unit.GRAM, List.of(Category.GRAIN));
+        Ingredient sugar = new Ingredient(IngredientId.create(), "Sugar", Unit.GRAM, List.of(Category.SWEETENER));
+        Ingredient salt = new Ingredient(IngredientId.create(), "Salt", Unit.GRAM, List.of(Category.ADDITIVE));
 
         ingredientRepository.save(flour);
         ingredientRepository.save(sugar);
@@ -212,9 +213,9 @@ class SearchIngredientsTests {
     @Test
     void searchIngredients_shouldExcludeSpecifiedIdsAndUseQuery_whenBothProvided() throws Exception {
         // Arrange
-        Ingredient flour = new Ingredient(new IngredientId(UUID.randomUUID()), "Flour", Unit.GRAM);
-        Ingredient sugar = new Ingredient(new IngredientId(UUID.randomUUID()), "Sugar", Unit.GRAM);
-        Ingredient salt = new Ingredient(new IngredientId(UUID.randomUUID()), "Salt", Unit.GRAM);
+        Ingredient flour = new Ingredient(IngredientId.create(), "Flour", Unit.GRAM, List.of(Category.GRAIN));
+        Ingredient sugar = new Ingredient(IngredientId.create(), "Sugar", Unit.GRAM, List.of(Category.SWEETENER));
+        Ingredient salt = new Ingredient(IngredientId.create(), "Salt", Unit.GRAM, List.of(Category.ADDITIVE));
 
         ingredientRepository.save(flour);
         ingredientRepository.save(sugar);
@@ -265,7 +266,8 @@ class SearchIngredientsTests {
     }
 
     private void seedIngredient(String name) {
-        Ingredient ingredient = new Ingredient(new IngredientId(UUID.randomUUID()), name, Unit.GRAM);
+        Ingredient ingredient = new Ingredient(
+                new IngredientId(UUID.randomUUID()), name, Unit.GRAM, List.of(Category.DAIRY));
         ingredientRepository.save(ingredient);
     }
 }

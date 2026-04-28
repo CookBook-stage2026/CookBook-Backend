@@ -2,6 +2,7 @@ package cookbook.stage.backend.api;
 
 import cookbook.stage.backend.api.input.CreateRecipeDto;
 import cookbook.stage.backend.api.input.CreateRecipeIngredientDto;
+import cookbook.stage.backend.api.input.RecipeSearchRequest;
 import cookbook.stage.backend.api.result.RecipeDto;
 import cookbook.stage.backend.api.result.RecipeSummaryDto;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
@@ -22,7 +23,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,6 +43,7 @@ public class RecipeController {
     /**
      * Adds a new recipe to the database
      *
+     * @param jwt The JWT token of the authenticated user
      * @param createRecipeDto The new recipe, without an id
      * @return The created recipe with its generated id
      */
@@ -75,6 +76,7 @@ public class RecipeController {
     /**
      * Gets a recipe by id
      *
+     * @param jwt The JWT token of the authenticated user
      * @param id The id of the requested recipe
      * @return Recipe
      */
@@ -89,28 +91,26 @@ public class RecipeController {
     }
 
     /**
-     * Gets all recipes with pagination and optional filtering
+     * Searches recipes with pagination and optional filtering
      *
-     * @param ingredientIds Optional list of ingredient IDs to filter recipes by
-     * @param page          current page (default 0)
-     * @param size          size of page (default 20)
-     * @return List of recipes
+     * @param jwt The JWT token of the authenticated user
+     * @param request Search criteria containing optional ingredient filter, preference filtering (default true),
+     *                page (default 0) and size (default 20)
+     * @return Page of recipe summaries
      */
-    @GetMapping
-    public Page<RecipeSummaryDto> getAllRecipes(
+    @PostMapping("/search")
+    public Page<RecipeSummaryDto> searchRecipes(
             @AuthenticationPrincipal Jwt jwt,
-            @RequestParam(required = false) List<UUID> ingredientIds,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @Valid @RequestBody RecipeSearchRequest request
     ) {
-        List<IngredientId> ingredients = (ingredientIds == null) ? List.of()
-                : ingredientIds.stream()
+        List<IngredientId> ingredients = request.ingredientIds().stream()
                   .map(IngredientId::new)
                   .toList();
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(request.page(), request.size());
+        UserId userId = new UserId(UUID.fromString(jwt.getSubject()));
 
-        return recipeService.findAllSummariesWithFilter(ingredients, pageable, UserId.fromJwt(jwt))
+        return recipeService.findAllSummariesWithFilter(ingredients, pageable, request.shouldApplyPreferences(), userId)
                 .map(RecipeSummaryDto::fromDomain);
     }
 }

@@ -1,5 +1,6 @@
 package cookbook.stage.backend.repository.jpa.recipe;
 
+import cookbook.stage.backend.domain.ingredient.Category;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,19 +22,26 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
     @EntityGraph(attributePaths = {"steps", "ingredients", "ingredients.ingredient"})
     Optional<JpaRecipeEntity> findByIdAndUserId(UUID id, UUID userId);
 
-    Page<JpaRecipeEntity> findByUserId(UUID userId, Pageable pageable);
-
     @Query("""
                 SELECT r FROM JpaRecipeEntity r
                 JOIN r.ingredients i
-                WHERE i.id.ingredientId IN :ingredientIds
+                WHERE (:#{#ingredientIds.size()} = 0 OR i.id.ingredientId IN :ingredientIds)
+                    AND (:#{#excludedIngredientIds.size()} = 0 OR i.id.ingredientId NOT IN :excludedIngredientIds)
+                    AND (
+                        :#{#excludedCategories.size()} = 0
+                        OR NOT EXISTS (
+                            SELECT c FROM i.ingredient.categories c
+                            WHERE c IN :excludedCategories
+                        )
+                    )
                     AND r.userId = :userId
                 GROUP BY r.id
-                HAVING COUNT(DISTINCT i.id.ingredientId) >= :idCount
+                HAVING :#{#ingredientIds.size()} = 0 OR COUNT(DISTINCT i.id.ingredientId) >= :#{#ingredientIds.size()}
             """)
-    Page<JpaRecipeEntity> findByIngredientsAndCreatorId(
+    Page<JpaRecipeEntity> findAllSummariesWithFilterByCreatorId(
             @Param("ingredientIds") List<UUID> ingredientIds,
-            @Param("idCount") int idCount,
+            @Param("excludedIngredientIds") List<UUID> excludedIngredientIds,
+            @Param("excludedCategories") List<Category> excludedCategories,
             @Param("userId") UUID userId,
             Pageable pageable
     );

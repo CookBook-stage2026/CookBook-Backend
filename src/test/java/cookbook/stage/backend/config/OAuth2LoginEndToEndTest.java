@@ -2,6 +2,7 @@ package cookbook.stage.backend.config;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import cookbook.stage.backend.api.input.RecipeSearchRequest;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.repository.CookieAuthorizationRequestRepository;
 import cookbook.stage.backend.service.UserService;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
@@ -28,14 +30,17 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
@@ -52,12 +57,17 @@ class OAuth2LoginEndToEndTest {
     private static final String MOCK_USER_SUB = "123456789";
     private static final String MOCK_USER_EMAIL = "testuser@gmail.com";
     private static final String MOCK_USER_NAME = "Test User";
+    private static final int DEFAULT_PAGE = 0;
+    private static final int DEFAULT_PAGE_SIZE = 10;
 
     private static WireMockServer wireMockServer;
     private static String mockProviderBaseUrl;
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private JsonMapper mapper;
 
     @Autowired
     private UserService userApi;
@@ -156,7 +166,11 @@ class OAuth2LoginEndToEndTest {
         Cookie accessTokenCookie = callbackResult.getResponse().getCookie("access_token");
         assertThat(accessTokenCookie).isNotNull();
 
-        var requestBuilder = get("/api/recipes").cookie(accessTokenCookie);
+        var requestBuilder = post("/api/recipes/search")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(
+                        new RecipeSearchRequest(List.of(), true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE)))
+                .cookie(accessTokenCookie);
 
         mockMvc.perform(requestBuilder)
                 .andExpect(status().isOk());

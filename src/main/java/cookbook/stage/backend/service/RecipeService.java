@@ -11,6 +11,7 @@ import cookbook.stage.backend.domain.recipe.RecipeRepository;
 import cookbook.stage.backend.domain.recipe.RecipeSummary;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
+import cookbook.stage.backend.domain.user.UserPreferences;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,12 +26,14 @@ public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final IngredientService ingredientService;
     private final UserService userService;
+    private final UserPreferenceService userPreferenceService;
 
     public RecipeService(RecipeRepository recipeRepository, IngredientService ingredientService,
-                         UserService userService) {
+                         UserService userService, UserPreferenceService userPreferenceService) {
         this.recipeRepository = recipeRepository;
         this.ingredientService = ingredientService;
         this.userService = userService;
+        this.userPreferenceService = userPreferenceService;
     }
 
     @Transactional
@@ -68,8 +71,16 @@ public class RecipeService {
                 .orElseThrow(id::notFound);
     }
 
-    public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds,
-                                                          Pageable pageable, UserId userId) {
-        return recipeRepository.findAllSummariesWithFilter(ingredientIds, pageable, userId);
+    public Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, Pageable pageable,
+                                                          boolean shouldApplyPreferences, UserId userId) {
+        userService.findById(userId)
+                .orElseThrow(userId::notFound);
+
+        if (shouldApplyPreferences) {
+            UserPreferences preferences = userPreferenceService.findPreferences(userId);
+            return recipeRepository.findAllSummariesWithFilter(ingredientIds, preferences, userId, pageable);
+        }
+
+        return recipeRepository.findAllSummariesWithFilter(ingredientIds, UserPreferences.empty(), userId, pageable);
     }
 }
