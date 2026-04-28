@@ -4,6 +4,8 @@ import cookbook.stage.backend.domain.ingredient.Category;
 import cookbook.stage.backend.domain.user.User;
 import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.repository.jpa.ingredient.JpaIngredientEntity;
+import cookbook.stage.backend.repository.jpa.recipe.JpaRecipeEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -12,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -41,6 +44,9 @@ public class JpaUserEntity {
             uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "provider_id"})
     )
     private List<JpaSocialConnectionEntity> socialConnections = new ArrayList<>();
+
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<JpaRecipeEntity> recipes = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(
@@ -105,5 +111,9 @@ public class JpaUserEntity {
     public void setExcludedIngredients(Set<JpaIngredientEntity> excludedIngredients) {
         this.excludedIngredients.clear();
         this.excludedIngredients.addAll(excludedIngredients);
+    }
+
+    public UUID getId() {
+        return id;
     }
 }

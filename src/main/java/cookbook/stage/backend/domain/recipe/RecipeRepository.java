@@ -1,8 +1,8 @@
 package cookbook.stage.backend.domain.recipe;
 
-import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.domain.ingredient.IngredientId;
 import cookbook.stage.backend.domain.user.UserPreferences;
+import cookbook.stage.backend.domain.user.UserId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,6 +16,8 @@ public interface RecipeRepository {
 
     Page<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, UserPreferences preferences,
                                                    UserId userId, Pageable pageable);
+
+    List<RecipeSummary> querySummaries(Pageable pageable, UserId userId, String query);
 
     long count();
 }

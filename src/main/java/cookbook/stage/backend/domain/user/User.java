@@ -3,13 +3,14 @@ package cookbook.stage.backend.domain.user;
 import java.util.List;
 
 public class User {
+
     private final UserId id;
     private String email;
     private String displayName;
     private List<SocialConnection> socialConnections;
 
     public User(String email, String displayName, List<SocialConnection> socialConnections) {
-        id = UserId.create();
+        this.id = UserId.create();
         this.email = email;
         this.displayName = displayName;
         this.socialConnections = socialConnections;

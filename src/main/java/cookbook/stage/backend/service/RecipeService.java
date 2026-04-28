@@ -61,8 +61,7 @@ public class RecipeService {
         return recipeRepository.save(new Recipe(
                 RecipeId.create(),
                 recipeDetails,
-                recipeIngredients,
-                user.getId()
+                recipeIngredients, user.getId()
         ));
     }
 
@@ -82,5 +81,9 @@ public class RecipeService {
         }
 
         return recipeRepository.findAllSummariesWithFilter(ingredientIds, UserPreferences.empty(), userId, pageable);
+    }
+
+    public List<RecipeSummary> searchSummariesByName(Pageable pageable, UserId userId, String query) {
+        return recipeRepository.querySummaries(pageable, userId, query);
     }
 }

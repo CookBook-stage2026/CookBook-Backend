@@ -166,7 +166,7 @@ class OAuth2LoginEndToEndTest {
         Cookie accessTokenCookie = callbackResult.getResponse().getCookie("access_token");
         assertThat(accessTokenCookie).isNotNull();
 
-        var requestBuilder = post("/api/recipes/search")
+        var requestBuilder = post("/api/recipes/filter")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(
                         new RecipeSearchRequest(List.of(), true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE)))
