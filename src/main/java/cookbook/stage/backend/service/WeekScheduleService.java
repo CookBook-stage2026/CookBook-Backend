@@ -27,4 +27,8 @@ public class WeekScheduleService {
         WeekSchedule weekSchedule = new WeekSchedule(WeekScheduleId.create(), user, daySchedules);
         return repo.save(weekSchedule);
     }
+
+    public WeekSchedule findByUserId(UserId userId) {
+        return repo.findForUser(userId);
+    }
 }

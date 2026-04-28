@@ -11,6 +11,7 @@ import cookbook.stage.backend.service.WeekScheduleService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,5 +53,16 @@ public class WeekScheduleController {
         var newSchedule = service.saveWeekSchedule(daySchedules, userId);
 
         return WeekScheduleDto.fromDomain(newSchedule);
+    }
+
+    /**
+     * Gets the week schedule for the logged-in user
+     * @return the week schedule for the logged-in user
+     */
+    @GetMapping
+    public WeekScheduleDto findForUser(
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return WeekScheduleDto.fromDomain(service.findByUserId(new UserId(UUID.fromString(jwt.getSubject()))));
     }
 }

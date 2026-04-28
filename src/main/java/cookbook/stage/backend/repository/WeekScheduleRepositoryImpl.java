@@ -1,5 +1,7 @@
 package cookbook.stage.backend.repository;
 
+import cookbook.stage.backend.domain.exception.NotFoundException;
+import cookbook.stage.backend.domain.user.UserId;
 import cookbook.stage.backend.domain.weekschedule.WeekSchedule;
 import cookbook.stage.backend.domain.weekschedule.WeekScheduleRepository;
 import cookbook.stage.backend.repository.jpa.schedule.JpaWeekScheduleEntity;
@@ -20,5 +22,14 @@ public class WeekScheduleRepositoryImpl implements WeekScheduleRepository {
     public WeekSchedule save(WeekSchedule schedule) {
         JpaWeekScheduleEntity entity = JpaWeekScheduleEntity.fromDomain(schedule);
         return weekScheduleRepository.save(entity).toDomain();
+    }
+
+    @Override
+    public WeekSchedule findForUser(UserId userId) {
+        var result = weekScheduleRepository.findWeekScheduleByUserId(userId.id());
+        if (result.isPresent()) {
+            return result.get().toDomain();
+        }
+        throw new NotFoundException("No week schedule found for user " + userId.id());
     }
 }
