@@ -99,8 +99,8 @@ public class RecipeController {
      *                page (default 0) and size (default 20)
      * @return Page of recipe summaries
      */
-    @PostMapping("/search")
-    public Page<RecipeSummaryDto> searchRecipes(
+    @PostMapping("/filter")
+    public Page<RecipeSummaryDto> filterRecipes(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody RecipeSearchRequest request
     ) {
