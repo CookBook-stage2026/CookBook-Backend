@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SpringBootTest
-class FindScheduleForUserTests {
+class FindForUserTests {
 
     @Autowired
     private MockMvc mockMvc;
@@ -72,6 +72,8 @@ class FindScheduleForUserTests {
     private static final int DEFAULT_DURATION_IN_MINUTES = 30;
     private static final String DEFAULT_RECIPE_DESCRIPTION = "test recipe";
     private static final int DEFAULT_QUANTITY = 5;
+    private static final int DAYS_IN_WEEK = 7;
+    private static final int DAYS_WITH_RECIPE = 3;
 
     @BeforeEach
     void clearDatabase() {
@@ -92,7 +94,7 @@ class FindScheduleForUserTests {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.days", hasSize(7)))
+                .andExpect(jsonPath("$.days", hasSize(DAYS_IN_WEEK)))
                 .andExpect(jsonPath("$.days[?(@.day=='MONDAY')].recipeSummary.name").value("Monday Recipe"))
                 .andExpect(jsonPath("$.days[?(@.day=='TUESDAY')].recipeSummary.name").value("Tuesday Recipe"))
                 .andExpect(jsonPath("$.days[?(@.day=='WEDNESDAY')].recipeSummary.name").value("Wednesday Recipe"))
@@ -119,7 +121,7 @@ class FindScheduleForUserTests {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.days", hasSize(3)))
+                .andExpect(jsonPath("$.days", hasSize(DAYS_WITH_RECIPE)))
                 .andExpect(jsonPath("$.days[?(@.day=='MONDAY')].recipeSummary.name").value("Monday Recipe"))
                 .andExpect(jsonPath("$.days[?(@.day=='WEDNESDAY')].recipeSummary.name").value("Monday Recipe"))
                 .andExpect(jsonPath("$.days[?(@.day=='FRIDAY')].recipeSummary.name").value("Monday Recipe"));
