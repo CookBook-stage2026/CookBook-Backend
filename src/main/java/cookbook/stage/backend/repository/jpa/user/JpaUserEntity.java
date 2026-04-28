@@ -45,7 +45,7 @@ public class JpaUserEntity {
     )
     private List<JpaSocialConnectionEntity> socialConnections = new ArrayList<>();
 
-    @OneToMany(mappedBy = "creatorId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JpaRecipeEntity> recipes = new ArrayList<>();
 
     @ElementCollection
