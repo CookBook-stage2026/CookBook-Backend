@@ -137,26 +137,4 @@ public class RecipeController {
                 new UserId(UUID.fromString(jwt.getSubject())),
                 query).stream().map(RecipeSummaryDto::fromDomain).toList();
     }
-
-    /**
-     * Searches recipes by name
-     *
-     * @param page  current page (default 0)
-     * @param size  current page size (default 10)
-     * @param query letters that have to be in the recipe name
-     * @return list of summaries of recipes that contain the query
-     */
-    @GetMapping("/search")
-    public List<RecipeSummaryDto> searchRecipeSummaries(
-            @AuthenticationPrincipal Jwt jwt,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam String query
-    ) {
-        Pageable pageable = PageRequest.of(page, size);
-
-        return recipeService.searchSummariesByName(pageable,
-                new UserId(UUID.fromString(jwt.getSubject())),
-                query).stream().map(RecipeSummaryDto::fromDomain).toList();
-    }
 }
