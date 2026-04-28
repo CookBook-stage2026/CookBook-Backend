@@ -1,6 +1,6 @@
 package cookbook.stage.backend.strategy;
 
-import cookbook.stage.backend.domain.auth.OAuth2UserInfo;
+import be.xplore.cookbook.core.domain.auth.OAuth2UserInfo;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;

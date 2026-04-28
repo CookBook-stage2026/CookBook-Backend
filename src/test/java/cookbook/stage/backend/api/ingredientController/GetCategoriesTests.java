@@ -1,6 +1,6 @@
 package cookbook.stage.backend.api.ingredientController;
 
-import cookbook.stage.backend.domain.ingredient.Category;
+import be.xplore.cookbook.core.domain.ingredient.Category;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

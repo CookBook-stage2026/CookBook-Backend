@@ -1,11 +1,11 @@
 package cookbook.stage.backend.api.ingredientController;
 
-import cookbook.stage.backend.api.input.IngredientSearchRequest;
-import cookbook.stage.backend.domain.ingredient.Category;
-import cookbook.stage.backend.domain.ingredient.Ingredient;
-import cookbook.stage.backend.domain.ingredient.IngredientId;
-import cookbook.stage.backend.domain.ingredient.IngredientRepository;
-import cookbook.stage.backend.domain.ingredient.Unit;
+import be.xplore.cookbook.dto.request.IngredientSearchRequest;
+import be.xplore.cookbook.core.domain.ingredient.Category;
+import be.xplore.cookbook.core.domain.ingredient.Ingredient;
+import be.xplore.cookbook.core.domain.ingredient.IngredientId;
+import be.xplore.cookbook.core.domain.ingredient.IngredientRepository;
+import be.xplore.cookbook.core.domain.ingredient.Unit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

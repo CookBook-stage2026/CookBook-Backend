@@ -1,10 +1,10 @@
 package cookbook.stage.backend.util.oAuth2AuthenticationSuccessHandler;
 
-import cookbook.stage.backend.domain.exception.OAuth2Exception;
+import be.xplore.cookbook.core.domain.exception.OAuth2Exception;
 import cookbook.stage.backend.repository.CookieAuthorizationRequestRepository;
-import cookbook.stage.backend.service.AuthService;
-import cookbook.stage.backend.service.JwtService;
-import cookbook.stage.backend.service.UserService;
+import be.xplore.cookbook.core.service.AuthService;
+import be.xplore.cookbook.core.service.JwtService;
+import be.xplore.cookbook.core.service.UserService;
 import cookbook.stage.backend.util.CookieUtils;
 import cookbook.stage.backend.util.OAuth2AuthenticationSuccessHandler;
 import org.junit.jupiter.api.Test;

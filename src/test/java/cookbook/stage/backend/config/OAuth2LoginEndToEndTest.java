@@ -2,10 +2,10 @@ package cookbook.stage.backend.config;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import cookbook.stage.backend.api.input.RecipeSearchRequest;
-import cookbook.stage.backend.domain.user.User;
+import be.xplore.cookbook.dto.request.RecipeSearchRequest;
+import be.xplore.cookbook.core.domain.user.User;
 import cookbook.stage.backend.repository.CookieAuthorizationRequestRepository;
-import cookbook.stage.backend.service.UserService;
+import be.xplore.cookbook.core.service.UserService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;

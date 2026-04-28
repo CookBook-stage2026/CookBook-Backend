@@ -1,15 +1,15 @@
 package cookbook.stage.backend.api.userController;
 
-import cookbook.stage.backend.domain.ingredient.Category;
-import cookbook.stage.backend.domain.ingredient.Ingredient;
-import cookbook.stage.backend.domain.ingredient.IngredientId;
-import cookbook.stage.backend.domain.ingredient.IngredientRepository;
-import cookbook.stage.backend.domain.ingredient.Unit;
-import cookbook.stage.backend.domain.user.User;
-import cookbook.stage.backend.domain.user.UserId;
-import cookbook.stage.backend.domain.user.UserPreferenceRepository;
-import cookbook.stage.backend.domain.user.UserPreferences;
-import cookbook.stage.backend.domain.user.UserRepository;
+import be.xplore.cookbook.core.domain.ingredient.Category;
+import be.xplore.cookbook.core.domain.ingredient.Ingredient;
+import be.xplore.cookbook.core.domain.ingredient.IngredientId;
+import be.xplore.cookbook.core.domain.ingredient.IngredientRepository;
+import be.xplore.cookbook.core.domain.ingredient.Unit;
+import be.xplore.cookbook.core.domain.user.User;
+import be.xplore.cookbook.core.domain.user.UserId;
+import be.xplore.cookbook.core.domain.user.UserPreferenceRepository;
+import be.xplore.cookbook.core.domain.user.UserPreferences;
+import be.xplore.cookbook.core.domain.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

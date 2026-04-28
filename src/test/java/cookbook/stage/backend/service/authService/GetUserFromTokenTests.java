@@ -1,7 +1,7 @@
 package cookbook.stage.backend.service.authService;
 
-import cookbook.stage.backend.domain.exception.OAuth2Exception;
-import cookbook.stage.backend.service.AuthService;
+import be.xplore.cookbook.core.domain.exception.OAuth2Exception;
+import be.xplore.cookbook.core.service.AuthService;
 import cookbook.stage.backend.strategy.OAuth2UserExtractorRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;

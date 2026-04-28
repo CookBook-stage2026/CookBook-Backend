@@ -1,6 +1,6 @@
 package cookbook.stage.backend.service.jwtService;
 
-import cookbook.stage.backend.service.JwtService;
+import be.xplore.cookbook.core.service.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;

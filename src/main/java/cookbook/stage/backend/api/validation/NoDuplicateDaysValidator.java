@@ -1,6 +1,6 @@
 package cookbook.stage.backend.api.validation;
 
-import cookbook.stage.backend.api.input.CreateWeekScheduleDto;
+import be.xplore.cookbook.dto.request.CreateWeekScheduleDto;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

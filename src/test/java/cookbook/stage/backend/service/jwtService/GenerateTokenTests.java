@@ -1,8 +1,8 @@
 package cookbook.stage.backend.service.jwtService;
 
-import cookbook.stage.backend.domain.user.User;
-import cookbook.stage.backend.domain.user.UserId;
-import cookbook.stage.backend.service.JwtService;
+import be.xplore.cookbook.core.domain.user.User;
+import be.xplore.cookbook.core.domain.user.UserId;
+import be.xplore.cookbook.core.service.JwtService;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
 package cookbook.stage.backend.strategy;
 
-import cookbook.stage.backend.domain.exception.OAuth2Exception;
+import be.xplore.cookbook.core.domain.exception.OAuth2Exception;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
