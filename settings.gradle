@@ -1,1 +1,6 @@
 rootProject.name = 'backend'
+
+include 'adapters'
+include 'adapters:incoming'
+include 'adapters:incoming:rest'
+include 'application'
