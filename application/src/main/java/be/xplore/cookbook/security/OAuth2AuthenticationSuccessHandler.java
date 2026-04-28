@@ -2,11 +2,7 @@ package be.xplore.cookbook.security;
 
 import be.xplore.cookbook.core.domain.exception.OAuth2Exception;
 import be.xplore.cookbook.core.domain.user.User;
-import cookbook.stage.backend.repository.CookieAuthorizationRequestRepository;
-import be.xplore.cookbook.core.service.AuthService;
-import be.xplore.cookbook.core.service.JwtService;
 import be.xplore.cookbook.core.service.UserService;
-import cookbook.stage.backend.util.CookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
@@ -56,7 +52,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
             throw new OAuth2Exception("OAuth2 authentication failed");
         }
 
-        OAuth2UserInfo userInfo = authService.getUserFromToken(token);
+        be.xplore.cookbook.core.domain.auth.OAuth2UserInfo userInfo = authService.getUserFromToken(token);
 
         User user = userService.findBySocialConnection(userInfo.provider(), userInfo.providerId())
                 .orElseGet(() -> userService.autoSaveAfterLogin(

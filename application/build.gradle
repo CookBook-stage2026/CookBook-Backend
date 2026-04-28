@@ -1,9 +1,24 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version '4.0.5'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'checkstyle'
+    id 'jacoco'
+    id 'org.sonarqube' version '7.2.3.7755'
 }
 
 group = 'be.xplore.cookbook'
 version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.14"
+}
 
 repositories {
     mavenCentral()
@@ -21,15 +36,39 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.13.0'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.13.0'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.13.0'
-    implementation project(":core")
 
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.boot:spring-boot-webmvc-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.wiremock:wiremock-standalone:3.13.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation project(":core")
+    implementation project(":adapters:outgoing:jpa")
+    implementation project(":adapters:incoming:rest")
 }
 
-test {
+tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+tasks.named('jacocoTestReport') {
+    dependsOn test
+    reports {
+        html.required = false
+        xml.required = true
+        csv.required = false
+    }
+}
+
+checkstyle {
+    toolVersion = '13.4.0'
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "CookBook-stage2026_CookBook-Backend")
+        property("sonar.organization", "cookbook-stage2026")
+    }
 }

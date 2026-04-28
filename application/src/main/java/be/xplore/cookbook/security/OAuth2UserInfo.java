@@ -1,9 +1,0 @@
-package be.xplore.cookbook.security;
-
-public record OAuth2UserInfo(
-        String provider,
-        String providerId,
-        String email,
-        String name
-) {
-}

@@ -1,7 +1,7 @@
 package be.xplore.cookbook.config;
 
-import cookbook.stage.backend.repository.CookieAuthorizationRequestRepository;
-import cookbook.stage.backend.util.OAuth2AuthenticationSuccessHandler;
+import be.xplore.cookbook.security.CookieAuthorizationRequestRepository;
+import be.xplore.cookbook.security.OAuth2AuthenticationSuccessHandler;
 import io.jsonwebtoken.io.Decoders;
 import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Value;
