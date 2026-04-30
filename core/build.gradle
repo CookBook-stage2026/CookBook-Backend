@@ -1,0 +1,13 @@
+plugins {
+    id 'java-library'
+}
+
+group 'be.xplore.cookbook'
+
+jar {
+    enabled = true
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'
+}
