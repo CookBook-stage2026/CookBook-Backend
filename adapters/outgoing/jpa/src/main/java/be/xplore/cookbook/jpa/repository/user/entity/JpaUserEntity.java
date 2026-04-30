@@ -2,8 +2,6 @@ package be.xplore.cookbook.jpa.repository.user.entity;
 
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
-import be.xplore.cookbook.jpa.repository.recipe.entity.JpaRecipeEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -11,7 +9,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -39,9 +36,6 @@ public class JpaUserEntity {
             uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "provider_id"})
     )
     private List<JpaSocialConnectionEntity> socialConnections = new ArrayList<>();
-
-    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<JpaRecipeEntity> recipes = new ArrayList<>();
 
     protected JpaUserEntity() {
     }

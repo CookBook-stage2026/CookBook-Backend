@@ -101,6 +101,12 @@ public abstract class BaseIntegrationTest {
         return user;
     }
 
+    protected User createUserWithId(UserId userId) {
+        User user = userRepository.save(new User(userId, USER_NAME, USER_EMAIL, List.of()));
+        userPreferenceRepository.save(UserPreferences.empty(user));
+        return user;
+    }
+
     protected Recipe createAndSaveRecipe(User user) {
         Ingredient ingredient = createAndSaveIngredient("Ingredient");
         return createAndSaveRecipe(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
@@ -132,7 +138,7 @@ public abstract class BaseIntegrationTest {
                 RecipeId.create(),
                 new RecipeDetails(name, description, durationInMinutes, servings, steps),
                 recipeIngredients,
-                user.id()
+                user
         );
         return recipeRepository.save(recipe);
     }
@@ -149,6 +155,13 @@ public abstract class BaseIntegrationTest {
     protected SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor validJwt() {
         return jwt().jwt(builder -> builder
                 .subject(USER_ID.id().toString())
+                .claim("email", USER_EMAIL)
+                .claim("name", USER_NAME));
+    }
+
+    protected SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor validJwtFromUserId(UserId userId) {
+        return jwt().jwt(builder -> builder
+                .subject(userId.id().toString())
                 .claim("email", USER_EMAIL)
                 .claim("name", USER_NAME));
     }

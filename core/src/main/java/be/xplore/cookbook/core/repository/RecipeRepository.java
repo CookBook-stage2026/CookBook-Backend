@@ -6,6 +6,7 @@ import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
+import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 
@@ -18,9 +19,9 @@ public interface RecipeRepository {
     Optional<Recipe> findById(RecipeId id, UserId userId);
 
     PagedResult<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, UserPreferences preferences,
-                                                          UserId userId, Paging pageable);
+                                                          User user, Paging pageable);
 
-    List<RecipeSummary> querySummaries(Paging pageable, UserId userId, String query);
+    List<RecipeSummary> querySummaries(Paging pageable, User user, String query);
 
     long count();
 }

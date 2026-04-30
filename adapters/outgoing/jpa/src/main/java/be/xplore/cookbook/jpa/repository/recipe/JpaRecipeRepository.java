@@ -2,6 +2,7 @@ package be.xplore.cookbook.jpa.repository.recipe;
 
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.jpa.repository.recipe.entity.JpaRecipeEntity;
+import be.xplore.cookbook.jpa.repository.user.entity.JpaUserEntity;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +36,7 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
                             WHERE c IN :excludedCategories
                         )
                     )
-                    AND r.userId = :userId
+                    AND r.user = :user
                 GROUP BY r.id
                 HAVING :#{#ingredientIds.size()} = 0 OR COUNT(DISTINCT i.id.ingredientId) >= :#{#ingredientIds.size()}
             """)
@@ -43,7 +44,7 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
             @Param("ingredientIds") List<UUID> ingredientIds,
             @Param("excludedIngredientIds") List<UUID> excludedIngredientIds,
             @Param("excludedCategories") List<Category> excludedCategories,
-            @Param("userId") UUID userId,
+            @Param("user") JpaUserEntity user,
             Pageable pageable
     );
 
@@ -53,11 +54,11 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
                 LOWER(r.name) LIKE LOWER(CONCAT(:name, '%'))
                 OR LOWER(r.name) LIKE LOWER(CONCAT('%', :name, '%'))
             )
-            AND r.userId = :userId
+            AND r.user = :user
             ORDER BY
                 CASE WHEN LOWER(r.name) LIKE LOWER(CONCAT(:name, '%')) THEN 0 ELSE 1 END,
                 r.name
             """)
     List<JpaRecipeEntity> searchByNamePrioritizingStartsWith(
-            @Param("name") String name, @Param("userId") UUID userId, Pageable pageable);
+            @Param("name") String name, @Param("user") JpaUserEntity user, Pageable pageable);
 }

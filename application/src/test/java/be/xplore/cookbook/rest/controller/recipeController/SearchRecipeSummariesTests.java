@@ -117,6 +117,7 @@ class SearchRecipeSummariesTests extends BaseIntegrationTest {
     void searchRecipeSummaries_shouldReturnEmptyList_whenNoRecipesExist() throws Exception {
         // Arrange
         String query = "pizza";
+        createUser();
 
         // Act & Assert
         performSearch(query, 0, DEFAULT_PAGE_SIZE)

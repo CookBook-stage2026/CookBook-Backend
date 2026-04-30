@@ -7,10 +7,12 @@ import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
+import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.jpa.repository.recipe.entity.JpaRecipeEntity;
+import be.xplore.cookbook.jpa.repository.user.entity.JpaUserEntity;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -45,7 +47,7 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     public PagedResult<RecipeSummary> findAllSummariesWithFilter(
             List<IngredientId> ingredientIds,
             UserPreferences preferences,
-            UserId userId,
+            User user,
             Paging paging
     ) {
         List<UUID> ingredientUuids = ingredientIds.stream()
@@ -63,7 +65,7 @@ public class RecipeRepositoryImpl implements RecipeRepository {
                 ingredientUuids,
                 excludedIngredientUuids,
                 excludedCategories,
-                userId.id(),
+                JpaUserEntity.fromDomain(user),
                 pageable
         );
 
@@ -78,10 +80,10 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public List<RecipeSummary> querySummaries(Paging paging, UserId userId, String query) {
+    public List<RecipeSummary> querySummaries(Paging paging, User user, String query) {
         Pageable pageable = PageRequest.of(paging.page(), paging.size());
 
-        return jpaRecipeRepository.searchByNamePrioritizingStartsWith(query, userId.id(), pageable)
+        return jpaRecipeRepository.searchByNamePrioritizingStartsWith(query, JpaUserEntity.fromDomain(user), pageable)
                 .stream().map(JpaRecipeEntity::toSummary).toList();
     }
 
