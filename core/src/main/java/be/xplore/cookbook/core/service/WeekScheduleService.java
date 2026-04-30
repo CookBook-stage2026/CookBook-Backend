@@ -5,24 +5,22 @@ import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.weekschedule.DaySchedule;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
 import be.xplore.cookbook.core.domain.weekschedule.WeekScheduleId;
+import be.xplore.cookbook.core.repository.UserRepository;
 import be.xplore.cookbook.core.repository.WeekScheduleRepository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Transactional(readOnly = true)
 public class WeekScheduleService {
     private final WeekScheduleRepository repo;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
-    public WeekScheduleService(WeekScheduleRepository repo, UserService userService) {
+    public WeekScheduleService(WeekScheduleRepository repo, UserRepository userRepository) {
         this.repo = repo;
-        this.userService = userService;
+        this.userRepository = userRepository;
     }
 
-    @Transactional
     public WeekSchedule saveWeekSchedule(List<DaySchedule> daySchedules, UserId userId) {
-        var user = userService.findById(userId)
+        var user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
         WeekSchedule weekSchedule = new WeekSchedule(WeekScheduleId.create(), user, daySchedules);

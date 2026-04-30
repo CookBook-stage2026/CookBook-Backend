@@ -14,5 +14,5 @@ public interface IngredientRepository {
 
     List<Ingredient> findByIds(List<IngredientId> ids);
 
-    List<Ingredient> searchByName(String name, List<IngredientId> selectedIds, Paging pageable);
+    List<Ingredient> searchByNameExcludingIds(String name, List<IngredientId> selectedIds, Paging pageable);
 }

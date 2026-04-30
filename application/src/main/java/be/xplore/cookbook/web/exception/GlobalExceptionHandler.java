@@ -2,7 +2,7 @@ package be.xplore.cookbook.web.exception;
 
 import be.xplore.cookbook.core.domain.exception.DataIntegrityException;
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
-import be.xplore.cookbook.core.domain.exception.OAuth2Exception;
+import be.xplore.cookbook.security.exception.OAuth2Exception;
 import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

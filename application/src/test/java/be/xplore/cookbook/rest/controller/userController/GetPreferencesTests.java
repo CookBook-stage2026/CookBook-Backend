@@ -31,7 +31,7 @@ class GetPreferencesTests extends BaseIntegrationTest {
         Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG);
 
         getUserPreferenceRepository().save(new UserPreferences(
-                user.getId(),
+                user,
                 List.of(Category.DAIRY),
                 List.of(ingredient)
         ));

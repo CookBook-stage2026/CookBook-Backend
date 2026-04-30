@@ -1,6 +1,6 @@
 package be.xplore.cookbook.jpa.repository.userpreference;
 
-import be.xplore.cookbook.core.domain.user.UserId;
+import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
 import be.xplore.cookbook.jpa.repository.userpreference.entity.JpaUserPreferencesEntity;
@@ -24,9 +24,9 @@ public class UserPreferenceRepositoryImpl implements UserPreferenceRepository {
     }
 
     @Override
-    public Optional<UserPreferences> findPreferences(UserId userId) {
+    public Optional<UserPreferences> findPreferences(User user) {
         return jpaUserPreferenceRepository
-                .findByUserId(userId.id())
+                .findByUserId(user.id().id())
                 .map(JpaUserPreferencesEntity::toDomain);
     }
 }

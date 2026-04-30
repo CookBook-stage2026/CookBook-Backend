@@ -1,6 +1,6 @@
 package be.xplore.cookbook.security.strategy;
 
-import be.xplore.cookbook.core.domain.exception.OAuth2Exception;
+import be.xplore.cookbook.security.exception.OAuth2Exception;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

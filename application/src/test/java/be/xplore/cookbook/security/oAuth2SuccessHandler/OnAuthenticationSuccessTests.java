@@ -1,6 +1,6 @@
 package be.xplore.cookbook.security.oAuth2SuccessHandler;
 
-import be.xplore.cookbook.core.domain.exception.OAuth2Exception;
+import be.xplore.cookbook.security.exception.OAuth2Exception;
 import be.xplore.cookbook.security.AuthService;
 import be.xplore.cookbook.security.CookieUtils;
 import be.xplore.cookbook.security.JwtService;

@@ -164,11 +164,11 @@ class OAuth2LoginEndToEndTest {
         Optional<User> createdUser = userApi.findBySocialConnection(PROVIDER_ID, MOCK_USER_SUB);
         assertThat(createdUser).isPresent()
                 .hasValueSatisfying(user -> assertThat(user)
-                        .returns(MOCK_USER_EMAIL, User::getEmail)
-                        .returns(MOCK_USER_NAME, User::getDisplayName)
+                        .returns(MOCK_USER_EMAIL, User::email)
+                        .returns(MOCK_USER_NAME, User::displayName)
                 );
 
-        Optional<UserPreferences> preferences = userPreferenceRepository.findPreferences(createdUser.get().getId());
+        Optional<UserPreferences> preferences = userPreferenceRepository.findPreferences(createdUser.get());
         assertThat(preferences).isPresent();
 
         Cookie accessTokenCookie = callbackResult.getResponse().getCookie("access_token");

@@ -4,18 +4,28 @@ import be.xplore.cookbook.core.domain.user.UserId;
 
 import java.util.List;
 
-// Will not convert to record class or add final since other issues include editing the Recipe class.
-public class Recipe {
-    private final RecipeId id;
-    private String name;
-    private String description;
-    private int durationInMinutes;
-    private int servings;
-    private final List<String> steps;
-    private final List<RecipeIngredient> ingredients;
-    private final UserId userId;
-
+public record Recipe(
+        RecipeId id,
+        String name,
+        String description,
+        int durationInMinutes,
+        int servings,
+        List<String> steps,
+        List<RecipeIngredient> ingredients,
+        UserId userId
+) {
     public Recipe(RecipeId id, RecipeDetails details, List<RecipeIngredient> ingredients, UserId userId) {
+        this(id,
+             details.name(),
+             details.description(),
+             details.durationInMinutes(),
+             details.servings(),
+             details.steps(),
+             ingredients,
+             userId);
+    }
+
+    public Recipe {
         if (id == null) {
             throw new IllegalArgumentException("A recipe must have an id");
         }
@@ -28,14 +38,7 @@ public class Recipe {
             throw new IllegalArgumentException("A recipe must have a creator");
         }
 
-        this.id = id;
-        this.name = details.name();
-        this.description = details.description();
-        this.durationInMinutes = details.durationInMinutes();
-        this.servings = details.servings();
-        this.steps = details.steps();
-        this.ingredients = List.copyOf(ingredients);
-        this.userId = userId;
+        ingredients = List.copyOf(ingredients);
     }
 
     public RecipeSummary summarize() {

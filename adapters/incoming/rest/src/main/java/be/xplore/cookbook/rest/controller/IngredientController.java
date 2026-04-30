@@ -45,7 +45,7 @@ public class IngredientController {
 
         Paging pageable = new Paging(request.page(), request.size());
 
-        return ingredientService.searchByName(request.query(), selected, pageable).stream()
+        return ingredientService.searchByNameExcludingIds(request.query(), selected, pageable).stream()
                 .map(IngredientDto::fromDomain)
                 .toList();
     }

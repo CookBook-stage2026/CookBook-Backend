@@ -64,10 +64,10 @@ public class JpaUserEntity {
 
     public static JpaUserEntity fromDomain(User user) {
         return new JpaUserEntity(
-                user.getId().id(),
-                user.getEmail(),
-                user.getDisplayName(),
-                user.getSocialConnections().stream()
+                user.id().id(),
+                user.email(),
+                user.displayName(),
+                user.socialConnections().stream()
                         .map(JpaSocialConnectionEntity::fromDomain)
                         .toList()
         );
