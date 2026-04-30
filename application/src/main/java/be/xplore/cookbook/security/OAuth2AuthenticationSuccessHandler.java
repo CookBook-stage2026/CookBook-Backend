@@ -1,6 +1,7 @@
 package be.xplore.cookbook.security;
 
-import be.xplore.cookbook.core.domain.exception.OAuth2Exception;
+import be.xplore.cookbook.core.domain.auth.OAuth2UserInfo;
+import be.xplore.cookbook.security.exception.OAuth2Exception;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
@@ -42,6 +44,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     }
 
     @Override
+    @Transactional
     public void onAuthenticationSuccess(@NonNull HttpServletRequest request,
                                         @NonNull HttpServletResponse response,
                                         @NonNull Authentication authentication) throws IOException {
@@ -52,7 +55,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
             throw new OAuth2Exception("OAuth2 authentication failed");
         }
 
-        be.xplore.cookbook.core.domain.auth.OAuth2UserInfo userInfo = authService.getUserFromToken(token);
+        OAuth2UserInfo userInfo = authService.getUserFromToken(token);
 
         User user = userService.findBySocialConnection(userInfo.provider(), userInfo.providerId())
                 .orElseGet(() -> userService.autoSaveAfterLogin(

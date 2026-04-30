@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.time.Instant;
 import java.util.Date;
 
 @Service
@@ -27,10 +28,10 @@ public class JwtService {
 
     public String generateToken(User user) {
         return Jwts.builder()
-                .subject(user.getId().id().toString())
-                .claim("email", user.getEmail())
-                .claim("name", user.getDisplayName())
-                .issuedAt(new Date())
+                .subject(user.id().id().toString())
+                .claim("email", user.email())
+                .claim("name", user.displayName())
+                .issuedAt(Date.from(Instant.now()))
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(signingKey())
                 .compact();

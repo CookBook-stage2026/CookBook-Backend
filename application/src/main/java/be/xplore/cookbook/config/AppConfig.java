@@ -12,45 +12,52 @@ import be.xplore.cookbook.core.service.UserService;
 import be.xplore.cookbook.core.service.WeekScheduleService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.Transactional;
 
 @Configuration
 public class AppConfig {
 
     @Bean
+    @Transactional(readOnly = true)
     public IngredientService ingredientService(IngredientRepository ingredientRepository) {
         return new IngredientService(ingredientRepository);
     }
 
     @Bean
+    @Transactional(readOnly = true)
     public RecipeService recipeService(
             RecipeRepository recipeRepository,
-            IngredientService ingredientService,
-            UserService userService,
-            UserPreferenceService userPreferenceService
+            IngredientRepository ingredientRepository,
+            UserRepository userRepository,
+            UserPreferenceRepository userPreferenceRepository
     ) {
-        return new RecipeService(recipeRepository, ingredientService, userService, userPreferenceService);
+        return new RecipeService(recipeRepository, ingredientRepository, userRepository, userPreferenceRepository);
     }
 
     @Bean
+    @Transactional(readOnly = true)
     public UserService userService(
             UserRepository userRepository,
-            UserPreferenceService userPreferenceService) {
-        return new UserService(userRepository, userPreferenceService);
+            UserPreferenceRepository userPreferenceRepository) {
+        return new UserService(userRepository, userPreferenceRepository);
     }
 
     @Bean
+    @Transactional(readOnly = true)
     public UserPreferenceService userPreferenceService(
             UserPreferenceRepository userPreferenceRepository,
-            IngredientService ingredientService
+            UserRepository userRepository,
+            IngredientRepository ingredientRepository
     ) {
-        return new UserPreferenceService(userPreferenceRepository, ingredientService);
+        return new UserPreferenceService(userPreferenceRepository, userRepository, ingredientRepository);
     }
 
     @Bean
+    @Transactional(readOnly = true)
     public WeekScheduleService weekScheduleService(
             WeekScheduleRepository weekScheduleRepository,
-            UserService userService
+            UserRepository userRepository
     ) {
-        return new WeekScheduleService(weekScheduleRepository, userService);
+        return new WeekScheduleService(weekScheduleRepository, userRepository);
     }
 }

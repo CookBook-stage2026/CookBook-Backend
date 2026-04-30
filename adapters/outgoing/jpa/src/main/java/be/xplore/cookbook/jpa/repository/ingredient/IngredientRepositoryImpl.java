@@ -43,7 +43,7 @@ public class IngredientRepositoryImpl implements IngredientRepository {
     }
 
     @Override
-    public List<Ingredient> searchByName(String name, List<IngredientId> selectedIds, Paging paging) {
+    public List<Ingredient> searchByNameExcludingIds(String name, List<IngredientId> selectedIds, Paging paging) {
         String searchName = name != null ? name : "";
         List<UUID> selectedUuids = selectedIds != null
                 ? selectedIds.stream().map(IngredientId::id).toList()

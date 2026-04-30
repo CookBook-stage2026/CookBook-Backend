@@ -97,7 +97,7 @@ public abstract class BaseIntegrationTest {
 
     protected User createUser() {
         User user = userRepository.save(new User(USER_ID, USER_NAME, USER_EMAIL, List.of()));
-        userPreferenceRepository.save(UserPreferences.empty(user.getId()));
+        userPreferenceRepository.save(UserPreferences.empty(user));
         return user;
     }
 
@@ -132,7 +132,7 @@ public abstract class BaseIntegrationTest {
                 RecipeId.create(),
                 new RecipeDetails(name, description, durationInMinutes, servings, steps),
                 recipeIngredients,
-                user.getId()
+                user.id()
         );
         return recipeRepository.save(recipe);
     }

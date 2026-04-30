@@ -1,7 +1,7 @@
 package be.xplore.cookbook.security;
 
 import be.xplore.cookbook.core.domain.auth.OAuth2UserInfo;
-import be.xplore.cookbook.core.domain.exception.OAuth2Exception;
+import be.xplore.cookbook.security.exception.OAuth2Exception;
 import be.xplore.cookbook.security.strategy.OAuth2UserExtractorRegistry;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Service;

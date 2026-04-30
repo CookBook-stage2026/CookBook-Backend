@@ -1,6 +1,6 @@
 package be.xplore.cookbook.security;
 
-import be.xplore.cookbook.core.domain.exception.OAuth2Exception;
+import be.xplore.cookbook.security.exception.OAuth2Exception;
 import io.jsonwebtoken.io.Decoders;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

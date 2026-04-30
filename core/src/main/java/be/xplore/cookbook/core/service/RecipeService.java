@@ -13,37 +13,37 @@ import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
+import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.RecipeRepository;
-import org.springframework.transaction.annotation.Transactional;
+import be.xplore.cookbook.core.repository.UserPreferenceRepository;
+import be.xplore.cookbook.core.repository.UserRepository;
 
 import java.util.List;
 import java.util.Map;
 
-@Transactional(readOnly = true)
 public class RecipeService {
     private final RecipeRepository recipeRepository;
-    private final IngredientService ingredientService;
-    private final UserService userService;
-    private final UserPreferenceService userPreferenceService;
+    private final IngredientRepository ingredientRepository;
+    private final UserRepository userRepository;
+    private final UserPreferenceRepository userPreferenceRepository;
 
-    public RecipeService(RecipeRepository recipeRepository, IngredientService ingredientService,
-                         UserService userService, UserPreferenceService userPreferenceService) {
+    public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository,
+                         UserRepository userRepository, UserPreferenceRepository userPreferenceRepository) {
         this.recipeRepository = recipeRepository;
-        this.ingredientService = ingredientService;
-        this.userService = userService;
-        this.userPreferenceService = userPreferenceService;
+        this.ingredientRepository = ingredientRepository;
+        this.userRepository = userRepository;
+        this.userPreferenceRepository = userPreferenceRepository;
     }
 
-    @Transactional
     public Recipe createRecipe(RecipeDetails recipeDetails,
                                Map<IngredientId, Double> ingredientQuantities, UserId userId) {
-        User user = userService.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(userId::notFound);
 
         List<IngredientId> ingredientIds = ingredientQuantities.keySet().stream()
                 .toList();
 
-        List<Ingredient> foundIngredients = ingredientService.getIngredientsByIds(ingredientIds);
+        List<Ingredient> foundIngredients = ingredientRepository.findByIds(ingredientIds);
 
         if (foundIngredients.size() != ingredientIds.size()) {
             throw new DataIntegrityException("One or more ingredients do not exist");
@@ -59,7 +59,7 @@ public class RecipeService {
         return recipeRepository.save(new Recipe(
                 RecipeId.create(),
                 recipeDetails,
-                recipeIngredients, user.getId()
+                recipeIngredients, user.id()
         ));
     }
 
@@ -70,16 +70,17 @@ public class RecipeService {
 
     public PagedResult<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, Paging pageable,
                                                                  boolean shouldApplyPreferences, UserId userId) {
-        userService.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(userId::notFound);
 
         if (shouldApplyPreferences) {
-            UserPreferences preferences = userPreferenceService.findPreferences(userId);
+            UserPreferences preferences = userPreferenceRepository.findPreferences(user)
+                    .orElseThrow(userId::notFound);
             return recipeRepository.findAllSummariesWithFilter(ingredientIds, preferences, userId, pageable);
         }
 
         return recipeRepository.findAllSummariesWithFilter(
-                ingredientIds, UserPreferences.empty(userId), userId, pageable);
+                ingredientIds, UserPreferences.empty(user), userId, pageable);
     }
 
     public List<RecipeSummary> searchSummariesByName(Paging pageable, UserId userId, String query) {

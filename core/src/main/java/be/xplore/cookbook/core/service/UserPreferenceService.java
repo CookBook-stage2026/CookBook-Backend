@@ -1,39 +1,44 @@
 package be.xplore.cookbook.core.service;
 
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
+import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
+import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
+import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
-import org.springframework.transaction.annotation.Transactional;
+import be.xplore.cookbook.core.repository.UserRepository;
 
 import java.util.List;
 
-@Transactional(readOnly = true)
 public class UserPreferenceService {
     private final UserPreferenceRepository userPreferenceRepository;
-    private final IngredientService ingredientService;
+    private final UserRepository userRepository;
+    private final IngredientRepository ingredientRepository;
 
     public UserPreferenceService(UserPreferenceRepository userPreferenceRepository,
-                                 IngredientService ingredientService) {
+                                 UserRepository userRepository,
+                                 IngredientRepository ingredientRepository
+    ) {
         this.userPreferenceRepository = userPreferenceRepository;
-        this.ingredientService = ingredientService;
+        this.userRepository = userRepository;
+        this.ingredientRepository = ingredientRepository;
     }
 
     public UserPreferences findPreferences(UserId userId) {
-        return userPreferenceRepository.findPreferences(userId)
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+        return userPreferenceRepository.findPreferences(user)
                 .orElseThrow(() -> new NotFoundException("User preferences not found"));
     }
 
-    @Transactional
     public void updatePreferences(UserId userId, List<Category> categories, List<IngredientId> ingredientIds) {
-        List<Ingredient> ingredients = ingredientService.getIngredientsByIds(ingredientIds);
-        userPreferenceRepository.save(new UserPreferences(userId, categories, ingredients));
-    }
-
-    public void createNewPreference(UserId userId) {
-        userPreferenceRepository.save(UserPreferences.empty(userId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+        List<Ingredient> ingredients = ingredientRepository.findByIds(ingredientIds);
+        userPreferenceRepository.save(new UserPreferences(user, categories, ingredients));
     }
 }

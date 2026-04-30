@@ -185,7 +185,7 @@ class FilterRecipesTests extends BaseIntegrationTest {
         User user = createUser();
 
         getUserPreferenceRepository().save(new UserPreferences(
-                user.getId(),
+                user,
                 List.of(Category.DAIRY),
                 List.of(flour)
         ));

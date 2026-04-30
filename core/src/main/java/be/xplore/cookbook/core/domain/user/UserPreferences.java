@@ -6,7 +6,7 @@ import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import java.util.List;
 
 public record UserPreferences(
-        UserId userId,
+        User user,
         List<Category> excludedCategories,
         List<Ingredient> excludedIngredients
 ) {
@@ -15,7 +15,7 @@ public record UserPreferences(
         excludedIngredients = excludedIngredients == null ? List.of() : excludedIngredients;
     }
 
-    public static UserPreferences empty(UserId userId) {
-        return new UserPreferences(userId, List.of(), List.of());
+    public static UserPreferences empty(User user) {
+        return new UserPreferences(user, List.of(), List.of());
     }
 }

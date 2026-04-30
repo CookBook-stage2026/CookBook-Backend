@@ -30,7 +30,7 @@ class UpdatePreferencesTests extends BaseIntegrationTest {
     @Test
     void updatePreferences_shouldReturn204_whenPreferencesAreUpdated() throws Exception {
         // Arrange
-        createUser();
+        User user = createUser();
 
         Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG);
 
@@ -43,7 +43,7 @@ class UpdatePreferencesTests extends BaseIntegrationTest {
         performUpdatePreferences(request)
                 .andExpect(status().isNoContent());
 
-        Optional<UserPreferences> preferences = getUserPreferenceRepository().findPreferences(USER_ID);
+        Optional<UserPreferences> preferences = getUserPreferenceRepository().findPreferences(user);
 
         assertThat(preferences).isPresent();
 
@@ -65,7 +65,7 @@ class UpdatePreferencesTests extends BaseIntegrationTest {
         Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG);
 
         getUserPreferenceRepository().save(new UserPreferences(
-                user.getId(),
+                user,
                 List.of(Category.DAIRY),
                 List.of(ingredient)
         ));
@@ -76,7 +76,7 @@ class UpdatePreferencesTests extends BaseIntegrationTest {
         performUpdatePreferences(request)
                 .andExpect(status().isNoContent());
 
-        Optional<UserPreferences> preferences = getUserPreferenceRepository().findPreferences(USER_ID);
+        Optional<UserPreferences> preferences = getUserPreferenceRepository().findPreferences(user);
 
         assertThat(preferences).isPresent();
         assertThat(preferences.get().excludedCategories()).isEmpty();

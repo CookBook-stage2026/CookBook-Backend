@@ -1,15 +1,16 @@
 package be.xplore.cookbook.rest.controller;
 
-import be.xplore.cookbook.rest.dto.request.UpdateUserPreferencesRequest;
-import be.xplore.cookbook.rest.dto.response.UserPreferencesDto;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.service.UserPreferenceService;
+import be.xplore.cookbook.rest.dto.request.UpdateUserPreferencesRequest;
+import be.xplore.cookbook.rest.dto.response.UserPreferencesDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,6 +50,7 @@ public class UserController {
      * @param request The new preferences containing excluded category and ingredient ids
      */
     @PutMapping("/preferences")
+    @Transactional
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updatePreferences(
             @AuthenticationPrincipal Jwt jwt,
