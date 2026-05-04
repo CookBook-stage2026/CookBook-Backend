@@ -3,7 +3,6 @@ package be.xplore.cookbook.core.service;
 import be.xplore.cookbook.core.common.PagedResult;
 import be.xplore.cookbook.core.domain.exception.DataIntegrityException;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
-import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeIngredient;
@@ -39,10 +38,10 @@ public class RecipeService {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(command.userId()::notFound);
 
-        List<IngredientId> ingredientIds = command.ingredientQuantities().keySet().stream().toList();
-        List<Ingredient> foundIngredients = ingredientRepository.findByIds(ingredientIds);
+        List<Ingredient> foundIngredients = ingredientRepository.findByIds(
+                command.ingredientQuantities().keySet().stream().toList());
 
-        if (foundIngredients.size() != ingredientIds.size()) {
+        if (foundIngredients.size() != command.ingredientQuantities().size()) {
             throw new DataIntegrityException("One or more ingredients do not exist");
         }
 
