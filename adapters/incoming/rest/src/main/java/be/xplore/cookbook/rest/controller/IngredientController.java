@@ -3,6 +3,7 @@ package be.xplore.cookbook.rest.controller;
 import be.xplore.cookbook.core.common.Paging;
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
+import be.xplore.cookbook.core.domain.ingredient.command.SearchIngredientsQuery;
 import be.xplore.cookbook.core.service.IngredientService;
 import be.xplore.cookbook.rest.dto.request.IngredientSearchRequest;
 import be.xplore.cookbook.rest.dto.response.IngredientDto;
@@ -27,32 +28,18 @@ public class IngredientController {
         this.ingredientService = ingredientService;
     }
 
-    /**
-     * Searches ingredients by name, with pagination (case-insensitive, substring match).
-     *
-     * @param request Search criteria containing optional query, already selected ids to exclude,
-     *                page (default 0) and size (default 10)
-     * @return list of ingredients matching the query
-     */
     @PostMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<IngredientDto> searchIngredients(
-            @RequestBody @Valid IngredientSearchRequest request
-    ) {
-        List<IngredientId> selected = request.alreadySelectedIds().stream()
+    public List<IngredientDto> searchIngredients(@RequestBody @Valid IngredientSearchRequest request) {
+        List<IngredientId> excludedIds = request.alreadySelectedIds().stream()
                 .map(IngredientId::new)
                 .toList();
 
-        Paging pageable = new Paging(request.page(), request.size());
-
-        return ingredientService.searchByNameExcludingIds(request.query(), selected, pageable).stream()
-                .map(IngredientDto::fromDomain)
-                .toList();
+        return ingredientService.searchByNameExcludingIds(
+                new SearchIngredientsQuery(request.query(), excludedIds, new Paging(request.page(), request.size()))
+        ).stream().map(IngredientDto::fromDomain).toList();
     }
 
-    /**
-     * Returns all available ingredient categories for the frontend.
-     */
     @GetMapping("/categories")
     @ResponseStatus(HttpStatus.OK)
     public List<String> getCategories() {

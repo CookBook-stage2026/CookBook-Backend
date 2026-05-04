@@ -2,6 +2,7 @@ package be.xplore.cookbook.config;
 
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
+import be.xplore.cookbook.core.domain.user.command.FindUserBySocialConnectionQuery;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
 import be.xplore.cookbook.core.service.UserService;
 import be.xplore.cookbook.rest.dto.request.RecipeSearchRequest;
@@ -161,7 +162,8 @@ class OAuth2LoginEndToEndTest {
         assertThat(clearedStateCookie).isNotNull();
         assertThat(clearedStateCookie.getMaxAge()).isZero();
 
-        Optional<User> createdUser = userApi.findBySocialConnection(PROVIDER_ID, MOCK_USER_SUB);
+        Optional<User> createdUser = userApi.findBySocialConnection(
+                new FindUserBySocialConnectionQuery(PROVIDER_ID, MOCK_USER_SUB));
         assertThat(createdUser).isPresent()
                 .hasValueSatisfying(user -> assertThat(user)
                         .returns(MOCK_USER_EMAIL, User::email)

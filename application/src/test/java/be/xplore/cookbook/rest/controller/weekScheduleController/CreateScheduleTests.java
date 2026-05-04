@@ -155,7 +155,7 @@ class CreateScheduleTests extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(days))))
                 .andDo(print())
-                .andExpect(status().isNotFound());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

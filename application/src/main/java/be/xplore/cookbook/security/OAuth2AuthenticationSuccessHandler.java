@@ -1,9 +1,11 @@
 package be.xplore.cookbook.security;
 
 import be.xplore.cookbook.core.domain.auth.OAuth2UserInfo;
-import be.xplore.cookbook.security.exception.OAuth2Exception;
 import be.xplore.cookbook.core.domain.user.User;
+import be.xplore.cookbook.core.domain.user.command.AutoSaveAfterLoginCommand;
+import be.xplore.cookbook.core.domain.user.command.FindUserBySocialConnectionQuery;
 import be.xplore.cookbook.core.service.UserService;
+import be.xplore.cookbook.security.exception.OAuth2Exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
@@ -57,9 +59,10 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
         OAuth2UserInfo userInfo = authService.getUserFromToken(token);
 
-        User user = userService.findBySocialConnection(userInfo.provider(), userInfo.providerId())
-                .orElseGet(() -> userService.autoSaveAfterLogin(
-                        userInfo.email(), userInfo.name(), userInfo.provider(), userInfo.providerId()
+        User user = userService.findBySocialConnection(new FindUserBySocialConnectionQuery(userInfo.provider(),
+                        userInfo.providerId()))
+                .orElseGet(() -> userService.autoSaveAfterLogin(new AutoSaveAfterLoginCommand(
+                        userInfo.email(), userInfo.name(), userInfo.provider(), userInfo.providerId())
                 ));
 
         cookieRepo.removeAuthorizationRequestCookies(request, response);
