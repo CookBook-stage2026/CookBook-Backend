@@ -27,6 +27,7 @@ dependencies {
     jacocoAggregation project(':core')
     jacocoAggregation project(':adapters:incoming:rest')
     jacocoAggregation project(':adapters:outgoing:jpa')
+    jacocoAggregation project(':adapters:outgoing:ai')
 }
 
 sonar {

@@ -101,6 +101,22 @@ public class RecipeController {
         ).stream().map(RecipeSummaryDto::fromDomain).toList();
     }
 
+    /**
+     * Gets a suggestion for an enhanced recipe with a new ingredient
+     *
+     * @param id The id of the recipe to enhance
+     * @return the enhanced recipe
+     */
+    @GetMapping("/{id}/enhance")
+    public RecipeDto enhanceRecipe(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID id
+    ) {
+        Recipe recipe = recipeService.enhanceRecipe(new RecipeId(id), getUserIdFromJwt(jwt));
+
+        return RecipeDto.fromDomain(recipe);
+    }
+
     private UserId getUserIdFromJwt(Jwt jwt) {
         return new UserId(UUID.fromString(jwt.getSubject()));
     }
