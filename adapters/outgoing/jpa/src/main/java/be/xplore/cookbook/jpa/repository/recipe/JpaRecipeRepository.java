@@ -21,7 +21,7 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
     @EntityGraph(attributePaths = {"steps", "ingredients", "ingredients.ingredient"})
     Optional<JpaRecipeEntity> findById(@NonNull UUID id);
 
-    @EntityGraph(attributePaths = {"steps", "ingredients", "ingredients.ingredient"})
+    @EntityGraph(attributePaths = {"user", "steps", "ingredients", "ingredients.ingredient"})
     Optional<JpaRecipeEntity> findByIdAndUserId(UUID id, UUID userId);
 
     @Query("""

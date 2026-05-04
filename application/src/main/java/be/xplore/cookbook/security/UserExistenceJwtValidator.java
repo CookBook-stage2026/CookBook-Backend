@@ -1,6 +1,7 @@
 package be.xplore.cookbook.security;
 
 import be.xplore.cookbook.core.domain.user.UserId;
+import be.xplore.cookbook.core.domain.user.command.FindUserByIdQuery;
 import be.xplore.cookbook.core.service.UserService;
 import be.xplore.cookbook.security.exception.OAuth2Exception;
 import org.springframework.security.oauth2.core.OAuth2Error;
@@ -27,7 +28,7 @@ public class UserExistenceJwtValidator implements OAuth2TokenValidator<Jwt> {
         try {
             UUID userId = UUID.fromString(subject);
 
-            if (userService.findById(new UserId(userId)).isPresent()) {
+            if (userService.findById(new FindUserByIdQuery(new UserId(userId))).isPresent()) {
                 return OAuth2TokenValidatorResult.success();
             }
         } catch (IllegalArgumentException _) {

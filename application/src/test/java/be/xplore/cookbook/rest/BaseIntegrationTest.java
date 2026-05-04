@@ -83,6 +83,38 @@ public abstract class BaseIntegrationTest {
         JdbcTestUtils.deleteFromTables(jdbcTemplate, getTablesToClear());
     }
 
+    public MockMvc getMockMvc() {
+        return mockMvc;
+    }
+
+    public JdbcTemplate getJdbcTemplate() {
+        return jdbcTemplate;
+    }
+
+    public UserRepository getUserRepository() {
+        return userRepository;
+    }
+
+    public IngredientRepository getIngredientRepository() {
+        return ingredientRepository;
+    }
+
+    public RecipeRepository getRecipeRepository() {
+        return recipeRepository;
+    }
+
+    public UserPreferenceRepository getUserPreferenceRepository() {
+        return userPreferenceRepository;
+    }
+
+    public WeekScheduleRepository getWeekScheduleRepository() {
+        return weekScheduleRepository;
+    }
+
+    public JsonMapper getMapper() {
+        return mapper;
+    }
+
     protected abstract String[] getTablesToClear();
 
     protected void seedWeekSchedule(User user, Map<DayOfWeek, Recipe> dailyRecipes) {
@@ -127,22 +159,6 @@ public abstract class BaseIntegrationTest {
                 ingredients, user);
     }
 
-    private Recipe createAndSaveRecipe(String name, String description, int durationInMinutes,
-                                       int servings, List<String> steps, List<Ingredient> ingredients,
-                                       User user) {
-        List<RecipeIngredient> recipeIngredients = ingredients.stream()
-                .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY))
-                .toList();
-
-        Recipe recipe = new Recipe(
-                RecipeId.create(),
-                new RecipeDetails(name, description, durationInMinutes, servings, steps),
-                recipeIngredients,
-                user
-        );
-        return recipeRepository.save(recipe);
-    }
-
     protected Ingredient createAndSaveIngredient(String name) {
         return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE);
     }
@@ -166,35 +182,19 @@ public abstract class BaseIntegrationTest {
                 .claim("name", USER_NAME));
     }
 
-    public MockMvc getMockMvc() {
-        return mockMvc;
-    }
+    private Recipe createAndSaveRecipe(String name, String description, int durationInMinutes,
+                                       int servings, List<String> steps, List<Ingredient> ingredients,
+                                       User user) {
+        List<RecipeIngredient> recipeIngredients = ingredients.stream()
+                .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY))
+                .toList();
 
-    public JdbcTemplate getJdbcTemplate() {
-        return jdbcTemplate;
-    }
-
-    public UserRepository getUserRepository() {
-        return userRepository;
-    }
-
-    public IngredientRepository getIngredientRepository() {
-        return ingredientRepository;
-    }
-
-    public RecipeRepository getRecipeRepository() {
-        return recipeRepository;
-    }
-
-    public UserPreferenceRepository getUserPreferenceRepository() {
-        return userPreferenceRepository;
-    }
-
-    public WeekScheduleRepository getWeekScheduleRepository() {
-        return weekScheduleRepository;
-    }
-
-    public JsonMapper getMapper() {
-        return mapper;
+        Recipe recipe = new Recipe(
+                RecipeId.create(),
+                new RecipeDetails(name, description, durationInMinutes, servings, steps),
+                recipeIngredients,
+                user
+        );
+        return recipeRepository.save(recipe);
     }
 }

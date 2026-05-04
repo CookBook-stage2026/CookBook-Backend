@@ -68,21 +68,16 @@ public class RecipeService {
         if (query.shouldApplyPreferences()) {
             UserPreferences preferences = userPreferenceRepository.findPreferences(user)
                     .orElseThrow(query.userId()::notFound);
-            return recipeRepository.findAllSummariesWithFilter(
-                    query.ingredientIds(), preferences, query.userId(), query.paging());
-                    .orElseThrow(userId::notFound);
-            return recipeRepository.findAllSummariesWithFilter(ingredientIds, preferences, user, pageable);
+            return recipeRepository.findAllSummariesWithFilter(query.ingredientIds(), preferences,
+                    user, query.paging());
         }
 
         return recipeRepository.findAllSummariesWithFilter(
-                query.ingredientIds(), UserPreferences.empty(user), query.userId(), query.paging());
-                ingredientIds, UserPreferences.empty(user), user, pageable);
+                query.ingredientIds(), UserPreferences.empty(user), user, query.paging());
     }
 
     public List<RecipeSummary> searchSummariesByName(SearchRecipesByNameQuery query) {
-        return recipeRepository.querySummaries(query.paging(), query.userId(), query.query());
-    public List<RecipeSummary> searchSummariesByName(Paging pageable, UserId userId, String query) {
-        var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        return recipeRepository.querySummaries(pageable, user, query);
+        var user = userRepository.findById(query.userId()).orElseThrow(UserNotFoundException::new);
+        return recipeRepository.querySummaries(query.paging(), user, query.query());
     }
 }

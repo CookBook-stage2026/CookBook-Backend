@@ -31,11 +31,8 @@ public class UserService {
         return userRepository.findBySocialConnection(query.provider(), query.providerId());
     }
 
-    public User autoSaveAfterLogin(String email, String name, String provider, String providerId) {
-        User user = new User(email, name, provider, providerId);
     public User autoSaveAfterLogin(AutoSaveAfterLoginCommand command) {
-        User user = new User(command.email(), command.name(), new ArrayList<>());
-        user.socialConnections().add(new SocialConnection(command.provider(), command.providerId()));
+        User user = new User(command.email(), command.name(), command.provider(), command.providerId());
         User savedUser = userRepository.save(user);
         userPreferenceRepository.save(UserPreferences.empty(savedUser));
         return savedUser;
