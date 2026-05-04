@@ -93,24 +93,24 @@ VALUES
 -- ---------------------------------------------------------
 -- RECIPES
 -- ---------------------------------------------------------
-INSERT INTO recipes (recipe_id, user_id, name, description, duration_in_minutes, servings)
-VALUES ('1ecba55b-a63c-43f6-a849-d736e6773f2d', 'b0311fb0-533c-40b0-be48-2bd0ba1f33a8', 'A classic Italian pasta dish originating from Rome, made with spaghetti, eggs, aged cheese, pancetta, and freshly ground black pepper, known for its rich texture and simple, traditional ingredients',
+INSERT INTO recipes (recipe_id, name, description, duration_in_minutes, servings)
+VALUES ('1ecba55b-a63c-43f6-a849-d736e6773f2d', 'A classic Italian pasta dish originating from Rome, made with spaghetti, eggs, aged cheese, pancetta, and freshly ground black pepper, known for its rich texture and simple, traditional ingredients',
         'Spaghetti Carbonara prepared with al dente pasta, crisp pancetta, eggs, Pecorino Romano cheese, black pepper, and a silky sauce created by emulsifying the ingredients without using cream', 30, 2),
-       ('8d96d734-11ea-408d-adc5-763311de5573', 'b0311fb0-533c-40b0-be48-2bd0ba1f33a8', 'Chicken Tikka Masala',
+       ('8d96d734-11ea-408d-adc5-763311de5573', 'Chicken Tikka Masala',
         'Creamy and spiced Indian curry with tender chicken', 45, 4),
-       ('3265de7a-3053-4e5c-97e6-5050e68aa8d0', 'b0311fb0-533c-40b0-be48-2bd0ba1f33a8', 'Beef Tacos', 'Mexican street-style tacos with seasoned ground beef',
+       ('3265de7a-3053-4e5c-97e6-5050e68aa8d0', 'Beef Tacos', 'Mexican street-style tacos with seasoned ground beef',
         25, 4),
-       ('203138be-1e83-4dcb-8130-07a60f2860b4', 'b0311fb0-533c-40b0-be48-2bd0ba1f33a8', 'Vegetable Stir Fry', 'Quick and healthy Asian-inspired stir fry', 20,
+       ('203138be-1e83-4dcb-8130-07a60f2860b4', 'Vegetable Stir Fry', 'Quick and healthy Asian-inspired stir fry', 20,
         2),
-       ('07b9c24b-efe4-4ea9-b3a0-f53a7eff9c1d', 'b0311fb0-533c-40b0-be48-2bd0ba1f33a8', 'French Onion Soup',
+       ('07b9c24b-efe4-4ea9-b3a0-f53a7eff9c1d', 'French Onion Soup',
         'Rich and hearty French classic topped with melted cheese', 60, 4),
-       ('ba581df1-3a58-474d-a824-f62f63ce0858', 'b0311fb0-533c-40b0-be48-2bd0ba1f33a8', 'Banana Pancakes', 'Fluffy pancakes with a hint of banana', 20, 2),
-       ('3a529f82-0fcc-48d4-99ce-c8b5cf945622', 'b0311fb0-533c-40b0-be48-2bd0ba1f33a8', 'Greek Salad', 'Fresh Mediterranean salad with feta and olives', 15, 2),
-       ('65fc2e5d-4b24-4db1-bab7-d8172257c32e', 'b0311fb0-533c-40b0-be48-2bd0ba1f33a8', 'Beef Bourguignon', 'Classic French braised beef stew in red wine', 180,
+       ('ba581df1-3a58-474d-a824-f62f63ce0858', 'Banana Pancakes', 'Fluffy pancakes with a hint of banana', 20, 2),
+       ('3a529f82-0fcc-48d4-99ce-c8b5cf945622', 'Greek Salad', 'Fresh Mediterranean salad with feta and olives', 15, 2),
+       ('65fc2e5d-4b24-4db1-bab7-d8172257c32e', 'Beef Bourguignon', 'Classic French braised beef stew in red wine', 180,
         6),
-       ('89b1dcef-112f-4226-9cb8-727a57cee5ca', 'b0311fb0-533c-40b0-be48-2bd0ba1f33a8', 'Margherita Pizza',
+       ('89b1dcef-112f-4226-9cb8-727a57cee5ca', 'Margherita Pizza',
         'Simple Neapolitan pizza with fresh basil and mozzarella', 40, 2),
-       ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', 'b0311fb0-533c-40b0-be48-2bd0ba1f33a8', 'Chocolate Lava Cake',
+       ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', 'Chocolate Lava Cake',
         'Decadent warm chocolate cake with a molten center', 25, 4);
 
 -- ---------------------------------------------------------
@@ -261,19 +261,11 @@ VALUES
 -- ---------------------------------------------------------
 -- USER
 -- ---------------------------------------------------------
-INSERT INTO users (user_id, email, display_name)
+INSERT INTO users (user_id, email, display_name, provider, provider_id)
 VALUES (
            'b0311fb0-533c-40b0-be48-2bd0ba1f33a8',
            'seeduser@cookbook.com',
-           'Seed User'
-       );
-
--- ---------------------------------------------------------
--- SOCIAL CONNECTION
--- ---------------------------------------------------------
-INSERT INTO social_connections (user_id, provider, provider_id)
-VALUES (
-           'b0311fb0-533c-40b0-be48-2bd0ba1f33a8',
-           'seed',
-           'seed-user-1'
+           'Seed User',
+        'google',
+        'google'
        );

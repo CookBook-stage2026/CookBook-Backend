@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +28,7 @@ class GenerateTokenTests {
     void generateToken_ValidUser_TokenGeneratedWithCorrectClaims() {
         // Arrange
         UUID rawId = UUID.randomUUID();
-        User user = new User(new UserId(rawId), "test@example.com", "Test User", List.of());
+        User user = new User(new UserId(rawId), "test@example.com", "Test User", "google", "google");
 
         // Act
         String token = jwtService.generateToken(user);

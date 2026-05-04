@@ -96,13 +96,13 @@ public abstract class BaseIntegrationTest {
     }
 
     protected User createUser() {
-        User user = userRepository.save(new User(USER_ID, USER_NAME, USER_EMAIL, List.of()));
+        User user = userRepository.save(new User(USER_ID, USER_NAME, USER_EMAIL, "google", "google"));
         userPreferenceRepository.save(UserPreferences.empty(user));
         return user;
     }
 
     protected User createUserWithId(UserId userId) {
-        User user = userRepository.save(new User(userId, USER_NAME, USER_EMAIL, List.of()));
+        User user = userRepository.save(new User(userId, USER_NAME, USER_EMAIL, "google", "google"));
         userPreferenceRepository.save(UserPreferences.empty(user));
         return user;
     }

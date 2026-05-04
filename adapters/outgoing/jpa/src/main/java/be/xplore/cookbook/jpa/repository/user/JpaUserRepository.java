@@ -12,8 +12,7 @@ public interface JpaUserRepository extends JpaRepository<JpaUserEntity, UUID> {
 
     @Query("""
         SELECT u FROM JpaUserEntity u
-        JOIN u.socialConnections c
-        WHERE c.provider = :provider AND c.providerId = :providerId
+        WHERE u.provider = :provider AND u.providerId = :providerId
     """)
     Optional<JpaUserEntity> findBySocialConnection(
             @Param("provider") String provider,

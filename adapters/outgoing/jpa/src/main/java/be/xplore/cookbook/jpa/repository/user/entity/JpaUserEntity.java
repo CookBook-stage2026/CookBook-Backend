@@ -2,18 +2,11 @@ package be.xplore.cookbook.jpa.repository.user.entity;
 
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -29,23 +22,22 @@ public class JpaUserEntity {
     @Column
     private String displayName;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(
-            name = "social_connections",
-            joinColumns = @JoinColumn(name = "user_id"),
-            uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "provider_id"})
-    )
-    private List<JpaSocialConnectionEntity> socialConnections = new ArrayList<>();
+    @Column
+    private String provider;
+
+    @Column
+    private String providerId;
 
     protected JpaUserEntity() {
     }
 
     public JpaUserEntity(UUID userId, String email, String displayName,
-                         List<JpaSocialConnectionEntity> socialConnections) {
+                         String provider, String providerId) {
         this.id = userId;
         this.email = email;
         this.displayName = displayName;
-        this.socialConnections = socialConnections;
+        this.provider = provider;
+        this.providerId = providerId;
     }
 
     public User toDomain() {
@@ -53,7 +45,8 @@ public class JpaUserEntity {
                 new UserId(this.id),
                 this.email,
                 this.displayName,
-                this.socialConnections.stream().map(JpaSocialConnectionEntity::toDomain).toList()
+                this.provider,
+                this.providerId
         );
     }
 
@@ -62,9 +55,8 @@ public class JpaUserEntity {
                 user.id().id(),
                 user.email(),
                 user.displayName(),
-                user.socialConnections().stream()
-                        .map(JpaSocialConnectionEntity::fromDomain)
-                        .toList()
+                user.provider(),
+                user.providerId()
         );
     }
 
