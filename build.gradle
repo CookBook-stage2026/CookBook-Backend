@@ -1,44 +1,79 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '4.0.5'
+    id 'org.springframework.boot' version '4.0.5' apply false
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'checkstyle'
+    id 'jacoco'
+    id 'org.sonarqube' version '7.2.3.7755'
+    id 'jacoco-report-aggregation'
 }
 
-group = 'cookbook.stage'
-version = '0.0.1-SNAPSHOT'
-description = 'backend'
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
-    }
-}
-
-repositories {
-    mavenCentral()
-}
-
-ext {
-    set('springModulithVersion', "2.0.5")
-}
-
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.modulith:spring-modulith-starter-core'
-    implementation 'org.springframework.modulith:spring-modulith-starter-jpa'
-    implementation 'org.xerial:sqlite-jdbc:3.51.3.0'
-    implementation 'org.hibernate.orm:hibernate-community-dialects'
-    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-    testImplementation 'org.springframework.modulith:spring-modulith-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
+apply plugin: 'io.spring.dependency-management'
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.modulith:spring-modulith-bom:${springModulithVersion}"
+        mavenBom "org.springframework.boot:spring-boot-dependencies:4.0.5"
     }
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+dependencies {
+    jacocoAggregation project(':application')
+    jacocoAggregation project(':core')
+    jacocoAggregation project(':adapters:incoming:rest')
+    jacocoAggregation project(':adapters:outgoing:jpa')
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "CookBook-stage2026_CookBook-Backend")
+        property("sonar.organization", "cookbook-stage2026")
+        property "sonar.coverage.jacoco.xmlReportPaths",
+                "${layout.buildDirectory.get()}/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml"
+    }
+}
+
+subprojects {
+    apply plugin: 'checkstyle'
+    apply plugin: 'jacoco'
+
+    group = 'be.xplore.cookbook'
+    version = '0.0.1-SNAPSHOT'
+
+    jacoco {
+        toolVersion = "0.8.14"
+    }
+
+    checkstyle {
+        toolVersion = '13.4.0'
+    }
+
+    plugins.withType(JavaPlugin).tap {
+        configureEach {
+            java {
+                toolchain {
+                    languageVersion = JavaLanguageVersion.of(25)
+                }
+            }
+
+            tasks.named('test') {
+                useJUnitPlatform()
+                finalizedBy jacocoTestReport
+            }
+
+            tasks.named('jacocoTestReport') {
+                dependsOn test
+                reports {
+                    html.required = false
+                    xml.required = true
+                    csv.required = false
+                }
+            }
+        }
+    }
 }

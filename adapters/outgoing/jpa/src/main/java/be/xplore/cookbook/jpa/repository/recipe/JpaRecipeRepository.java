@@ -1,0 +1,64 @@
+package be.xplore.cookbook.jpa.repository.recipe;
+
+import be.xplore.cookbook.core.domain.ingredient.Category;
+import be.xplore.cookbook.jpa.repository.recipe.entity.JpaRecipeEntity;
+import be.xplore.cookbook.jpa.repository.user.entity.JpaUserEntity;
+import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID> {
+
+    @Override
+    @EntityGraph(attributePaths = {"steps", "ingredients", "ingredients.ingredient"})
+    Optional<JpaRecipeEntity> findById(@NonNull UUID id);
+
+    @EntityGraph(attributePaths = {"user", "steps", "ingredients", "ingredients.ingredient"})
+    Optional<JpaRecipeEntity> findByIdAndUserId(UUID id, UUID userId);
+
+    @Query("""
+                SELECT r FROM JpaRecipeEntity r
+                JOIN r.ingredients i
+                WHERE (:#{#ingredientIds.size()} = 0 OR i.id.ingredientId IN :ingredientIds)
+                    AND (:#{#excludedIngredientIds.size()} = 0 OR i.id.ingredientId NOT IN :excludedIngredientIds)
+                    AND (
+                        :#{#excludedCategories.size()} = 0
+                        OR NOT EXISTS (
+                            SELECT c FROM i.ingredient.categories c
+                            WHERE c IN :excludedCategories
+                        )
+                    )
+                    AND r.user = :user
+                GROUP BY r.id
+                HAVING :#{#ingredientIds.size()} = 0 OR COUNT(DISTINCT i.id.ingredientId) >= :#{#ingredientIds.size()}
+            """)
+    Page<JpaRecipeEntity> findAllSummariesWithFilterByCreatorId(
+            @Param("ingredientIds") List<UUID> ingredientIds,
+            @Param("excludedIngredientIds") List<UUID> excludedIngredientIds,
+            @Param("excludedCategories") List<Category> excludedCategories,
+            @Param("user") JpaUserEntity user,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT r FROM JpaRecipeEntity r
+            WHERE (
+                LOWER(r.name) LIKE LOWER(CONCAT(:name, '%'))
+                OR LOWER(r.name) LIKE LOWER(CONCAT('%', :name, '%'))
+            )
+            AND r.user = :user
+            ORDER BY
+                CASE WHEN LOWER(r.name) LIKE LOWER(CONCAT(:name, '%')) THEN 0 ELSE 1 END,
+                r.name
+            """)
+    List<JpaRecipeEntity> searchByNamePrioritizingStartsWith(
+            @Param("name") String name, @Param("user") JpaUserEntity user, Pageable pageable);
+}

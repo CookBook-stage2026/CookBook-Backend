@@ -37,3 +37,6 @@ out/
 .vscode/
 
 myDatabase.db
+application/src/main/resources/*development*.properties
+application/src/main/resources/application-dev.properties
+application/src/main/resources/secret.properties

@@ -1,1 +1,6 @@
 rootProject.name = 'backend'
+
+include 'adapters:incoming:rest'
+include 'application'
+include 'core'
+include 'adapters:outgoing:jpa'
