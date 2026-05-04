@@ -11,6 +11,7 @@ services:
       - SPRING_PROFILES_ACTIVE=deploy
     volumes:
       - db-data:/app/data
+    profiles: [ "deploy" ]
 
   frontend:
     image: cookbook-frontend
@@ -18,6 +19,25 @@ services:
       - "80:8081"
     depends_on:
       - backend
+    profiles: [ "deploy" ]
+
+  ollama:
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:11434/api/tags" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    profiles: [ "dev" ]
 
 volumes:
   db-data:
+  ollama-data:
