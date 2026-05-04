@@ -4,6 +4,7 @@ import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.user.User;
+import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -78,7 +79,7 @@ class GetRecipeByIdTests extends BaseIntegrationTest {
     void getRecipeById_shouldReturn404_whenUserNotAllowedToAccess() throws Exception {
         // Arrange
         createUser();
-        User otherUser = new User("email", "name", List.of());
+        var otherUser = createUserWithId(UserId.create());
 
         Ingredient ingredient1 = createAndSaveIngredient(DEFAULT_INGREDIENT_NAME);
         Ingredient ingredient2 = createAndSaveIngredient(DEFAULT_INGREDIENT_NAME_2);

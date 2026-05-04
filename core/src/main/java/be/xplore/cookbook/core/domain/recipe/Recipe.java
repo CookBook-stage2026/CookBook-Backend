@@ -1,6 +1,6 @@
 package be.xplore.cookbook.core.domain.recipe;
 
-import be.xplore.cookbook.core.domain.user.UserId;
+import be.xplore.cookbook.core.domain.user.User;
 
 import java.util.List;
 
@@ -12,9 +12,9 @@ public record Recipe(
         int servings,
         List<String> steps,
         List<RecipeIngredient> ingredients,
-        UserId userId
+        User user
 ) {
-    public Recipe(RecipeId id, RecipeDetails details, List<RecipeIngredient> ingredients, UserId userId) {
+    public Recipe(RecipeId id, RecipeDetails details, List<RecipeIngredient> ingredients, User user) {
         this(id,
              details.name(),
              details.description(),
@@ -22,7 +22,7 @@ public record Recipe(
              details.servings(),
              details.steps(),
              ingredients,
-             userId);
+             user);
     }
 
     public Recipe {
@@ -34,7 +34,7 @@ public record Recipe(
             throw new IllegalArgumentException("A recipe must have at least one ingredient");
         }
 
-        if (userId == null) {
+        if (user == null) {
             throw new IllegalArgumentException("A recipe must have a creator");
         }
 
@@ -73,7 +73,7 @@ public record Recipe(
         return servings;
     }
 
-    public UserId getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 }

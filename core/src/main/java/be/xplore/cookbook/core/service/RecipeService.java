@@ -2,6 +2,7 @@ package be.xplore.cookbook.core.service;
 
 import be.xplore.cookbook.core.common.PagedResult;
 import be.xplore.cookbook.core.domain.exception.DataIntegrityException;
+import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
@@ -50,7 +51,9 @@ public class RecipeService {
                         new RecipeIngredient(ingredient, command.ingredientQuantities().get(ingredient.id())))
                 .toList();
 
-        return recipeRepository.save(new Recipe(RecipeId.create(), command.details(), recipeIngredients, user.id()));
+        return recipeRepository.save(new Recipe(RecipeId.create(), command.details(),
+                recipeIngredients, user
+        ));
     }
 
     public Recipe findById(FindRecipeByIdQuery query) {
@@ -65,15 +68,16 @@ public class RecipeService {
         if (query.shouldApplyPreferences()) {
             UserPreferences preferences = userPreferenceRepository.findPreferences(user)
                     .orElseThrow(query.userId()::notFound);
-            return recipeRepository.findAllSummariesWithFilter(
-                    query.ingredientIds(), preferences, query.userId(), query.paging());
+            return recipeRepository.findAllSummariesWithFilter(query.ingredientIds(), preferences,
+                    user, query.paging());
         }
 
         return recipeRepository.findAllSummariesWithFilter(
-                query.ingredientIds(), UserPreferences.empty(user), query.userId(), query.paging());
+                query.ingredientIds(), UserPreferences.empty(user), user, query.paging());
     }
 
     public List<RecipeSummary> searchSummariesByName(SearchRecipesByNameQuery query) {
-        return recipeRepository.querySummaries(query.paging(), query.userId(), query.query());
+        var user = userRepository.findById(query.userId()).orElseThrow(UserNotFoundException::new);
+        return recipeRepository.querySummaries(query.paging(), user, query.query());
     }
 }

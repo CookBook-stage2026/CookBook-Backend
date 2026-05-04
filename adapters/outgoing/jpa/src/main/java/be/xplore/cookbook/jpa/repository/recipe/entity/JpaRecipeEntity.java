@@ -5,8 +5,8 @@ import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeIngredient;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
-import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.jpa.repository.ingredient.entity.JpaIngredientEntity;
+import be.xplore.cookbook.jpa.repository.user.entity.JpaUserEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -14,12 +14,14 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -51,23 +53,23 @@ public class JpaRecipeEntity {
     private List<String> steps;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<JpaRecipeIngredientEntity> ingredients = new ArrayList<>();
+    private Set<JpaRecipeIngredientEntity> ingredients = new HashSet<>();
 
-    @Column(nullable = false)
-    private UUID userId;
+    @ManyToOne
+    private JpaUserEntity user;
 
     protected JpaRecipeEntity() {
     }
 
     public JpaRecipeEntity(UUID id, String name, String description, int durationInMinutes,
-                           List<String> steps, int servings, UserId userId) {
+                           List<String> steps, int servings, JpaUserEntity user) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.durationInMinutes = durationInMinutes;
         this.steps = steps;
         this.servings = servings;
-        this.userId = userId.id();
+        this.user = user;
     }
 
     public static JpaRecipeEntity fromDomain(Recipe recipe) {
@@ -78,7 +80,7 @@ public class JpaRecipeEntity {
                 recipe.getDurationInMinutes(),
                 recipe.getSteps(),
                 recipe.getServings(),
-                recipe.getUserId()
+                JpaUserEntity.fromDomain(recipe.getUser())
         );
         recipe.getIngredients().forEach(entity::addIngredient);
         return entity;
@@ -99,7 +101,7 @@ public class JpaRecipeEntity {
                         steps
                 ),
                 domainIngredients,
-                new UserId(userId)
+                user.toDomain()
         );
     }
 

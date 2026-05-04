@@ -83,76 +83,6 @@ public abstract class BaseIntegrationTest {
         JdbcTestUtils.deleteFromTables(jdbcTemplate, getTablesToClear());
     }
 
-    protected abstract String[] getTablesToClear();
-
-    protected void seedWeekSchedule(User user, Map<DayOfWeek, Recipe> dailyRecipes) {
-        List<DaySchedule> daySchedules = new ArrayList<>();
-        dailyRecipes.forEach((day, recipe) ->
-                daySchedules.add(new DaySchedule(DayScheduleId.create(), recipe, day))
-        );
-
-        WeekSchedule weekSchedule = new WeekSchedule(WeekScheduleId.create(), user, daySchedules);
-        getWeekScheduleRepository().save(weekSchedule);
-    }
-
-    protected User createUser() {
-        User user = userRepository.save(new User(USER_ID, USER_NAME, USER_EMAIL, List.of()));
-        userPreferenceRepository.save(UserPreferences.empty(user));
-        return user;
-    }
-
-    protected Recipe createAndSaveRecipe(User user) {
-        Ingredient ingredient = createAndSaveIngredient("Ingredient");
-        return createAndSaveRecipe(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
-                DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS,
-                List.of(ingredient), user);
-    }
-
-    protected Recipe createAndSaveRecipe(String name, User user) {
-        Ingredient ingredient = createAndSaveIngredient("Ingredient");
-        return createAndSaveRecipe(name, DEFAULT_RECIPE_DESCRIPTION,
-                DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS,
-                List.of(ingredient), user);
-    }
-
-    protected Recipe createAndSaveRecipeWithIngredients(List<Ingredient> ingredients, User user) {
-        return createAndSaveRecipe(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
-                DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS,
-                ingredients, user);
-    }
-
-    private Recipe createAndSaveRecipe(String name, String description, int durationInMinutes,
-                                       int servings, List<String> steps, List<Ingredient> ingredients,
-                                       User user) {
-        List<RecipeIngredient> recipeIngredients = ingredients.stream()
-                .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY))
-                .toList();
-
-        Recipe recipe = new Recipe(
-                RecipeId.create(),
-                new RecipeDetails(name, description, durationInMinutes, servings, steps),
-                recipeIngredients,
-                user.id()
-        );
-        return recipeRepository.save(recipe);
-    }
-
-    protected Ingredient createAndSaveIngredient(String name) {
-        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE);
-    }
-
-    protected Ingredient createAndSaveIngredient(String name, Unit unit, Category category) {
-        Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit, List.of(category));
-        return ingredientRepository.save(ingredient);
-    }
-
-    protected SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor validJwt() {
-        return jwt().jwt(builder -> builder
-                .subject(USER_ID.id().toString())
-                .claim("email", USER_EMAIL)
-                .claim("name", USER_NAME));
-    }
-
     public MockMvc getMockMvc() {
         return mockMvc;
     }
@@ -183,5 +113,88 @@ public abstract class BaseIntegrationTest {
 
     public JsonMapper getMapper() {
         return mapper;
+    }
+
+    protected abstract String[] getTablesToClear();
+
+    protected void seedWeekSchedule(User user, Map<DayOfWeek, Recipe> dailyRecipes) {
+        List<DaySchedule> daySchedules = new ArrayList<>();
+        dailyRecipes.forEach((day, recipe) ->
+                daySchedules.add(new DaySchedule(DayScheduleId.create(), recipe, day))
+        );
+
+        WeekSchedule weekSchedule = new WeekSchedule(WeekScheduleId.create(), user, daySchedules);
+        getWeekScheduleRepository().save(weekSchedule);
+    }
+
+    protected User createUser() {
+        User user = userRepository.save(new User(USER_ID, USER_NAME, USER_EMAIL, "google", "google"));
+        userPreferenceRepository.save(UserPreferences.empty(user));
+        return user;
+    }
+
+    protected User createUserWithId(UserId userId) {
+        User user = userRepository.save(new User(userId, USER_NAME, USER_EMAIL, "google", "google"));
+        userPreferenceRepository.save(UserPreferences.empty(user));
+        return user;
+    }
+
+    protected Recipe createAndSaveRecipe(User user) {
+        Ingredient ingredient = createAndSaveIngredient("Ingredient");
+        return createAndSaveRecipe(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
+                DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS,
+                List.of(ingredient), user);
+    }
+
+    protected Recipe createAndSaveRecipe(String name, User user) {
+        Ingredient ingredient = createAndSaveIngredient("Ingredient");
+        return createAndSaveRecipe(name, DEFAULT_RECIPE_DESCRIPTION,
+                DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS,
+                List.of(ingredient), user);
+    }
+
+    protected Recipe createAndSaveRecipeWithIngredients(List<Ingredient> ingredients, User user) {
+        return createAndSaveRecipe(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
+                DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS,
+                ingredients, user);
+    }
+
+    protected Ingredient createAndSaveIngredient(String name) {
+        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE);
+    }
+
+    protected Ingredient createAndSaveIngredient(String name, Unit unit, Category category) {
+        Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit, List.of(category));
+        return ingredientRepository.save(ingredient);
+    }
+
+    protected SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor validJwt() {
+        return jwt().jwt(builder -> builder
+                .subject(USER_ID.id().toString())
+                .claim("email", USER_EMAIL)
+                .claim("name", USER_NAME));
+    }
+
+    protected SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor validJwtFromUserId(UserId userId) {
+        return jwt().jwt(builder -> builder
+                .subject(userId.id().toString())
+                .claim("email", USER_EMAIL)
+                .claim("name", USER_NAME));
+    }
+
+    private Recipe createAndSaveRecipe(String name, String description, int durationInMinutes,
+                                       int servings, List<String> steps, List<Ingredient> ingredients,
+                                       User user) {
+        List<RecipeIngredient> recipeIngredients = ingredients.stream()
+                .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY))
+                .toList();
+
+        Recipe recipe = new Recipe(
+                RecipeId.create(),
+                new RecipeDetails(name, description, durationInMinutes, servings, steps),
+                recipeIngredients,
+                user
+        );
+        return recipeRepository.save(recipe);
     }
 }

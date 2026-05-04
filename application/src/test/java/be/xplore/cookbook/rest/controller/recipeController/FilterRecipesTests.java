@@ -5,6 +5,7 @@ import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.user.User;
+import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
 import be.xplore.cookbook.rest.dto.request.RecipeSearchRequest;
@@ -121,11 +122,12 @@ class FilterRecipesTests extends BaseIntegrationTest {
     @Test
     void filterRecipes_shouldReturnEmptyList_whenNoRecipesOfLoggedInUserExist() throws Exception {
         // Arrange
-        createUser();
-        createAndSaveRecipe(new User("email", "name", List.of()));
+        var user1 = createUser();
+        var user2 = createUserWithId(UserId.create());
+        createAndSaveRecipe(user1);
 
         // Act & Assert
-        performFilter(defaultRequest())
+        performFilterWithPredefinedUserId(defaultRequest(), user2.id())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(0)))
@@ -209,6 +211,16 @@ class FilterRecipesTests extends BaseIntegrationTest {
     private ResultActions performFilter(RecipeSearchRequest request) throws Exception {
         return getMockMvc().perform(post("/api/recipes/filter")
                         .with(validJwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(getMapper().writeValueAsString(request)))
+                .andDo(print());
+    }
+
+    private ResultActions performFilterWithPredefinedUserId(RecipeSearchRequest request,
+                                                            UserId userId) throws Exception {
+        return getMockMvc().perform(post("/api/recipes/filter")
+                        .with(validJwtFromUserId(userId))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(getMapper().writeValueAsString(request)))
