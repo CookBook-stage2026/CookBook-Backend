@@ -2,7 +2,8 @@ package be.xplore.cookbook.rest.controller;
 
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.user.UserId;
-import be.xplore.cookbook.core.domain.user.UserPreferences;
+import be.xplore.cookbook.core.domain.user.command.FindUserPreferencesQuery;
+import be.xplore.cookbook.core.domain.user.command.UpdateUserPreferencesCommand;
 import be.xplore.cookbook.core.service.UserPreferenceService;
 import be.xplore.cookbook.rest.dto.request.UpdateUserPreferencesRequest;
 import be.xplore.cookbook.rest.dto.response.UserPreferencesDto;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -29,38 +31,25 @@ public class UserController {
         this.userPreferenceService = userPreferenceService;
     }
 
-    /**
-     * Gets the preferences of a user
-     *
-     * @param jwt The JWT token of the authenticated user
-     * @return The preferences containing excluded categories and ingredient ids
-     */
     @GetMapping("/preferences")
-    public UserPreferencesDto getPreferences(
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-        UserPreferences preferences = userPreferenceService.findPreferences(getUserIdFromJwt(jwt));
-        return UserPreferencesDto.fromDomain(preferences);
+    public UserPreferencesDto getPreferences(@AuthenticationPrincipal Jwt jwt) {
+        return UserPreferencesDto.fromDomain(
+                userPreferenceService.findPreferences(new FindUserPreferencesQuery(getUserIdFromJwt(jwt)))
+        );
     }
 
-    /**
-     * Updates the preferences of a user
-     *
-     * @param jwt The JWT token of the authenticated user
-     * @param request The new preferences containing excluded category and ingredient ids
-     */
     @PutMapping("/preferences")
     @Transactional
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updatePreferences(
-            @AuthenticationPrincipal Jwt jwt,
-            @Valid @RequestBody UpdateUserPreferencesRequest request
-    ) {
-        userPreferenceService.updatePreferences(
-                getUserIdFromJwt(jwt),
-                request.excludedCategories(),
-                request.excludedIngredientIds().stream().map(IngredientId::new).toList()
-        );
+    public void updatePreferences(@AuthenticationPrincipal Jwt jwt,
+                                  @Valid @RequestBody UpdateUserPreferencesRequest request) {
+        List<IngredientId> excludedIngredientIds = request.excludedIngredientIds().stream()
+                .map(IngredientId::new)
+                .toList();
+
+        userPreferenceService.updatePreferences(new UpdateUserPreferencesCommand(
+                getUserIdFromJwt(jwt), request.excludedCategories(), excludedIngredientIds
+        ));
     }
 
     private UserId getUserIdFromJwt(Jwt jwt) {

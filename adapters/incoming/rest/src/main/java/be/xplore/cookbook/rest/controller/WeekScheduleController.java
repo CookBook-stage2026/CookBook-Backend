@@ -2,9 +2,8 @@ package be.xplore.cookbook.rest.controller;
 
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.user.UserId;
-import be.xplore.cookbook.core.domain.weekschedule.DaySchedule;
-import be.xplore.cookbook.core.domain.weekschedule.DayScheduleId;
-import be.xplore.cookbook.core.service.RecipeService;
+import be.xplore.cookbook.core.domain.weekschedule.command.CreateWeekScheduleCommand;
+import be.xplore.cookbook.core.domain.weekschedule.command.FindWeekScheduleByUserQuery;
 import be.xplore.cookbook.core.service.WeekScheduleService;
 import be.xplore.cookbook.rest.dto.request.CreateWeekScheduleDto;
 import be.xplore.cookbook.rest.dto.response.WeekScheduleDto;
@@ -18,54 +17,37 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/schedules")
 public class WeekScheduleController {
     private final WeekScheduleService service;
-    private final RecipeService recipeService;
 
-    public WeekScheduleController(WeekScheduleService service, RecipeService recipeService) {
+    public WeekScheduleController(WeekScheduleService service) {
         this.service = service;
-        this.recipeService = recipeService;
     }
 
-    /**
-     * Creates a new week schedule based on the given DTO.
-     *
-     * @param dto the new weekSchedule, without an id.
-     * @return The newly created week schedule
-     */
     @PostMapping
     @Transactional
-    public WeekScheduleDto createSchedule(
-            @AuthenticationPrincipal Jwt jwt,
-            @Valid @RequestBody CreateWeekScheduleDto dto
-    ) {
-        UserId userId = new UserId(UUID.fromString(jwt.getSubject()));
+    public WeekScheduleDto createSchedule(@AuthenticationPrincipal Jwt jwt,
+                                          @Valid @RequestBody CreateWeekScheduleDto dto) {
+        UserId userId = getUserIdFromJwt(jwt);
 
-        var daySchedules = dto.days().stream()
-                .map(dayDto -> {
-                    var recipe = recipeService.findById(new RecipeId(dayDto.recipeId()), userId);
-                    return new DaySchedule(DayScheduleId.create(), recipe, dayDto.day());
-                })
+        List<CreateWeekScheduleCommand.DayEntry> days = dto.days().stream()
+                .map(d -> new CreateWeekScheduleCommand.DayEntry(new RecipeId(d.recipeId()), d.day()))
                 .toList();
 
-        var newSchedule = service.saveWeekSchedule(daySchedules, userId);
-
-        return WeekScheduleDto.fromDomain(newSchedule);
+        return WeekScheduleDto.fromDomain(service.saveWeekSchedule(new CreateWeekScheduleCommand(days, userId)));
     }
 
-    /**
-     * Gets the week schedule for the logged-in user
-     *
-     * @return the week schedule for the logged-in user
-     */
     @GetMapping
-    public WeekScheduleDto findForUser(
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-        return WeekScheduleDto.fromDomain(service.findByUserId(new UserId(UUID.fromString(jwt.getSubject()))));
+    public WeekScheduleDto findForUser(@AuthenticationPrincipal Jwt jwt) {
+        return WeekScheduleDto.fromDomain(service.findByUserId(new FindWeekScheduleByUserQuery(getUserIdFromJwt(jwt))));
+    }
+
+    private UserId getUserIdFromJwt(Jwt jwt) {
+        return new UserId(UUID.fromString(jwt.getSubject()));
     }
 }

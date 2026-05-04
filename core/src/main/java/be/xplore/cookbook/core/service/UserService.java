@@ -3,8 +3,10 @@ package be.xplore.cookbook.core.service;
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
 import be.xplore.cookbook.core.domain.user.SocialConnection;
 import be.xplore.cookbook.core.domain.user.User;
-import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
+import be.xplore.cookbook.core.domain.user.command.AutoSaveAfterLoginCommand;
+import be.xplore.cookbook.core.domain.user.command.FindUserByIdQuery;
+import be.xplore.cookbook.core.domain.user.command.FindUserBySocialConnectionQuery;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
 
@@ -20,20 +22,20 @@ public class UserService {
         this.userPreferenceRepository = userPreferenceRepository;
     }
 
-    public Optional<User> findById(UserId id) {
-        if (id == null) {
+    public Optional<User> findById(FindUserByIdQuery query) {
+        if (query.userId() == null) {
             throw new NotFoundException("User ID cannot be null");
         }
-        return userRepository.findById(id);
+        return userRepository.findById(query.userId());
     }
 
-    public Optional<User> findBySocialConnection(String provider, String providerId) {
-        return userRepository.findBySocialConnection(provider, providerId);
+    public Optional<User> findBySocialConnection(FindUserBySocialConnectionQuery query) {
+        return userRepository.findBySocialConnection(query.provider(), query.providerId());
     }
 
-    public User autoSaveAfterLogin(String email, String name, String provider, String providerId) {
-        User user = new User(email, name, new ArrayList<>());
-        user.socialConnections().add(new SocialConnection(provider, providerId));
+    public User autoSaveAfterLogin(AutoSaveAfterLoginCommand command) {
+        User user = new User(command.email(), command.name(), new ArrayList<>());
+        user.socialConnections().add(new SocialConnection(command.provider(), command.providerId()));
         User savedUser = userRepository.save(user);
         userPreferenceRepository.save(UserPreferences.empty(savedUser));
         return savedUser;

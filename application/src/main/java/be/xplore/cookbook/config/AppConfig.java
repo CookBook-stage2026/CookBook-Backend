@@ -56,8 +56,9 @@ public class AppConfig {
     @Transactional(readOnly = true)
     public WeekScheduleService weekScheduleService(
             WeekScheduleRepository weekScheduleRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            RecipeRepository recipeRepository
     ) {
-        return new WeekScheduleService(weekScheduleRepository, userRepository);
+        return new WeekScheduleService(weekScheduleRepository, userRepository, recipeRepository);
     }
 }
