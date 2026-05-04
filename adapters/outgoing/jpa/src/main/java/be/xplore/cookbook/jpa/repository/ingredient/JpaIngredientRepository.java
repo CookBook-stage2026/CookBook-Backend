@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface JpaIngredientRepository extends JpaRepository<JpaIngredientEntity, UUID> {
@@ -26,4 +27,6 @@ public interface JpaIngredientRepository extends JpaRepository<JpaIngredientEnti
             @Param("name") String name,
             @Param("excludedIds") List<UUID> excludedIds,
             Pageable pageable);
+
+    Optional<JpaIngredientEntity> findByNameIgnoreCase(String name);
 }

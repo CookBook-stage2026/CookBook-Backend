@@ -1,5 +1,6 @@
 package be.xplore.cookbook.web.exception;
 
+import be.xplore.cookbook.core.domain.exception.AiClientException;
 import be.xplore.cookbook.core.domain.exception.DataIntegrityException;
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
 import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
@@ -41,6 +42,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
         String responseBody = ex.getMessage();
         return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+    }
+
+    @ExceptionHandler(AiClientException.class)
+    ResponseEntity<Object> handleBadGatewayException(AiClientException ex, WebRequest request) {
+        String responseBody = ex.getMessage();
+        return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.BAD_GATEWAY, request);
     }
 
     @ExceptionHandler(Exception.class)

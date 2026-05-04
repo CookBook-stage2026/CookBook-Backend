@@ -1,5 +1,7 @@
 package be.xplore.cookbook.config;
 
+import be.xplore.cookbook.ai.OllamaProperties;
+import be.xplore.cookbook.core.ai.AiPort;
 import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
@@ -10,11 +12,13 @@ import be.xplore.cookbook.core.service.RecipeService;
 import be.xplore.cookbook.core.service.UserPreferenceService;
 import be.xplore.cookbook.core.service.UserService;
 import be.xplore.cookbook.core.service.WeekScheduleService;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.Transactional;
 
 @Configuration
+@EnableConfigurationProperties(OllamaProperties.class)
 public class AppConfig {
 
     @Bean
@@ -29,9 +33,11 @@ public class AppConfig {
             RecipeRepository recipeRepository,
             IngredientRepository ingredientRepository,
             UserRepository userRepository,
-            UserPreferenceRepository userPreferenceRepository
+            UserPreferenceRepository userPreferenceRepository,
+            AiPort aiPort
     ) {
-        return new RecipeService(recipeRepository, ingredientRepository, userRepository, userPreferenceRepository);
+        return new RecipeService(recipeRepository, ingredientRepository, userRepository,
+                userPreferenceRepository, aiPort);
     }
 
     @Bean

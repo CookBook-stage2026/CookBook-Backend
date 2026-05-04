@@ -1,0 +1,7 @@
+package be.xplore.cookbook.core.domain.exception;
+
+public class AiResponseParsingException extends RuntimeException {
+    public AiResponseParsingException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
