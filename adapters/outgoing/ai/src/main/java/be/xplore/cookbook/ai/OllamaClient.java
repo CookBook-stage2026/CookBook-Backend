@@ -4,6 +4,7 @@ import be.xplore.cookbook.ai.dto.OllamaRequest;
 import be.xplore.cookbook.ai.dto.OllamaResponse;
 import be.xplore.cookbook.core.domain.exception.AiConnectionException;
 import be.xplore.cookbook.core.domain.exception.AiResponseParsingException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -17,7 +18,11 @@ public class OllamaClient {
 
     private final RestClient restClient;
     private final OllamaProperties properties;
-    private static final int CONNECT_TIMEOUT = 5;
+
+    @Value("${ollama.connect-timeout-seconds}")
+    private static final int CONNECT_TIMEOUT = 10;
+
+    @Value("${ollama.read-timeout-seconds:60}")
     private static final int READ_TIMEOUT = 60;
 
     public OllamaClient(OllamaProperties properties) {

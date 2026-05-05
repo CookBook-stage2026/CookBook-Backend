@@ -29,6 +29,7 @@ services:
       - ollama-data:/root/.ollama
       - ./model_files:/model_files
       - ./scripts:/scripts
+    tty: true
     entrypoint: ["/bin/sh", "/scripts/run_ollama.sh"]
     profiles: [ "dev" ]
 

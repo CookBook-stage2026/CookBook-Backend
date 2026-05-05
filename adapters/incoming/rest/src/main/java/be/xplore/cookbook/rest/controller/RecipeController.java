@@ -51,7 +51,7 @@ public class RecipeController {
     @ResponseStatus(HttpStatus.CREATED)
     public RecipeDto createRecipe(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateRecipeDto dto) {
         List<IngredientWithQuantity> ingredientQuantities = dto.ingredients().stream()
-                .map((i) -> new IngredientWithQuantity(
+                .map(i -> new IngredientWithQuantity(
                         new IngredientId(i.ingredientId()), i.baseQuantity()))
                 .toList();
 
@@ -126,7 +126,7 @@ public class RecipeController {
             @Valid @RequestBody UpdateRecipeDto dto
     ) {
         List<IngredientWithQuantity> ingredientQuantities = dto.ingredients().stream()
-                .map((i) -> new IngredientWithQuantity(
+                .map(i -> new IngredientWithQuantity(
                         new IngredientId(i.ingredientId()), i.baseQuantity()))
                 .toList();
 

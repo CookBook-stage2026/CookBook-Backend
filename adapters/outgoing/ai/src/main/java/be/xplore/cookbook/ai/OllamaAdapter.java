@@ -28,14 +28,14 @@ public class OllamaAdapter implements AiPort {
 
     @Override
     public EnhancedRecipeSuggestion enhanceRecipe(Recipe recipe) {
-        String jsonInput = buildJsonInput(recipe);
-        String prompt = buildPrompt(jsonInput);
+        String jsonInput = buildRecipeJsonInput(recipe);
+        String prompt = buildEnhanceRecipePrompt(jsonInput);
         String response = ollamaClient.chat(prompt);
         logger.info(response);
-        return parseResponse(response);
+        return parseEnhanceRecipeResponse(response);
     }
 
-    private String buildJsonInput(Recipe recipe) {
+    private String buildRecipeJsonInput(Recipe recipe) {
         try {
             RecipeInput input = RecipeInput.fromDomain(recipe);
 
@@ -45,7 +45,7 @@ public class OllamaAdapter implements AiPort {
         }
     }
 
-    private String buildPrompt(String jsonInput) {
+    private String buildEnhanceRecipePrompt(String jsonInput) {
         return """
                 You are a professional chef. Please enhance the following recipe.
                 Suggest minor culinary adjustments for better flavor, by adding 1 or 2 ingredients and update the steps.
@@ -79,7 +79,7 @@ public class OllamaAdapter implements AiPort {
                 """.formatted(jsonInput);
     }
 
-    private EnhancedRecipeSuggestion parseResponse(String response) {
+    private EnhancedRecipeSuggestion parseEnhanceRecipeResponse(String response) {
         try {
             var node = mapper.readTree(response);
             var newIngredient = node.get("newIngredient");
