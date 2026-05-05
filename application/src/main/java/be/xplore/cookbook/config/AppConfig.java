@@ -1,10 +1,12 @@
 package be.xplore.cookbook.config;
 
+import be.xplore.cookbook.core.domain.household.HouseholdRepository;
 import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
 import be.xplore.cookbook.core.repository.WeekScheduleRepository;
+import be.xplore.cookbook.core.service.HouseHoldService;
 import be.xplore.cookbook.core.service.IngredientService;
 import be.xplore.cookbook.core.service.RecipeService;
 import be.xplore.cookbook.core.service.UserPreferenceService;
@@ -60,5 +62,14 @@ public class AppConfig {
             RecipeRepository recipeRepository
     ) {
         return new WeekScheduleService(weekScheduleRepository, userRepository, recipeRepository);
+    }
+
+    @Bean
+    @Transactional(readOnly = true)
+    public HouseHoldService houseHoldService(
+            HouseholdRepository houseHoldRepository,
+            UserRepository userRepository
+    ) {
+        return new HouseHoldService(houseHoldRepository, userRepository);
     }
 }

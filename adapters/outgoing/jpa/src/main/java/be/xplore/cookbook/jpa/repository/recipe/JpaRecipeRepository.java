@@ -36,7 +36,11 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
                             WHERE c IN :excludedCategories
                         )
                     )
-                    AND r.user = :user
+                    AND (r.user IN (
+                        SELECT hm FROM JpaHouseholdEntity h
+                        JOIN h.members hm
+                        WHERE :user MEMBER OF h.members OR h.creator = :user
+                    ) OR r.user = :user)
                 GROUP BY r.id
                 HAVING :#{#ingredientIds.size()} = 0 OR COUNT(DISTINCT i.id.ingredientId) >= :#{#ingredientIds.size()}
             """)
@@ -54,7 +58,11 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
                 LOWER(r.name) LIKE LOWER(CONCAT(:name, '%'))
                 OR LOWER(r.name) LIKE LOWER(CONCAT('%', :name, '%'))
             )
-            AND r.user = :user
+            AND (r.user IN (
+                SELECT hm FROM JpaHouseholdEntity h
+                JOIN h.members hm
+                WHERE :user MEMBER OF h.members OR h.creator = :user
+            ) OR r.user = :user)
             ORDER BY
                 CASE WHEN LOWER(r.name) LIKE LOWER(CONCAT(:name, '%')) THEN 0 ELSE 1 END,
                 r.name
