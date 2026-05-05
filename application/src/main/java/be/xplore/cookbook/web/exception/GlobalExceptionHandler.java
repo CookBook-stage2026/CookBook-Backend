@@ -1,6 +1,7 @@
 package be.xplore.cookbook.web.exception;
 
-import be.xplore.cookbook.core.domain.exception.AiClientException;
+import be.xplore.cookbook.core.domain.exception.AiConnectionException;
+import be.xplore.cookbook.core.domain.exception.AiResponseParsingException;
 import be.xplore.cookbook.core.domain.exception.DataIntegrityException;
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
 import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
@@ -17,7 +18,10 @@ import java.nio.file.AccessDeniedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-    @ExceptionHandler({OAuth2Exception.class, UserNotFoundException.class})
+    @ExceptionHandler({
+            OAuth2Exception.class,
+            UserNotFoundException.class
+    })
     ResponseEntity<Object> handleUnauthorizedException(RuntimeException ex, WebRequest request) {
         String responseBody = ex.getMessage();
         return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
@@ -44,10 +48,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
     }
 
-    @ExceptionHandler(AiClientException.class)
-    ResponseEntity<Object> handleBadGatewayException(AiClientException ex, WebRequest request) {
+    @ExceptionHandler(AiResponseParsingException.class)
+    ResponseEntity<Object> handleBadGatewayException(AiResponseParsingException ex, WebRequest request) {
         String responseBody = ex.getMessage();
         return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.BAD_GATEWAY, request);
+    }
+
+    @ExceptionHandler(AiConnectionException.class)
+    ResponseEntity<Object> handleServiceUnavailableException(AiConnectionException ex, WebRequest request) {
+        String responseBody = ex.getMessage();
+        return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(),
+                HttpStatus.SERVICE_UNAVAILABLE, request);
     }
 
     @ExceptionHandler(Exception.class)

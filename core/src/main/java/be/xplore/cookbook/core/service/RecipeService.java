@@ -119,7 +119,7 @@ public class RecipeService {
                 new RecipeDetails(
                         recipe.name(),
                         recipe.description(),
-                        recipe.durationInMinutes(),
+                        suggestion.durationInMinutes(),
                         recipe.servings(),
                         suggestion.updatedSteps()
                 ),
