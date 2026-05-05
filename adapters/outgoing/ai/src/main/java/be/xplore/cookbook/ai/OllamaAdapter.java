@@ -1,5 +1,6 @@
 package be.xplore.cookbook.ai;
 
+import be.xplore.cookbook.ai.dto.RecipeInput;
 import be.xplore.cookbook.core.ai.AiPort;
 import be.xplore.cookbook.core.ai.EnhancedRecipeSuggestion;
 import be.xplore.cookbook.core.domain.exception.AiResponseParsingException;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 @Component
@@ -37,19 +37,9 @@ public class OllamaAdapter implements AiPort {
 
     private String buildJsonInput(Recipe recipe) {
         try {
-            var recipeInput = Map.of(
-                    "name", recipe.name(),
-                    "ingredients", recipe.ingredients().stream().map(ri -> Map.of(
-                            "name", ri.ingredient().name(),
-                            "quantity", ri.baseQuantity(),
-                            "unit", ri.ingredient().unit().name(),
-                            "categories", ri.ingredient().categories().stream().map(Enum::name).toList()
-                    )).toList(),
-                    "steps", recipe.steps(),
-                    "servings", recipe.servings()
-            );
+            RecipeInput input = RecipeInput.fromDomain(recipe);
 
-            return mapper.writeValueAsString(recipeInput);
+            return mapper.writeValueAsString(input);
         } catch (Exception e) {
             throw new AiResponseParsingException("Failed to serialize recipe for AI", e);
         }

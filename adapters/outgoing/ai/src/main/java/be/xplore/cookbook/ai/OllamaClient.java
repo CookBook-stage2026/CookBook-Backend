@@ -2,11 +2,13 @@ package be.xplore.cookbook.ai;
 
 import be.xplore.cookbook.ai.dto.OllamaRequest;
 import be.xplore.cookbook.ai.dto.OllamaResponse;
-import be.xplore.cookbook.core.domain.exception.AiClientException;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import be.xplore.cookbook.core.domain.exception.AiConnectionException;
+import be.xplore.cookbook.core.domain.exception.AiResponseParsingException;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.List;
 
@@ -21,13 +23,17 @@ public class OllamaClient {
     public OllamaClient(OllamaProperties properties) {
         this.properties = properties;
 
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setReadTimeout(Duration.ofSeconds(READ_TIMEOUT));
-        factory.setConnectTimeout(Duration.ofSeconds(CONNECT_TIMEOUT));
+        HttpClient httpClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .connectTimeout(Duration.ofSeconds(CONNECT_TIMEOUT))
+                .build();
+
+        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
+        requestFactory.setReadTimeout(Duration.ofSeconds(READ_TIMEOUT));
 
         this.restClient = RestClient.builder()
                 .baseUrl(properties.baseUrl())
-                .requestFactory(factory)
+                .requestFactory(requestFactory)
                 .build();
     }
 
@@ -38,16 +44,22 @@ public class OllamaClient {
                 false
         );
 
-        OllamaResponse response = restClient.post()
-                .uri("/api/chat")
-                .body(request)
-                .retrieve()
-                .body(OllamaResponse.class);
+        try {
+            OllamaResponse response = restClient.post()
+                    .uri("/api/chat")
+                    .body(request)
+                    .retrieve()
+                    .body(OllamaResponse.class);
 
-        if (response == null || response.message() == null || response.message().content() == null) {
-            throw new AiClientException("Ollama returned invalid response");
+            if (response == null || response.message() == null || response.message().content() == null) {
+                throw new AiResponseParsingException("AI returned invalid response");
+            }
+
+            return response.message().content();
+        } catch (AiResponseParsingException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AiConnectionException("AI service is unreachable", e);
         }
-
-        return response.message().content();
     }
 }
