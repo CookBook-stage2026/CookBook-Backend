@@ -1,13 +1,13 @@
 #!/bin/bash
 
 echo "Starting Ollama server..."
-/bin/ollama serve &
+ollama serve &
 
 echo "Waiting for Ollama server to start..."
 sleep 5
 
 echo "Pulling model..."
-/bin/ollama run "${OLLAMA_MODEL:-llama3.2:3b}"
+ollama create finetuned_llama -f /model_files/Modelfile
+ollama run finetuned_llama
 
 echo "Model is ready."
-wait

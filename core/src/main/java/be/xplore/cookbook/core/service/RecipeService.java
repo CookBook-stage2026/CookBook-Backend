@@ -16,6 +16,7 @@ import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FindRecipeByIdQuery;
+import be.xplore.cookbook.core.domain.recipe.command.IngredientWithQuantity;
 import be.xplore.cookbook.core.domain.recipe.command.SearchRecipesByNameQuery;
 import be.xplore.cookbook.core.domain.recipe.command.UpdateRecipeCommand;
 import be.xplore.cookbook.core.domain.user.User;
@@ -28,7 +29,6 @@ import be.xplore.cookbook.core.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class RecipeService {
     private final RecipeRepository recipeRepository;
@@ -51,20 +51,11 @@ public class RecipeService {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(command.userId()::notFound);
 
-        List<Ingredient> foundIngredients = ingredientRepository.findByIds(
-                command.ingredientQuantities().keySet().stream().toList());
-
-        if (foundIngredients.size() != command.ingredientQuantities().size()) {
-            throw new DataIntegrityException("One or more ingredients do not exist");
-        }
-
-        List<RecipeIngredient> recipeIngredients = foundIngredients.stream()
-                .map(ingredient ->
-                        new RecipeIngredient(ingredient, command.ingredientQuantities().get(ingredient.id())))
-                .toList();
-
-        return recipeRepository.save(new Recipe(RecipeId.create(), command.details(),
-                recipeIngredients, user
+        return recipeRepository.save(new Recipe(
+                RecipeId.create(),
+                command.details(),
+                mapToRecipeIngredients(command.ingredientQuantities()),
+                user
         ));
     }
 
@@ -145,17 +136,23 @@ public class RecipeService {
         ));
     }
 
-    private List<RecipeIngredient> mapToRecipeIngredients(Map<IngredientId, Double> ingredientQuantities) {
+    private List<RecipeIngredient> mapToRecipeIngredients(List<IngredientWithQuantity> ingredientQuantities) {
         List<Ingredient> foundIngredients = ingredientRepository.findByIds(
-                ingredientQuantities.keySet().stream().toList());
+                ingredientQuantities.stream().map(IngredientWithQuantity::ingredientId).toList());
 
         if (foundIngredients.size() != ingredientQuantities.size()) {
             throw new DataIntegrityException("One or more ingredients do not exist");
         }
 
-        return foundIngredients.stream()
-                .map(ingredient ->
-                        new RecipeIngredient(ingredient, ingredientQuantities.get(ingredient.id())))
+        return ingredientQuantities.stream()
+                .map(iwq -> {
+                    Ingredient ingredient = foundIngredients.stream()
+                            .filter(i -> i.id().equals(iwq.ingredientId()))
+                            .findFirst()
+                            .orElseThrow(() ->
+                                    new DataIntegrityException("Ingredient not found: " + iwq.ingredientId()));
+                    return new RecipeIngredient(ingredient, iwq.quantity());
+                })
                 .toList();
     }
 }

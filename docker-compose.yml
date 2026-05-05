@@ -22,20 +22,14 @@ services:
     profiles: [ "deploy" ]
 
   ollama:
-    build:
-      context: .
-      dockerfile: Dockerfile.ollama
+    image: ollama/ollama:latest
     ports:
       - "11434:11434"
     volumes:
       - ollama-data:/root/.ollama
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:11434/api/tags" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 60s
+      - ./model_files:/model_files
+      - ./scripts:/scripts
+    entrypoint: ["/bin/sh", "/scripts/run_ollama.sh"]
     profiles: [ "dev" ]
 
 volumes:

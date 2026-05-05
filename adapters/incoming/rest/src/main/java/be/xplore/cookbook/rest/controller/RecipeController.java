@@ -8,12 +8,12 @@ import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FindRecipeByIdQuery;
+import be.xplore.cookbook.core.domain.recipe.command.IngredientWithQuantity;
 import be.xplore.cookbook.core.domain.recipe.command.SearchRecipesByNameQuery;
 import be.xplore.cookbook.core.domain.recipe.command.UpdateRecipeCommand;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.service.RecipeService;
 import be.xplore.cookbook.rest.dto.request.CreateRecipeDto;
-import be.xplore.cookbook.rest.dto.request.NewRecipeIngredientDto;
 import be.xplore.cookbook.rest.dto.request.RecipeSearchRequest;
 import be.xplore.cookbook.rest.dto.request.UpdateRecipeDto;
 import be.xplore.cookbook.rest.dto.response.PaginatedResponse;
@@ -35,9 +35,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/recipes")
@@ -52,10 +50,10 @@ public class RecipeController {
     @Transactional
     @ResponseStatus(HttpStatus.CREATED)
     public RecipeDto createRecipe(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateRecipeDto dto) {
-        Map<IngredientId, Double> ingredientQuantities = dto.ingredients().stream()
-                .collect(Collectors.toMap(
-                        i -> new IngredientId(i.ingredientId()), NewRecipeIngredientDto::baseQuantity
-                ));
+        List<IngredientWithQuantity> ingredientQuantities = dto.ingredients().stream()
+                .map((i) -> new IngredientWithQuantity(
+                        new IngredientId(i.ingredientId()), i.baseQuantity()))
+                .toList();
 
         Recipe recipe = recipeService.createRecipe(new CreateRecipeCommand(
                 new RecipeDetails(dto.name(), dto.description(), dto.durationInMinutes(), dto.servings(), dto.steps()),
@@ -81,7 +79,7 @@ public class RecipeController {
 
         var result = recipeService.findAllSummariesWithFilter(new FilterRecipesQuery(
                 ingredients, new Paging(
-                        request.page(), request.size()), request.shouldApplyPreferences(), getUserIdFromJwt(jwt)
+                request.page(), request.size()), request.shouldApplyPreferences(), getUserIdFromJwt(jwt)
         ));
 
         return new PaginatedResponse<>(
@@ -127,12 +125,10 @@ public class RecipeController {
             @PathVariable UUID id,
             @Valid @RequestBody UpdateRecipeDto dto
     ) {
-        Map<IngredientId, Double> ingredientQuantities = dto.ingredients().stream()
-                .collect(Collectors.toMap(
-                        i -> new IngredientId(i.ingredientId()),
-                        NewRecipeIngredientDto::baseQuantity,
-                        Double::sum
-                ));
+        List<IngredientWithQuantity> ingredientQuantities = dto.ingredients().stream()
+                .map((i) -> new IngredientWithQuantity(
+                        new IngredientId(i.ingredientId()), i.baseQuantity()))
+                .toList();
 
         recipeService.updateRecipe(new UpdateRecipeCommand(
                 new RecipeId(id),
