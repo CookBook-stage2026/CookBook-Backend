@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class FilterRecipesTests extends BaseIntegrationTest {
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int NUMBER_OF_RECIPES = 3;
 
     @Override
     protected String[] getTablesToClear() {
@@ -201,6 +203,138 @@ class FilterRecipesTests extends BaseIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].id").value(expected.getId().id().toString()))
+                .andExpect(jsonPath("$.page.totalElements").value(1));
+    }
+
+    @Test
+    void filterRecipes_shouldReturnRecipesFromHouseholdMembers_whenUserIsInHousehold() throws Exception {
+        // Arrange
+        User user1 = createUser();
+        User user2 = createUserWithId(UserId.create());
+        User user3 = createUserWithId(UserId.create());
+
+        List<User> householdMembers = new ArrayList<>();
+        householdMembers.add(user2);
+        householdMembers.add(user3);
+
+        createHouseholdWithMembers(householdMembers, user1);
+
+        Recipe recipeByUser1 = createAndSaveRecipe(user1);
+        Recipe recipeByUser2 = createAndSaveRecipe(user2);
+        Recipe recipeByUser3 = createAndSaveRecipe(user3);
+
+        // Act & Assert
+        performFilterWithPredefinedUserId(defaultRequest(), user1.id())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(NUMBER_OF_RECIPES)))
+                .andExpect(jsonPath("$.content[*].id", hasItems(
+                        recipeByUser1.getId().id().toString(),
+                        recipeByUser2.getId().id().toString(),
+                        recipeByUser3.getId().id().toString()
+                )))
+                .andExpect(jsonPath("$.page.totalElements").value(NUMBER_OF_RECIPES));
+    }
+
+    @Test
+    void filterRecipes_shouldNotReturnRecipesFromNonHouseholdMembers_whenUserIsInHousehold() throws Exception {
+        // Arrange
+        User user1 = createUser();
+        User user2 = createUserWithId(UserId.create());
+        User userOutsideHousehold = createUserWithId(UserId.create());
+
+        List<User> householdMembers = new ArrayList<>();
+        householdMembers.add(user2);
+
+        createHouseholdWithMembers(householdMembers, user1);
+
+        Recipe recipeByUser1 = createAndSaveRecipe(user1);
+        createAndSaveRecipe(userOutsideHousehold);
+
+        // Act & Assert
+        performFilterWithPredefinedUserId(defaultRequest(), user1.id())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id").value(recipeByUser1.getId().id().toString()))
+                .andExpect(jsonPath("$.page.totalElements").value(1));
+    }
+
+    @Test
+    void filterRecipes_shouldReturnOnlyOwnRecipes_whenUserIsNotInAnyHousehold() throws Exception {
+        // Arrange
+        User user1 = createUser();
+        User user2 = createUserWithId(UserId.create());
+
+        Recipe recipeByUser1 = createAndSaveRecipe(user1);
+        createAndSaveRecipe(user2);
+
+        // Act & Assert
+        performFilterWithPredefinedUserId(defaultRequest(), user1.id())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id").value(recipeByUser1.getId().id().toString()))
+                .andExpect(jsonPath("$.page.totalElements").value(1));
+    }
+
+    @Test
+    void filterRecipes_shouldApplyIngredientFilterAcrossHouseholdMembers() throws Exception {
+        // Arrange
+        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN);
+        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN);
+
+        User user1 = createUser();
+        User user2 = createUserWithId(UserId.create());
+
+
+        List<User> householdMembers = new ArrayList<>();
+        householdMembers.add(user2);
+
+        createHouseholdWithMembers(householdMembers, user1);
+
+        Recipe recipeByUser1 = createAndSaveRecipeWithIngredients(List.of(flour), user1);
+        createAndSaveRecipeWithIngredients(List.of(sugar), user2);
+
+        RecipeSearchRequest dto = new RecipeSearchRequest(
+                List.of(flour.id().id()),
+                true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE
+        );
+
+        // Act & Assert
+        performFilterWithPredefinedUserId(dto, user1.id())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id").value(recipeByUser1.getId().id().toString()))
+                .andExpect(jsonPath("$.page.totalElements").value(1));
+    }
+
+    @Test
+    void filterRecipes_shouldApplyExclusionPreferencesAcrossHouseholdMembers() throws Exception {
+        // Arrange
+        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN);
+        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN);
+
+        User user1 = createUser();
+        User user2 = createUserWithId(UserId.create());
+
+        List<User> householdMembers = new ArrayList<>();
+        householdMembers.add(user2);
+
+        createHouseholdWithMembers(householdMembers, user1);
+
+        getUserPreferenceRepository().save(new UserPreferences(
+                user1,
+                List.of(),
+                List.of(flour)
+        ));
+
+        createAndSaveRecipeWithIngredients(List.of(flour), user1);
+        createAndSaveRecipeWithIngredients(List.of(flour), user2);
+        Recipe nonExcludedRecipe = createAndSaveRecipeWithIngredients(List.of(sugar), user2);
+
+        // Act & Assert
+        performFilterWithPredefinedUserId(defaultRequest(), user1.id())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id").value(nonExcludedRecipe.getId().id().toString()))
                 .andExpect(jsonPath("$.page.totalElements").value(1));
     }
 

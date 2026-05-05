@@ -1,9 +1,14 @@
 package be.xplore.cookbook.rest.controller.recipeController;
 
+import be.xplore.cookbook.core.domain.user.User;
+import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -176,6 +181,103 @@ class SearchRecipeSummariesTests extends BaseIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    @Test
+    void searchRecipeSummaries_shouldReturnRecipesFromHouseholdMembers_whenUserIsInHousehold() throws Exception {
+        // Arrange
+        var user1 = createUser();
+        var user2 = createUserWithId(UserId.create());
+        var user3 = createUserWithId(UserId.create());
+        List<User> householdMembers = new ArrayList<>();
+        householdMembers.add(user2);
+        householdMembers.add(user3);
+
+        createHouseholdWithMembers(householdMembers, user1);
+
+        createAndSaveRecipe(user1);
+        createAndSaveRecipe(user2);
+        createAndSaveRecipe(user3);
+
+        String query = "Test";
+
+        // Act & Assert
+        performSearchAsUser(query, 0, DEFAULT_PAGE_SIZE, user1.id())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(DEFAULT_SIZE)));
+    }
+
+    @Test
+    void searchRecipeSummaries_shouldNotReturnRecipesFromNonHouseholdMembers_whenUserIsInHousehold() throws Exception {
+        // Arrange
+        var user1 = createUser();
+        var user2 = createUserWithId(UserId.create());
+        var userOutsideHousehold = createUserWithId(UserId.create());
+
+        List<User> householdMembers = new ArrayList<>();
+        householdMembers.add(user2);
+
+        createHouseholdWithMembers(householdMembers, user1);
+
+        createAndSaveRecipe(user1);
+        createAndSaveRecipe(userOutsideHousehold);
+
+        String query = "Test";
+
+        // Act & Assert
+        performSearchAsUser(query, 0, DEFAULT_PAGE_SIZE, user1.id())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].name").value("Test Name"));
+    }
+
+    @Test
+    void searchRecipeSummaries_shouldReturnOnlyOwnRecipes_whenUserIsNotInAnyHousehold() throws Exception {
+        // Arrange
+        var user1 = createUser();
+        var user2 = createUserWithId(UserId.create());
+
+        createAndSaveRecipe(user1);
+        createAndSaveRecipe(user2);
+
+        String query = "Test";
+
+        // Act & Assert
+        performSearchAsUser(query, 0, DEFAULT_PAGE_SIZE, user1.id())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void searchRecipeSummaries_shouldBeCaseInsensitiveForHouseholdRecipes_whenSearching() throws Exception {
+        // Arrange
+        var user1 = createUser();
+        var user2 = createUserWithId(UserId.create());
+
+        List<User> householdMembers = new ArrayList<>();
+        householdMembers.add(user2);
+
+        createHouseholdWithMembers(householdMembers, user1);
+
+        createAndSaveRecipe(user1);
+        createAndSaveRecipe(user2);
+
+        String query = "test";
+
+        // Act & Assert
+        performSearchAsUser(query, 0, DEFAULT_PAGE_SIZE, user1.id())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    private ResultActions performSearchAsUser(String query, int page, int size, UserId userId) throws Exception {
+        return getMockMvc().perform(get("/api/recipes/search")
+                        .with(validJwtFromUserId(userId))
+                        .with(csrf())
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size))
+                        .param("query", query))
+                .andDo(print());
     }
 
     private ResultActions performSearch(String query, int page, int size) throws Exception {
