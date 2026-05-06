@@ -4,6 +4,7 @@ import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.weekschedule.WeekScheduleId;
 import be.xplore.cookbook.core.domain.weekschedule.command.CreateWeekScheduleCommand;
+import be.xplore.cookbook.core.domain.weekschedule.command.DayEntry;
 import be.xplore.cookbook.core.domain.weekschedule.command.FindWeekSchedulesByUserQuery;
 import be.xplore.cookbook.core.domain.weekschedule.command.UpdateWeekScheduleCommand;
 import be.xplore.cookbook.core.service.WeekScheduleService;
@@ -44,8 +45,8 @@ public class WeekScheduleController {
                                           @Valid @RequestBody CreateWeekScheduleDto dto) {
         UserId userId = getUserIdFromJwt(jwt);
 
-        List<CreateWeekScheduleCommand.DayEntry> days = dto.days().stream()
-                .map(d -> new CreateWeekScheduleCommand.DayEntry(
+        List<DayEntry> days = dto.days().stream()
+                .map(d -> new DayEntry(
                         new RecipeId(d.recipeId()), d.day()))
                 .toList();
 
@@ -60,8 +61,8 @@ public class WeekScheduleController {
                                @Valid @RequestBody UpdateWeekScheduleDto dto) {
         UserId userId = getUserIdFromJwt(jwt);
 
-        List<UpdateWeekScheduleCommand.DayEntry> days = dto.days().stream()
-                .map(d -> new UpdateWeekScheduleCommand.DayEntry(
+        List<DayEntry> days = dto.days().stream()
+                .map(d -> new DayEntry(
                         new RecipeId(d.recipeId()), d.day()))
                 .toList();
 
