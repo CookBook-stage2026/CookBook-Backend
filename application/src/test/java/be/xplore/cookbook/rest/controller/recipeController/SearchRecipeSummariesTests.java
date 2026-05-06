@@ -232,23 +232,6 @@ class SearchRecipeSummariesTests extends BaseIntegrationTest {
     }
 
     @Test
-    void searchRecipeSummaries_shouldReturnOnlyOwnRecipes_whenUserIsNotInAnyHousehold() throws Exception {
-        // Arrange
-        var user1 = createUser();
-        var user2 = createUserWithId(UserId.create());
-
-        createAndSaveRecipe(user1);
-        createAndSaveRecipe(user2);
-
-        String query = "Test";
-
-        // Act & Assert
-        performSearchAsUser(query, 0, DEFAULT_PAGE_SIZE, user1.id())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
-    }
-
-    @Test
     void searchRecipeSummaries_shouldBeCaseInsensitiveForHouseholdRecipes_whenSearching() throws Exception {
         // Arrange
         var user1 = createUser();

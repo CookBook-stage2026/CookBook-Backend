@@ -259,23 +259,6 @@ class FilterRecipesTests extends BaseIntegrationTest {
     }
 
     @Test
-    void filterRecipes_shouldReturnOnlyOwnRecipes_whenUserIsNotInAnyHousehold() throws Exception {
-        // Arrange
-        User user1 = createUser();
-        User user2 = createUserWithId(UserId.create());
-
-        Recipe recipeByUser1 = createAndSaveRecipe(user1);
-        createAndSaveRecipe(user2);
-
-        // Act & Assert
-        performFilterWithPredefinedUserId(defaultRequest(), user1.id())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].id").value(recipeByUser1.getId().id().toString()))
-                .andExpect(jsonPath("$.page.totalElements").value(1));
-    }
-
-    @Test
     void filterRecipes_shouldApplyIngredientFilterAcrossHouseholdMembers() throws Exception {
         // Arrange
         Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN);

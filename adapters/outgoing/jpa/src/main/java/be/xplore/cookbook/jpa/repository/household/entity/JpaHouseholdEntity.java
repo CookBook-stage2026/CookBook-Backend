@@ -5,6 +5,7 @@ import be.xplore.cookbook.core.domain.household.HouseholdId;
 import be.xplore.cookbook.jpa.repository.user.entity.JpaUserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
@@ -19,7 +20,7 @@ public class JpaHouseholdEntity {
     @Id
     private UUID id;
 
-    @Column
+    @Column(nullable = false)
     private String name;
 
     @Column
@@ -28,7 +29,7 @@ public class JpaHouseholdEntity {
     @ManyToMany
     private List<JpaUserEntity> members;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private JpaUserEntity creator;
 
     protected JpaHouseholdEntity() {
