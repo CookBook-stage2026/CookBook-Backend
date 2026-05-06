@@ -4,7 +4,13 @@ plugins {
     id 'io.spring.dependency-management'
 }
 
-group 'be.xplore.cookbook'
+group = 'be.xplore.cookbook'
+
+dependencyManagement {
+    imports {
+        mavenBom "dev.langchain4j:langchain4j-bom:1.14.0"
+    }
+}
 
 dependencies {
     implementation project(":core")
