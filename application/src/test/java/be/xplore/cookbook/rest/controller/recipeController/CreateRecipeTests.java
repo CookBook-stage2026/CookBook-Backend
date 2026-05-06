@@ -5,7 +5,7 @@ import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
 import be.xplore.cookbook.rest.dto.request.CreateRecipeDto;
-import be.xplore.cookbook.rest.dto.request.CreateRecipeIngredientDto;
+import be.xplore.cookbook.rest.dto.request.NewRecipeIngredientDto;
 import be.xplore.cookbook.rest.dto.response.RecipeDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -42,8 +42,8 @@ class CreateRecipeTests extends BaseIntegrationTest {
         Ingredient eggs = createAndSaveIngredient("Eggs");
 
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
-                new CreateRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY),
-                new CreateRecipeIngredientDto(eggs.id().id(), 2.0)
+                new NewRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY),
+                new NewRecipeIngredientDto(eggs.id().id(), 2.0)
         ));
 
         User user = createUser();
@@ -107,7 +107,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
                 "Test Description",
                 MINUTES_IN_HOUR,
                 List.of("This is step 1", "This is step 2"),
-                List.of(new CreateRecipeIngredientDto(flour.id().id(), -1.0)),
+                List.of(new NewRecipeIngredientDto(flour.id().id(), -1.0)),
                 2
         );
 
@@ -122,7 +122,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
     void createRecipe_shouldReturn400_whenIngredientDoesNotExist() throws Exception {
         // Arrange
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
-                new CreateRecipeIngredientDto(UUID.randomUUID(), DEFAULT_QUANTITY)
+                new NewRecipeIngredientDto(UUID.randomUUID(), DEFAULT_QUANTITY)
         ));
 
         createUser();
@@ -138,7 +138,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
         Ingredient flour = createAndSaveIngredient("Flour");
 
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
-                new CreateRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY)
+                new NewRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY)
         ));
 
         // Act & Assert
@@ -149,7 +149,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    private CreateRecipeDto buildCreateRecipeDto(List<CreateRecipeIngredientDto> ingredients) {
+    private CreateRecipeDto buildCreateRecipeDto(List<NewRecipeIngredientDto> ingredients) {
         return new CreateRecipeDto(
                 "Test Name",
                 "Test Description",

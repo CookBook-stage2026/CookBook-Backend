@@ -11,6 +11,7 @@ services:
       - SPRING_PROFILES_ACTIVE=deploy
     volumes:
       - db-data:/app/data
+    profiles: [ "deploy" ]
 
   frontend:
     image: cookbook-frontend
@@ -18,6 +19,20 @@ services:
       - "80:8081"
     depends_on:
       - backend
+    profiles: [ "deploy" ]
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+      - ./model_files:/model_files
+      - ./scripts:/scripts
+    tty: true
+    entrypoint: ["/bin/sh", "/scripts/run_ollama.sh"]
+    profiles: [ "dev" ]
 
 volumes:
   db-data:
+  ollama-data:

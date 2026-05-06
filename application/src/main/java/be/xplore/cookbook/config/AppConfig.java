@@ -1,5 +1,6 @@
 package be.xplore.cookbook.config;
 
+import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
 import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
@@ -29,9 +30,11 @@ public class AppConfig {
             RecipeRepository recipeRepository,
             IngredientRepository ingredientRepository,
             UserRepository userRepository,
-            UserPreferenceRepository userPreferenceRepository
+            UserPreferenceRepository userPreferenceRepository,
+            RecipeSuggestionsPort aiPort
     ) {
-        return new RecipeService(recipeRepository, ingredientRepository, userRepository, userPreferenceRepository);
+        return new RecipeService(recipeRepository, ingredientRepository, userRepository,
+                userPreferenceRepository, aiPort);
     }
 
     @Bean

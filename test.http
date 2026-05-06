@@ -1,0 +1,15 @@
+POST http://localhost:11434/api/generate
+Content-Type: application/json
+
+{
+  "model": "llama3.2:3b",
+  "prompt": "say hello",
+  "stream": false
+}
+
+
+### Enhance Spaghetti Carbonara
+GET http://localhost:8080/api/recipes/1ecba55b-a63c-43f6-a849-d736e6773f2d/enhance
+Cookie: access_token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxODI0MDU4Yi0xNzYyLTRlNjMtOWExMi1mYTY4ZDk4Mzc2YjQiLCJlbWFpbCI6ImRvbmFsZGR1Y2tpZTMxM0BnbWFpbC5jb20iLCJuYW1lIjoiQW5vbnltb3VzIiwiaWF0IjoxNzc3OTA0NTA4LCJleHAiOjE3Nzc5MDgxMDh9.An3HhsjHIICPKJdaPpE0EubKoGz_hhL2WsK5ev7qXZVeEniFSZAxiO2PfKEDqTWmo2LO3p1zJPpvbPocVUX4Mw
+
+Accept: application/json

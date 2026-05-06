@@ -1,24 +1,33 @@
 package be.xplore.cookbook.core.service;
 
+import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
+import be.xplore.cookbook.core.port.recipe.SuggestedRecipeEnhancement;
 import be.xplore.cookbook.core.common.PagedResult;
 import be.xplore.cookbook.core.domain.exception.DataIntegrityException;
+import be.xplore.cookbook.core.domain.exception.NotFoundException;
 import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
+import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
+import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeIngredient;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FindRecipeByIdQuery;
+import be.xplore.cookbook.core.domain.recipe.command.IngredientWithQuantity;
 import be.xplore.cookbook.core.domain.recipe.command.SearchRecipesByNameQuery;
+import be.xplore.cookbook.core.domain.recipe.command.UpdateRecipeCommand;
 import be.xplore.cookbook.core.domain.user.User;
+import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecipeService {
@@ -26,33 +35,27 @@ public class RecipeService {
     private final IngredientRepository ingredientRepository;
     private final UserRepository userRepository;
     private final UserPreferenceRepository userPreferenceRepository;
+    private final RecipeSuggestionsPort aiPort;
 
     public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository,
-                         UserRepository userRepository, UserPreferenceRepository userPreferenceRepository) {
+                         UserRepository userRepository, UserPreferenceRepository userPreferenceRepository,
+                         RecipeSuggestionsPort aiPort) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
         this.userRepository = userRepository;
         this.userPreferenceRepository = userPreferenceRepository;
+        this.aiPort = aiPort;
     }
 
     public Recipe createRecipe(CreateRecipeCommand command) {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(command.userId()::notFound);
 
-        List<Ingredient> foundIngredients = ingredientRepository.findByIds(
-                command.ingredientQuantities().keySet().stream().toList());
-
-        if (foundIngredients.size() != command.ingredientQuantities().size()) {
-            throw new DataIntegrityException("One or more ingredients do not exist");
-        }
-
-        List<RecipeIngredient> recipeIngredients = foundIngredients.stream()
-                .map(ingredient ->
-                        new RecipeIngredient(ingredient, command.ingredientQuantities().get(ingredient.id())))
-                .toList();
-
-        return recipeRepository.save(new Recipe(RecipeId.create(), command.details(),
-                recipeIngredients, user
+        return recipeRepository.save(new Recipe(
+                RecipeId.create(),
+                command.details(),
+                mapToRecipeIngredients(command.ingredientQuantities()),
+                user
         ));
     }
 
@@ -79,5 +82,77 @@ public class RecipeService {
     public List<RecipeSummary> searchSummariesByName(SearchRecipesByNameQuery query) {
         var user = userRepository.findById(query.userId()).orElseThrow(UserNotFoundException::new);
         return recipeRepository.querySummaries(query.paging(), user, query.query());
+    }
+
+    public Recipe enhanceRecipe(RecipeId recipeId, UserId userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        Recipe recipe = recipeRepository.findById(recipeId, user.id())
+                .orElseThrow(() -> new NotFoundException("Recipe not found"));
+
+        SuggestedRecipeEnhancement suggestion = aiPort.enhanceRecipe(recipe);
+
+        Ingredient ingredient = ingredientRepository
+                .findByNameIgnoreCase(suggestion.newIngredient().name())
+                .orElseGet(() -> ingredientRepository.save(new Ingredient(
+                        IngredientId.create(),
+                        suggestion.newIngredient().name(),
+                        suggestion.newIngredient().unit(),
+                        suggestion.newIngredient().categories()
+                )));
+
+        RecipeIngredient newRecipeIngredient = new RecipeIngredient(ingredient, suggestion.newIngredient().quantity());
+
+        List<RecipeIngredient> updatedIngredients = new ArrayList<>(recipe.ingredients());
+        updatedIngredients.add(newRecipeIngredient);
+
+        return new Recipe(
+                recipe.id(),
+                new RecipeDetails(
+                        recipe.name(),
+                        recipe.description(),
+                        suggestion.durationInMinutes(),
+                        recipe.servings(),
+                        suggestion.updatedSteps()
+                ),
+                updatedIngredients,
+                recipe.user()
+        );
+    }
+
+    public void updateRecipe(UpdateRecipeCommand command) {
+        User user = userRepository.findById(command.userId())
+                .orElseThrow(command.userId()::notFound);
+
+        recipeRepository.findById(command.id(), user.id())
+                .orElseThrow(() -> new NotFoundException("Recipe not found"));
+
+        recipeRepository.save(new Recipe(
+                command.id(),
+                command.details(),
+                mapToRecipeIngredients(command.ingredientQuantities()),
+                user
+        ));
+    }
+
+    private List<RecipeIngredient> mapToRecipeIngredients(List<IngredientWithQuantity> ingredientQuantities) {
+        List<Ingredient> foundIngredients = ingredientRepository.findByIds(
+                ingredientQuantities.stream().map(IngredientWithQuantity::ingredientId).toList());
+
+        if (foundIngredients.size() != ingredientQuantities.size()) {
+            throw new DataIntegrityException("One or more ingredients do not exist");
+        }
+
+        return ingredientQuantities.stream()
+                .map(iwq -> {
+                    Ingredient ingredient = foundIngredients.stream()
+                            .filter(i -> i.id().equals(iwq.ingredientId()))
+                            .findFirst()
+                            .orElseThrow(() ->
+                                    new DataIntegrityException("Ingredient not found: " + iwq.ingredientId()));
+                    return new RecipeIngredient(ingredient, iwq.quantity());
+                })
+                .toList();
     }
 }

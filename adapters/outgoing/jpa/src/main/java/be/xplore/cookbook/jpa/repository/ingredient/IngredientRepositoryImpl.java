@@ -56,4 +56,10 @@ public class IngredientRepositoryImpl implements IngredientRepository {
                 .map(JpaIngredientEntity::toDomainWithoutCategories)
                 .toList();
     }
+
+    @Override
+    public Optional<Ingredient> findByNameIgnoreCase(String name) {
+        return jpaIngredientRepository.findByNameIgnoreCase(name)
+                .map(JpaIngredientEntity::toDomainWithoutCategories);
+    }
 }
