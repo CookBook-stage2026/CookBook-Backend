@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -127,13 +128,12 @@ public abstract class BaseIntegrationTest {
 
     protected abstract String[] getTablesToClear();
 
-    protected void seedWeekSchedule(User user, Map<DayOfWeek, Recipe> dailyRecipes) {
+    protected void seedWeekSchedule(User user, Map<DayOfWeek, Recipe> dailyRecipes, LocalDate weekStartDate) {
         List<DaySchedule> daySchedules = new ArrayList<>();
         dailyRecipes.forEach((day, recipe) ->
                 daySchedules.add(new DaySchedule(DayScheduleId.create(), recipe, day))
         );
-
-        WeekSchedule weekSchedule = new WeekSchedule(WeekScheduleId.create(), user, daySchedules);
+        WeekSchedule weekSchedule = new WeekSchedule(WeekScheduleId.create(), user, weekStartDate, daySchedules);
         getWeekScheduleRepository().save(weekSchedule);
     }
 
