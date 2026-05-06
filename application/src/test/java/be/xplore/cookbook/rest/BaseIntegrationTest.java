@@ -1,5 +1,8 @@
 package be.xplore.cookbook.rest;
 
+import be.xplore.cookbook.core.domain.household.Household;
+import be.xplore.cookbook.core.domain.household.HouseholdId;
+import be.xplore.cookbook.core.domain.household.HouseholdRepository;
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
@@ -76,6 +79,9 @@ public abstract class BaseIntegrationTest {
     private WeekScheduleRepository weekScheduleRepository;
 
     @Autowired
+    private HouseholdRepository householdRepository;
+
+    @Autowired
     private JsonMapper mapper;
 
     @BeforeEach
@@ -111,6 +117,10 @@ public abstract class BaseIntegrationTest {
         return weekScheduleRepository;
     }
 
+    public HouseholdRepository getHouseholdRepository() {
+        return householdRepository;
+    }
+
     public JsonMapper getMapper() {
         return mapper;
     }
@@ -137,6 +147,12 @@ public abstract class BaseIntegrationTest {
         User user = userRepository.save(new User(userId, USER_NAME, USER_EMAIL, "google", "google"));
         userPreferenceRepository.save(UserPreferences.empty(user));
         return user;
+    }
+
+    protected Household createHouseholdWithMembers(List<User> members, User creator) {
+        Household household = new Household(HouseholdId.create(), creator,
+                members, "Test Household", "Test Household");
+        return householdRepository.save(household);
     }
 
     protected Recipe createAndSaveRecipe(User user) {
