@@ -1,16 +1,16 @@
-package be.xplore.cookbook.core.ai;
+package be.xplore.cookbook.core.port.recipe;
 
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 
 import java.util.List;
 
-public record EnhancedRecipeSuggestion(
+public record SuggestedRecipeEnhancement(
         int durationInMinutes,
-        NewAiIngredient newIngredient,
+        SuggestedIngredient newIngredient,
         List<String> updatedSteps
 ) {
-    public record NewAiIngredient(
+    public record SuggestedIngredient(
             String name,
             double quantity,
             Unit unit,

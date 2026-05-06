@@ -1,6 +1,5 @@
 package be.xplore.cookbook.rest.controller.recipeController;
 
-import be.xplore.cookbook.ai.dto.OllamaResponse;
 import be.xplore.cookbook.core.common.Paging;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.user.User;
@@ -67,17 +66,11 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
 
     @BeforeEach
     void stubOllamaChat() {
-        String innerJsonContent = buildResponseContent();
-
-        OllamaResponse mockResponse = new OllamaResponse(
-                new OllamaResponse.Message("assistant", innerJsonContent),
-                true
-        );
-
+        String responseBody = buildOllamaResponseBodyWithContent(buildResponseContent());
         WireMock.stubFor(WireMock.post(WireMock.urlPathEqualTo("/api/chat"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withBody(getMapper().writeValueAsString(mockResponse))));
+                        .withBody(responseBody)));
     }
 
     @AfterEach
@@ -178,22 +171,15 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
     }
 
     @Test
-    void enhanceRecipe_shouldReturn502_whenAiReturnsInvalidJson() throws Exception {
-        // Arrange
-        OllamaResponse mockResponse = new OllamaResponse(
-                new OllamaResponse.Message("assistant", "this is invalid json"),
-                true
-        );
-
+    void enhanceRecipe_shouldReturn502_whenAiReturnsInvalidResponse() throws Exception {
         WireMock.stubFor(WireMock.post(WireMock.urlPathEqualTo("/api/chat"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withBody(getMapper().writeValueAsString(mockResponse))));
+                        .withBody(buildOllamaResponseBodyWithContent("this is not valid json"))));
 
         User user = createUser();
         Recipe recipe = createAndSaveRecipe(user);
 
-        // Act & Assert
         performEnhanceRecipe(recipe.id().id().toString())
                 .andExpect(status().isBadGateway());
     }
@@ -218,6 +204,18 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
                         .with(validJwt())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
+    }
+
+    private String buildOllamaResponseBodyWithContent(String content) {
+        record Message(String role, String content) {
+        }
+
+        record OllamaResponse(Message message, boolean done) {
+        }
+
+        return getMapper().writeValueAsString(
+                new OllamaResponse(new Message("assistant", content), true)
+        );
     }
 
     private static String buildResponseContent() {

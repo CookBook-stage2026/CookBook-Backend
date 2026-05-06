@@ -1,7 +1,7 @@
 package be.xplore.cookbook.core.service;
 
-import be.xplore.cookbook.core.ai.AiPort;
-import be.xplore.cookbook.core.ai.EnhancedRecipeSuggestion;
+import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
+import be.xplore.cookbook.core.port.recipe.SuggestedRecipeEnhancement;
 import be.xplore.cookbook.core.common.PagedResult;
 import be.xplore.cookbook.core.domain.exception.DataIntegrityException;
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
@@ -35,11 +35,11 @@ public class RecipeService {
     private final IngredientRepository ingredientRepository;
     private final UserRepository userRepository;
     private final UserPreferenceRepository userPreferenceRepository;
-    private final AiPort aiPort;
+    private final RecipeSuggestionsPort aiPort;
 
     public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository,
                          UserRepository userRepository, UserPreferenceRepository userPreferenceRepository,
-                         AiPort aiPort) {
+                         RecipeSuggestionsPort aiPort) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
         this.userRepository = userRepository;
@@ -91,7 +91,7 @@ public class RecipeService {
         Recipe recipe = recipeRepository.findById(recipeId, user.id())
                 .orElseThrow(() -> new NotFoundException("Recipe not found"));
 
-        EnhancedRecipeSuggestion suggestion = aiPort.enhanceRecipe(recipe);
+        SuggestedRecipeEnhancement suggestion = aiPort.enhanceRecipe(recipe);
 
         Ingredient ingredient = ingredientRepository
                 .findByNameIgnoreCase(suggestion.newIngredient().name())
