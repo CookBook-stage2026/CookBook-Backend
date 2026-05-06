@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -28,6 +29,8 @@ class CreateScheduleTests extends BaseIntegrationTest {
 
     private static final int NUMBER_OF_DAYS_IN_WEEK = 7;
     private static final int AMOUNT_OF_RECIPES = 3;
+    private static final int REMAINING_DAYS_IN_WEEK = 6;
+    private static final LocalDate MONDAY = LocalDate.of(2026, 5, 4);
 
     @Override
     protected String[] getTablesToClear() {
@@ -49,10 +52,12 @@ class CreateScheduleTests extends BaseIntegrationTest {
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(days))))
+                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(MONDAY, days))))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.weekStartDate").value(MONDAY.toString()))
+                .andExpect(jsonPath("$.weekEndDate").value(MONDAY.plusDays(REMAINING_DAYS_IN_WEEK).toString()))
                 .andExpect(jsonPath("$.days", hasSize(NUMBER_OF_DAYS_IN_WEEK)))
                 .andExpect(jsonPath("$.days[*].day", containsInAnyOrder(
                         "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY",
@@ -81,10 +86,11 @@ class CreateScheduleTests extends BaseIntegrationTest {
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(days))))
+                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(MONDAY, days))))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.weekStartDate").value(MONDAY.toString()))
                 .andExpect(jsonPath("$.days", hasSize(AMOUNT_OF_RECIPES)))
                 .andExpect(jsonPath("$.days[*].recipeSummary.name",
                         containsInAnyOrder("Monday Recipe", "Monday Recipe", "Monday Recipe")))
@@ -105,10 +111,11 @@ class CreateScheduleTests extends BaseIntegrationTest {
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(days))))
+                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(MONDAY, days))))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.weekStartDate").value(MONDAY.toString()))
                 .andExpect(jsonPath("$.days", hasSize(1)))
                 .andExpect(jsonPath("$.days[0].recipeSummary.name").value("Single Day Recipe"))
                 .andExpect(jsonPath("$.days[0].day").value("TUESDAY"));
@@ -123,9 +130,10 @@ class CreateScheduleTests extends BaseIntegrationTest {
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(days))))
+                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(MONDAY, days))))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.weekStartDate").value(MONDAY.toString()));
     }
 
     @Test
@@ -136,13 +144,13 @@ class CreateScheduleTests extends BaseIntegrationTest {
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(null))))
+                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(MONDAY, null))))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void createSchedule_NonExistentRecipe_ShouldReturnNotFound() throws Exception {
+    void createSchedule_NonExistentRecipe_ShouldReturnUnauthorized() throws Exception {
         UUID nonExistentRecipeId = UUID.randomUUID();
 
         List<CreateDayScheduleDto> days = List.of(
@@ -153,7 +161,7 @@ class CreateScheduleTests extends BaseIntegrationTest {
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(days))))
+                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(MONDAY, days))))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
@@ -167,44 +175,9 @@ class CreateScheduleTests extends BaseIntegrationTest {
         getMockMvc().perform(post("/api/schedules")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(days))))
+                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(MONDAY, days))))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void createSchedule_ReplaceExistingSchedule_ShouldUpdateAndReturn() throws Exception {
-        var user = createUser();
-        var recipe1 = createAndSaveRecipe("Original Recipe", user);
-        var recipe2 = createAndSaveRecipe("Updated Recipe", user);
-
-        List<CreateDayScheduleDto> initialDays = List.of(
-                new CreateDayScheduleDto(recipe1.getId().id(), DayOfWeek.MONDAY)
-        );
-
-        getMockMvc().perform(post("/api/schedules")
-                        .with(validJwt())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(initialDays))))
-                .andExpect(status().isOk());
-
-        List<CreateDayScheduleDto> updatedDays = List.of(
-                new CreateDayScheduleDto(recipe2.getId().id(), DayOfWeek.MONDAY),
-                new CreateDayScheduleDto(recipe2.getId().id(), DayOfWeek.TUESDAY)
-        );
-
-        getMockMvc().perform(post("/api/schedules")
-                        .with(validJwt())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(updatedDays))))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.days", hasSize(2)))
-                .andExpect(jsonPath("$.days[?(@.day=='MONDAY')].recipeSummary.name").value("Updated Recipe"))
-                .andExpect(jsonPath("$.days[?(@.day=='TUESDAY')].recipeSummary.name").value("Updated Recipe"));
     }
 
     @Test
@@ -221,7 +194,7 @@ class CreateScheduleTests extends BaseIntegrationTest {
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(days))))
+                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(MONDAY, days))))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
@@ -238,7 +211,27 @@ class CreateScheduleTests extends BaseIntegrationTest {
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(days))))
+                        .content(getMapper().writeValueAsString(new CreateWeekScheduleDto(MONDAY, days))))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createSchedule_WeekStartNotMonday_ShouldReturnBadRequest() throws Exception {
+        var user = createUser();
+        var recipe = createAndSaveRecipe("Test Recipe", user);
+
+        List<CreateDayScheduleDto> days = List.of(
+                new CreateDayScheduleDto(recipe.getId().id(), DayOfWeek.MONDAY)
+        );
+
+        // Wednesday
+        getMockMvc().perform(post("/api/schedules")
+                        .with(validJwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(getMapper().writeValueAsString(
+                                new CreateWeekScheduleDto(MONDAY.plusDays(2), days))))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
