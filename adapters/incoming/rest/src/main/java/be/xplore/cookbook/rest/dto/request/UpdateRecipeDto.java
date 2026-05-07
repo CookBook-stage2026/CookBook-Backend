@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record CreateRecipeDto(
+public record UpdateRecipeDto(
         @NotBlank String name,
         @NotBlank String description,
         int durationInMinutes,

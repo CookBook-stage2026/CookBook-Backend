@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Positive;
 
 import java.util.UUID;
 
-public record CreateRecipeIngredientDto(
+public record NewRecipeIngredientDto(
         @NotNull UUID ingredientId,
         @Positive double baseQuantity
 ) {

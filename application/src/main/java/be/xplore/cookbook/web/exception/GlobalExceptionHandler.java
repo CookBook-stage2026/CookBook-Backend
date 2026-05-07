@@ -1,5 +1,7 @@
 package be.xplore.cookbook.web.exception;
 
+import be.xplore.cookbook.ai.exception.AiConnectionException;
+import be.xplore.cookbook.ai.exception.AiInvalidResponseException;
 import be.xplore.cookbook.core.domain.exception.DataIntegrityException;
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
 import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
@@ -16,7 +18,10 @@ import java.nio.file.AccessDeniedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-    @ExceptionHandler({OAuth2Exception.class, UserNotFoundException.class})
+    @ExceptionHandler({
+            OAuth2Exception.class,
+            UserNotFoundException.class
+    })
     ResponseEntity<Object> handleUnauthorizedException(RuntimeException ex, WebRequest request) {
         String responseBody = ex.getMessage();
         return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
@@ -41,6 +46,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
         String responseBody = ex.getMessage();
         return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+    }
+
+    @ExceptionHandler(AiInvalidResponseException.class)
+    ResponseEntity<Object> handleBadGatewayException(AiInvalidResponseException ex, WebRequest request) {
+        String responseBody = ex.getMessage();
+        return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.BAD_GATEWAY, request);
+    }
+
+    @ExceptionHandler(AiConnectionException.class)
+    ResponseEntity<Object> handleServiceUnavailableException(AiConnectionException ex, WebRequest request) {
+        String responseBody = ex.getMessage();
+        return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(),
+                HttpStatus.SERVICE_UNAVAILABLE, request);
     }
 
     @ExceptionHandler(Exception.class)

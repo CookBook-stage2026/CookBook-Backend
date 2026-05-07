@@ -13,6 +13,7 @@ apply plugin: 'io.spring.dependency-management'
 dependencyManagement {
     imports {
         mavenBom "org.springframework.boot:spring-boot-dependencies:4.0.5"
+        mavenBom "dev.langchain4j:langchain4j-bom:1.14.0"
     }
 }
 
@@ -27,6 +28,7 @@ dependencies {
     jacocoAggregation project(':core')
     jacocoAggregation project(':adapters:incoming:rest')
     jacocoAggregation project(':adapters:outgoing:jpa')
+    jacocoAggregation project(':adapters:outgoing:ai')
 }
 
 sonar {
