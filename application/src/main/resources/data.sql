@@ -42,7 +42,8 @@ VALUES
     ('373507a5-b659-4ca9-868c-8f39319946b2', 'Fresh mozzarella', 'GRAM'),
     ('6c81d1a3-66f7-42de-9ad1-05a5d748bcc8', 'Fresh basil', 'GRAM'),
     ('00885e1e-20a0-4c3d-aa23-ce1bd5ddc385', 'Dark chocolate', 'GRAM'),
-    ('78223711-7e76-4f37-99c1-6c80daa63f2e', 'Sugar', 'GRAM');
+    ('78223711-7e76-4f37-99c1-6c80daa63f2e', 'Sugar', 'GRAM'),
+    ('5008d28b-a36b-41de-a6e0-2a9dd0db9feb', 'Water', 'MILLILITER');
 
 -- ---------------------------------------------------------
 -- INGREDIENT CATEGORIES
