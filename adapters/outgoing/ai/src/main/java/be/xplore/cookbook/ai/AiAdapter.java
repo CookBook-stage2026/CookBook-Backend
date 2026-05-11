@@ -10,12 +10,14 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 @Component
 public class AiAdapter implements RecipeSuggestionsPort {
 
     private final RecipeSuggestionsAiService aiService;
     private final JsonMapper jsonMapper;
+    private final Logger logger = Logger.getLogger(AiAdapter.class.getName());
 
     public AiAdapter(RecipeSuggestionsAiService aiService, JsonMapper jsonMapper) {
         this.aiService = aiService;
@@ -32,6 +34,7 @@ public class AiAdapter implements RecipeSuggestionsPort {
             if (cause instanceof IOException) {
                 throw new AiConnectionException("AI service is unavailable", e);
             }
+            logger.warning(e.getLocalizedMessage());
             throw new AiInvalidResponseException("AI returned an unexpected response", e);
         }
     }
