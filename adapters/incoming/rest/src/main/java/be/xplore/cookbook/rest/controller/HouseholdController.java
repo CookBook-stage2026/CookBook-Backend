@@ -2,7 +2,7 @@ package be.xplore.cookbook.rest.controller;
 
 import be.xplore.cookbook.core.domain.household.command.CreateHouseholdCommand;
 import be.xplore.cookbook.core.domain.user.UserId;
-import be.xplore.cookbook.core.service.HouseHoldService;
+import be.xplore.cookbook.core.service.HouseholdService;
 import be.xplore.cookbook.rest.dto.request.CreateHouseholdDto;
 import be.xplore.cookbook.rest.dto.response.HouseholdDto;
 import jakarta.validation.Valid;
@@ -21,10 +21,10 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/households")
 public class HouseholdController {
-    private final HouseHoldService houseHoldService;
+    private final HouseholdService householdService;
 
-    public HouseholdController(HouseHoldService houseHoldService) {
-        this.houseHoldService = houseHoldService;
+    public HouseholdController(HouseholdService householdService) {
+        this.householdService = householdService;
     }
 
     @PostMapping
@@ -34,7 +34,7 @@ public class HouseholdController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestBody @Valid CreateHouseholdDto request
     ) {
-        return HouseholdDto.fromDomain(houseHoldService.createHouseHold(new CreateHouseholdCommand(
+        return HouseholdDto.fromDomain(householdService.createHouseHold(new CreateHouseholdCommand(
                 request.name(),
                 request.description(),
                 new UserId(UUID.fromString(jwt.getSubject()))

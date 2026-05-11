@@ -3,6 +3,7 @@ package be.xplore.cookbook.web.exception;
 import be.xplore.cookbook.ai.exception.AiConnectionException;
 import be.xplore.cookbook.ai.exception.AiInvalidResponseException;
 import be.xplore.cookbook.core.domain.exception.DataIntegrityException;
+import be.xplore.cookbook.core.domain.exception.ForbiddenException;
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
 import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
 import be.xplore.cookbook.security.exception.OAuth2Exception;
@@ -18,6 +19,14 @@ import java.nio.file.AccessDeniedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+    @ExceptionHandler({
+            ForbiddenException.class
+    })
+    ResponseEntity<Object> handleForbiddenException(RuntimeException ex, WebRequest request) {
+        String responseBody = ex.getMessage();
+        return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+    }
+
     @ExceptionHandler({
             OAuth2Exception.class,
             UserNotFoundException.class

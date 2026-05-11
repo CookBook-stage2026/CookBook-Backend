@@ -37,7 +37,7 @@ class UpdateScheduleTests extends BaseIntegrationTest {
 
         Map<DayOfWeek, Recipe> originalSchedule = new EnumMap<>(DayOfWeek.class);
         originalSchedule.put(DayOfWeek.MONDAY, originalRecipe);
-        seedWeekSchedule(user, originalSchedule, MONDAY);
+        createWeekSchedule(user, originalSchedule, MONDAY);
 
         var savedSchedule = getWeekScheduleRepository().findAllByUserId(user.id()).getFirst();
 
@@ -65,7 +65,7 @@ class UpdateScheduleTests extends BaseIntegrationTest {
         Map<DayOfWeek, Recipe> originalSchedule = new EnumMap<>(DayOfWeek.class);
         originalSchedule.put(DayOfWeek.MONDAY, originalRecipe);
         originalSchedule.put(DayOfWeek.TUESDAY, originalRecipe);
-        seedWeekSchedule(user, originalSchedule, MONDAY);
+        createWeekSchedule(user, originalSchedule, MONDAY);
 
         var savedSchedule = getWeekScheduleRepository().findAllByUserId(user.id()).getFirst();
 
@@ -89,7 +89,7 @@ class UpdateScheduleTests extends BaseIntegrationTest {
 
         Map<DayOfWeek, Recipe> originalSchedule = new EnumMap<>(DayOfWeek.class);
         originalSchedule.put(DayOfWeek.MONDAY, recipe);
-        seedWeekSchedule(user, originalSchedule, MONDAY);
+        createWeekSchedule(user, originalSchedule, MONDAY);
 
         var savedSchedule = getWeekScheduleRepository().findAllByUserId(user.id()).getFirst();
 
@@ -130,7 +130,7 @@ class UpdateScheduleTests extends BaseIntegrationTest {
 
         Map<DayOfWeek, Recipe> originalSchedule = new EnumMap<>(DayOfWeek.class);
         originalSchedule.put(DayOfWeek.MONDAY, recipe);
-        seedWeekSchedule(user, originalSchedule, MONDAY);
+        createWeekSchedule(user, originalSchedule, MONDAY);
 
         var savedSchedule = getWeekScheduleRepository().findAllByUserId(user.id()).getFirst();
 
@@ -154,7 +154,7 @@ class UpdateScheduleTests extends BaseIntegrationTest {
 
         Map<DayOfWeek, Recipe> originalSchedule = new EnumMap<>(DayOfWeek.class);
         originalSchedule.put(DayOfWeek.MONDAY, recipe);
-        seedWeekSchedule(user, originalSchedule, MONDAY);
+        createWeekSchedule(user, originalSchedule, MONDAY);
 
         var savedSchedule = getWeekScheduleRepository().findAllByUserId(user.id()).getFirst();
 
@@ -174,7 +174,7 @@ class UpdateScheduleTests extends BaseIntegrationTest {
 
         Map<DayOfWeek, Recipe> originalSchedule = new EnumMap<>(DayOfWeek.class);
         originalSchedule.put(DayOfWeek.MONDAY, recipe);
-        seedWeekSchedule(user, originalSchedule, MONDAY);
+        createWeekSchedule(user, originalSchedule, MONDAY);
 
         var savedSchedule = getWeekScheduleRepository().findAllByUserId(user.id()).getFirst();
 
@@ -213,7 +213,7 @@ class UpdateScheduleTests extends BaseIntegrationTest {
 
         Map<DayOfWeek, Recipe> originalSchedule = new EnumMap<>(DayOfWeek.class);
         originalSchedule.put(DayOfWeek.MONDAY, recipe);
-        seedWeekSchedule(user, originalSchedule, MONDAY);
+        createWeekSchedule(user, originalSchedule, MONDAY);
 
         var savedSchedule = getWeekScheduleRepository().findAllByUserId(user.id()).getFirst();
 

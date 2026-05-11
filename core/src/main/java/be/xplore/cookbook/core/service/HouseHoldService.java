@@ -6,18 +6,18 @@ import be.xplore.cookbook.core.domain.household.HouseholdRepository;
 import be.xplore.cookbook.core.domain.household.command.CreateHouseholdCommand;
 import be.xplore.cookbook.core.repository.UserRepository;
 
-public class HouseHoldService {
-    private final HouseholdRepository houseHoldRepository;
+public class HouseholdService {
+    private final HouseholdRepository householdRepository;
     private final UserRepository userRepository;
 
-    public HouseHoldService(HouseholdRepository houseHoldRepository, UserRepository userRepository) {
-        this.houseHoldRepository = houseHoldRepository;
+    public HouseholdService(HouseholdRepository householdRepository, UserRepository userRepository) {
+        this.householdRepository = householdRepository;
         this.userRepository = userRepository;
     }
 
     public Household createHouseHold(CreateHouseholdCommand command) {
         Household household = new Household(command.name(), command.description(),
                 userRepository.findById(command.creatorId()).orElseThrow(UserNotFoundException::new));
-        return houseHoldRepository.save(household);
+        return householdRepository.save(household);
     }
 }
