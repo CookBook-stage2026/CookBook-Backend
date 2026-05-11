@@ -1,6 +1,6 @@
 services:
   backend:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/cookbook/backend
+    image: 819109475556.dkr.ecr.eu-north-1.amazonaws.com/cookbook/backend
     env_file:
       - .env
     expose:
@@ -8,7 +8,7 @@ services:
     mem_limit: 1024m
 
   frontend:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/cookbook/frontend
+    image: 819109475556.dkr.ecr.eu-north-1.amazonaws.com/cookbook/frontend
     expose:
       - "3000"
     mem_limit: 516m
