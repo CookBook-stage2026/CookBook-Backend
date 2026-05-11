@@ -26,6 +26,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'dev.langchain4j:langchain4j'
     implementation 'dev.langchain4j:langchain4j-ollama'
+    implementation 'dev.langchain4j:langchain4j-bedrock'
     implementation 'dev.langchain4j:langchain4j-spring-boot-starter'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
