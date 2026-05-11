@@ -110,7 +110,7 @@ jobs:
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
         with:
           push: true
-          tags: 819109475556.dkr.ecr.eu-north-1.amazonaws.com/cookbook/backend:latest
+          tags: ${{ secrets.AWS_BACKEND_TAG }}
 
       - name: Zip deploy files
         run: |
