@@ -81,4 +81,15 @@ public class WeekScheduleService {
                 })
                 .toList();
     }
+
+    public void deleteWeekSchedule(WeekScheduleId id, UserId userId) {
+        var existing = weekScheduleRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Week schedule not found"));
+
+        if (!existing.user().id().equals(userId)) {
+            throw new UserNotFoundException();
+        }
+
+        weekScheduleRepository.deleteById(id);
+    }
 }
