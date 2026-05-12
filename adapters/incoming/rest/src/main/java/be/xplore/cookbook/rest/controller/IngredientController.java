@@ -3,6 +3,7 @@ package be.xplore.cookbook.rest.controller;
 import be.xplore.cookbook.core.common.Paging;
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
+import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.ingredient.command.SearchIngredientsQuery;
 import be.xplore.cookbook.core.service.IngredientService;
 import be.xplore.cookbook.rest.dto.request.IngredientSearchRequest;
@@ -45,6 +46,14 @@ public class IngredientController {
     public List<String> getCategories() {
         return Arrays.stream(Category.values())
                 .map(Category::name)
+                .toList();
+    }
+
+    @GetMapping("/units")
+    @ResponseStatus(HttpStatus.OK)
+    public List<String> getUnits() {
+        return Arrays.stream(Unit.values())
+                .map(Unit::name)
                 .toList();
     }
 }
