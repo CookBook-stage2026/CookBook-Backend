@@ -2,7 +2,7 @@ package be.xplore.cookbook.jpa.repository.householdinvite;
 
 import be.xplore.cookbook.core.domain.householdinvite.HouseholdInvite;
 import be.xplore.cookbook.core.domain.householdinvite.HouseholdInviteId;
-import be.xplore.cookbook.core.domain.householdinvite.HouseholdInviteRepository;
+import be.xplore.cookbook.core.repository.HouseholdInviteRepository;
 import be.xplore.cookbook.jpa.repository.household.entity.JpaHouseholdEntity;
 import be.xplore.cookbook.jpa.repository.householdinvite.entity.JpaHouseholdInviteEntity;
 import jakarta.persistence.EntityManager;

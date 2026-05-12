@@ -1,9 +1,9 @@
 package be.xplore.cookbook.config;
 
 import be.xplore.cookbook.config.properties.HouseholdInviteProperties;
-import be.xplore.cookbook.core.domain.household.HouseholdRepository;
-import be.xplore.cookbook.core.domain.householdinvite.HouseholdInviteRepository;
 import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
+import be.xplore.cookbook.core.repository.HouseholdInviteRepository;
+import be.xplore.cookbook.core.repository.HouseholdRepository;
 import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;

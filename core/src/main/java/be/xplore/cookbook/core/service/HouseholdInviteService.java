@@ -4,16 +4,16 @@ import be.xplore.cookbook.core.domain.exception.ForbiddenException;
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
 import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
 import be.xplore.cookbook.core.domain.household.Household;
-import be.xplore.cookbook.core.domain.household.HouseholdRepository;
 import be.xplore.cookbook.core.domain.household.exception.HouseholdNotFoundException;
 import be.xplore.cookbook.core.domain.householdinvite.HouseholdInvite;
-import be.xplore.cookbook.core.domain.householdinvite.HouseholdInviteRepository;
 import be.xplore.cookbook.core.domain.householdinvite.HouseholdInviteToken;
 import be.xplore.cookbook.core.domain.householdinvite.InviteTokenGenerator;
 import be.xplore.cookbook.core.domain.householdinvite.command.AcceptInviteCommand;
 import be.xplore.cookbook.core.domain.householdinvite.command.CreateInviteCommand;
 import be.xplore.cookbook.core.domain.householdinvite.command.RevokeInviteCommand;
 import be.xplore.cookbook.core.domain.user.User;
+import be.xplore.cookbook.core.repository.HouseholdInviteRepository;
+import be.xplore.cookbook.core.repository.HouseholdRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
 
 import java.time.Duration;

@@ -28,7 +28,7 @@ class HouseholdInviteControllerCreateInviteTests extends BaseIntegrationTest {
         Household household = createHouseholdWithMembers(new ArrayList<>(), creator);
 
         getMockMvc().perform(post("/api/household-invites/{id}/invites", household.id().id())
-                        .with(jwt().jwt(j -> j.subject(creator.id().id().toString())))
+                        .with(validJwt())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNotEmpty())
