@@ -15,6 +15,7 @@ import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.EnhanceRecipeQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FindRecipeByIdQuery;
+import be.xplore.cookbook.core.domain.recipe.command.ImportRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.IngredientWithQuantity;
 import be.xplore.cookbook.core.domain.recipe.command.SearchRecipesByNameQuery;
 import be.xplore.cookbook.core.domain.recipe.command.UpdateRecipeCommand;
@@ -22,6 +23,9 @@ import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
 import be.xplore.cookbook.core.port.recipe.SuggestedRecipeEnhancement;
+import be.xplore.cookbook.core.port.recipe.RecipeImportPort;
+import be.xplore.cookbook.core.port.recipe.ScrapedIngredient;
+import be.xplore.cookbook.core.port.recipe.ScrapedRecipe;
 import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
@@ -36,15 +40,17 @@ public class RecipeService {
     private final UserRepository userRepository;
     private final UserPreferenceRepository userPreferenceRepository;
     private final RecipeSuggestionsPort aiPort;
+    private final RecipeImportPort recipeImportPort;
 
     public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository,
                          UserRepository userRepository, UserPreferenceRepository userPreferenceRepository,
-                         RecipeSuggestionsPort aiPort) {
+                         RecipeSuggestionsPort aiPort, RecipeImportPort recipeImportPort) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
         this.userRepository = userRepository;
         this.userPreferenceRepository = userPreferenceRepository;
         this.aiPort = aiPort;
+        this.recipeImportPort = recipeImportPort;
     }
 
     public Recipe createRecipe(CreateRecipeCommand command) {
@@ -134,6 +140,41 @@ public class RecipeService {
                 mapToRecipeIngredients(command.ingredientQuantities()),
                 user
         ));
+    }
+
+    public Recipe importRecipe(ImportRecipeCommand command) {
+        User user = userRepository.findById(command.userId())
+                .orElseThrow(UserNotFoundException::new);
+
+        ScrapedRecipe scraped = recipeImportPort.scrape(command.url());
+
+        List<RecipeIngredient> recipeIngredients = scraped.ingredients().stream()
+                .map(this::resolveRecipeIngredient)
+                .toList();
+
+        return recipeRepository.save(new Recipe(
+                RecipeId.create(),
+                new RecipeDetails(
+                        scraped.title(),
+                        scraped.description(),
+                        scraped.durationInMinutes(),
+                        scraped.servings(),
+                        scraped.steps()
+                ),
+                recipeIngredients,
+                user
+        ));
+    }
+
+    private RecipeIngredient resolveRecipeIngredient(ScrapedIngredient scraped) {
+        Ingredient ingredient = ingredientRepository.findByNameIgnoreCase(scraped.name())
+                .orElseGet(() -> ingredientRepository.save(new Ingredient(
+                        IngredientId.create(),
+                        scraped.name(),
+                        scraped.unit(),
+                        List.of()
+                )));
+        return new RecipeIngredient(ingredient, scraped.quantity());
     }
 
     private List<RecipeIngredient> mapToRecipeIngredients(List<IngredientWithQuantity> ingredientQuantities) {

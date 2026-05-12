@@ -8,8 +8,11 @@ import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
+import be.xplore.cookbook.core.port.recipe.RecipeImportPort;
 import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
 import be.xplore.cookbook.core.port.recipe.ScheduleSuggestionsPort;
+import be.xplore.cookbook.core.port.recipe.ScrapedIngredient;
+import be.xplore.cookbook.core.port.recipe.ScrapedRecipe;
 import be.xplore.cookbook.core.port.recipe.SuggestedRecipeEnhancement;
 import be.xplore.cookbook.core.port.recipe.SuggestedRecipeId;
 import org.springframework.stereotype.Component;
@@ -21,18 +24,22 @@ import java.util.List;
 import java.util.logging.Logger;
 
 @Component
-public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort {
+public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort, RecipeImportPort {
 
     private static final int PREVIOUS_WEEK_INDEX = 0;
     private static final int CURRENT_WEEK_INDEX = 1;
     private static final int NEXT_WEEK_INDEX = 2;
 
-    private final RecipeSuggestionsAiService aiService;
+    private final RecipeSuggestionsAiService recipeSuggestionsAiService;
+    private final RecipeImportAiService recipeImportAiService;
     private final JsonMapper jsonMapper;
     private final Logger logger = Logger.getLogger(AiAdapter.class.getName());
 
-    public AiAdapter(RecipeSuggestionsAiService aiService, JsonMapper jsonMapper) {
-        this.aiService = aiService;
+    public AiAdapter(RecipeSuggestionsAiService recipeSuggestionsAiService,
+                     RecipeImportAiService recipeImportAiService,
+                     JsonMapper jsonMapper) {
+        this.recipeSuggestionsAiService = recipeSuggestionsAiService;
+        this.recipeImportAiService = recipeImportAiService;
         this.jsonMapper = jsonMapper;
     }
 
@@ -40,7 +47,7 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
     public SuggestedRecipeEnhancement enhanceRecipe(Recipe recipe) {
         String recipeJson = serialize(RecipeInput.fromDomain(recipe));
         try {
-            return aiService.enhanceRecipe(recipeJson);
+            return recipeSuggestionsAiService.enhanceRecipe(recipeJson);
         } catch (RuntimeException e) {
             throw handleException(e);
         }
@@ -57,6 +64,24 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
         } catch (RuntimeException e) {
             throw handleException(e);
         }
+    }
+
+    @Override
+    public ScrapedRecipe scrape(String url) {
+        var result = recipeImportAiService.importFromUrl(url);
+
+        List<ScrapedIngredient> ingredients = result.ingredients().stream()
+                .map(i -> new ScrapedIngredient(i.name(), i.unit(), i.quantity()))
+                .toList();
+
+        return new ScrapedRecipe(
+                result.title(),
+                result.description(),
+                result.durationInMinutes(),
+                result.servings(),
+                result.steps(),
+                ingredients
+        );
     }
 
     private String serialize(Object input) {
