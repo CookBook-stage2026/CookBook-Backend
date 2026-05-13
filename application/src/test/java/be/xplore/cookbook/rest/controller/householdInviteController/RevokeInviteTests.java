@@ -15,7 +15,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class HouseholdInviteControllerRevokeInviteTests extends BaseIntegrationTest {
+class RevokeInviteTests extends BaseIntegrationTest {
 
     private static final int DEFAULT_INVITE_DURATION = 15;
 

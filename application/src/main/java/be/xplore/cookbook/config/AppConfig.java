@@ -16,7 +16,6 @@ import be.xplore.cookbook.core.service.RecipeService;
 import be.xplore.cookbook.core.service.UserPreferenceService;
 import be.xplore.cookbook.core.service.UserService;
 import be.xplore.cookbook.core.service.WeekScheduleService;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 
 @Configuration
-@ConfigurationPropertiesScan
 @EnableConfigurationProperties(HouseholdInviteProperties.class)
 public class AppConfig {
 

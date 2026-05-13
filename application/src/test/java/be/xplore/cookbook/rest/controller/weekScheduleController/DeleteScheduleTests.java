@@ -36,7 +36,7 @@ class DeleteScheduleTests extends BaseIntegrationTest {
 
         var originalSchedule = new EnumMap<DayOfWeek, Recipe>(DayOfWeek.class);
         originalSchedule.put(DayOfWeek.MONDAY, recipe);
-        seedWeekSchedule(user, originalSchedule, MONDAY);
+        createWeekSchedule(user, originalSchedule, MONDAY);
 
         WeekSchedule savedSchedule = getWeekScheduleRepository().findAllByUserId(user.id()).getFirst();
 
@@ -69,7 +69,7 @@ class DeleteScheduleTests extends BaseIntegrationTest {
 
         var originalSchedule = new EnumMap<DayOfWeek, Recipe>(DayOfWeek.class);
         originalSchedule.put(DayOfWeek.MONDAY, recipe);
-        seedWeekSchedule(owner, originalSchedule, MONDAY);
+        createWeekSchedule(owner, originalSchedule, MONDAY);
 
         WeekSchedule savedSchedule = getWeekScheduleRepository().findAllByUserId(owner.id()).getFirst();
 

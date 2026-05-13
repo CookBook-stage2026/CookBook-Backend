@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class HouseholdInviteControllerCreateInviteTests extends BaseIntegrationTest {
+class CreateInviteTests extends BaseIntegrationTest {
 
     @Override
     protected String[] getTablesToClear() {
