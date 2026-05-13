@@ -139,10 +139,10 @@ public class RecipeController {
     @ResponseStatus(HttpStatus.CREATED)
     public RecipeDto importRecipe(
             @Valid @RequestBody ImportRecipeRequest request,
-            @AuthenticationPrincipal UserId userId
+            @AuthenticationPrincipal Jwt jwt
     ) {
         Recipe recipe = recipeService.importRecipe((
-                new ImportRecipeCommand(request.url(), userId)
+                new ImportRecipeCommand(request.url(), getUserIdFromJwt(jwt))
         ));
         return RecipeDto.fromDomain(recipe);
     }

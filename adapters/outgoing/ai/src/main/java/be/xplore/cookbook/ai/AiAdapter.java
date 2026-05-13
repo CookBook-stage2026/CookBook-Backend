@@ -30,16 +30,13 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
     private static final int CURRENT_WEEK_INDEX = 1;
     private static final int NEXT_WEEK_INDEX = 2;
 
-    private final RecipeSuggestionsAiService recipeSuggestionsAiService;
-    private final RecipeImportAiService recipeImportAiService;
+    private final RecipeAiService recipeAiService;
     private final JsonMapper jsonMapper;
     private final Logger logger = Logger.getLogger(AiAdapter.class.getName());
 
-    public AiAdapter(RecipeSuggestionsAiService recipeSuggestionsAiService,
-                     RecipeImportAiService recipeImportAiService,
+    public AiAdapter(RecipeAiService recipeAiService,
                      JsonMapper jsonMapper) {
-        this.recipeSuggestionsAiService = recipeSuggestionsAiService;
-        this.recipeImportAiService = recipeImportAiService;
+        this.recipeAiService = recipeAiService;
         this.jsonMapper = jsonMapper;
     }
 
@@ -47,7 +44,7 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
     public SuggestedRecipeEnhancement enhanceRecipe(Recipe recipe) {
         String recipeJson = serialize(RecipeInput.fromDomain(recipe));
         try {
-            return recipeSuggestionsAiService.enhanceRecipe(recipeJson);
+            return recipeAiService.enhanceRecipe(recipeJson);
         } catch (RuntimeException e) {
             throw handleException(e);
         }
@@ -68,20 +65,29 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
 
     @Override
     public ScrapedRecipe scrape(String url) {
-        var result = recipeImportAiService.importFromUrl(url);
+        try {
+            var result = recipeAiService.importFromUrl(url);
 
-        List<ScrapedIngredient> ingredients = result.ingredients().stream()
-                .map(i -> new ScrapedIngredient(i.name(), i.unit(), i.quantity()))
-                .toList();
+            List<ScrapedIngredient> ingredients = result.ingredients().stream()
+                    .map(i -> new ScrapedIngredient(i.name(), i.unit(), i.quantity()))
+                    .toList();
 
-        return new ScrapedRecipe(
-                result.title(),
-                result.description(),
-                result.durationInMinutes(),
-                result.servings(),
-                result.steps(),
-                ingredients
-        );
+            return new ScrapedRecipe(
+                    result.title(),
+                    result.description(),
+                    result.durationInMinutes(),
+                    result.servings(),
+                    result.steps(),
+                    ingredients
+            );
+        } catch (RuntimeException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw new AiConnectionException("AI service is unavailable", e);
+            }
+            logger.warning(e.getLocalizedMessage());
+            throw new AiInvalidResponseException("AI returned an unexpected response", e);
+        }
     }
 
     private String serialize(Object input) {

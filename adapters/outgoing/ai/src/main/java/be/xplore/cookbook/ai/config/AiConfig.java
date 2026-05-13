@@ -1,19 +1,20 @@
 package be.xplore.cookbook.ai.config;
 
-import be.xplore.cookbook.ai.RecipeImportAiService;
-import be.xplore.cookbook.ai.component.WebFetchTool;
+import be.xplore.cookbook.ai.RecipeAiService;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.tool.ToolProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AiConfig {
     @Bean
-    RecipeImportAiService recipeImportAiService(ChatModel chatModel, WebFetchTool webFetchTool) {
-        return AiServices.builder(RecipeImportAiService.class)
+    public RecipeAiService recipeAiService(ChatModel chatModel, ToolProvider toolProvider) {
+        return AiServices.builder(RecipeAiService.class)
                 .chatModel(chatModel)
-                .tools(webFetchTool)
+                .toolProvider(toolProvider)
+                .maxSequentialToolsInvocations(2)
                 .build();
     }
 }
