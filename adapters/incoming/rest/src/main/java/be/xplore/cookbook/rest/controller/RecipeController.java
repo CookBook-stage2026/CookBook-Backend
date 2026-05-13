@@ -6,6 +6,7 @@ import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
+import be.xplore.cookbook.core.domain.recipe.command.EnhanceRecipeQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FindRecipeByIdQuery;
 import be.xplore.cookbook.core.domain.recipe.command.IngredientWithQuantity;
@@ -102,18 +103,12 @@ public class RecipeController {
         ).stream().map(RecipeSummaryDto::fromDomain).toList();
     }
 
-    /**
-     * Gets a suggestion for an enhanced recipe with a new ingredient
-     *
-     * @param id The id of the recipe to enhance
-     * @return the enhanced recipe
-     */
     @GetMapping("/{id}/enhance")
     public RecipeDto enhanceRecipe(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID id
     ) {
-        Recipe recipe = recipeService.enhanceRecipe(new RecipeId(id), getUserIdFromJwt(jwt));
+        Recipe recipe = recipeService.enhanceRecipe(new EnhanceRecipeQuery(new RecipeId(id), getUserIdFromJwt(jwt)));
 
         return RecipeDto.fromDomain(recipe);
     }

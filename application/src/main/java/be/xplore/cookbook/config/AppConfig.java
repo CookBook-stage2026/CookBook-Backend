@@ -2,6 +2,7 @@ package be.xplore.cookbook.config;
 
 import be.xplore.cookbook.config.properties.HouseholdInviteProperties;
 import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
+import be.xplore.cookbook.core.port.recipe.ScheduleSuggestionsPort;
 import be.xplore.cookbook.core.repository.HouseholdInviteRepository;
 import be.xplore.cookbook.core.repository.HouseholdRepository;
 import be.xplore.cookbook.core.repository.IngredientRepository;
@@ -69,9 +70,12 @@ public class AppConfig {
     public WeekScheduleService weekScheduleService(
             WeekScheduleRepository weekScheduleRepository,
             UserRepository userRepository,
-            RecipeRepository recipeRepository
+            RecipeRepository recipeRepository,
+            UserPreferenceRepository userPreferenceRepository,
+            ScheduleSuggestionsPort scheduleSuggestionsPort
     ) {
-        return new WeekScheduleService(weekScheduleRepository, userRepository, recipeRepository);
+        return new WeekScheduleService(weekScheduleRepository, userRepository, recipeRepository,
+                userPreferenceRepository, scheduleSuggestionsPort);
     }
 
     @Bean

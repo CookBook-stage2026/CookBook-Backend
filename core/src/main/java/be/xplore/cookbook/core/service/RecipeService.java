@@ -1,7 +1,5 @@
 package be.xplore.cookbook.core.service;
 
-import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
-import be.xplore.cookbook.core.port.recipe.SuggestedRecipeEnhancement;
 import be.xplore.cookbook.core.common.PagedResult;
 import be.xplore.cookbook.core.domain.exception.DataIntegrityException;
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
@@ -14,14 +12,16 @@ import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeIngredient;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
+import be.xplore.cookbook.core.domain.recipe.command.EnhanceRecipeQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FindRecipeByIdQuery;
 import be.xplore.cookbook.core.domain.recipe.command.IngredientWithQuantity;
 import be.xplore.cookbook.core.domain.recipe.command.SearchRecipesByNameQuery;
 import be.xplore.cookbook.core.domain.recipe.command.UpdateRecipeCommand;
 import be.xplore.cookbook.core.domain.user.User;
-import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
+import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
+import be.xplore.cookbook.core.port.recipe.SuggestedRecipeEnhancement;
 import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
@@ -84,11 +84,11 @@ public class RecipeService {
         return recipeRepository.querySummaries(query.paging(), user, query.query());
     }
 
-    public Recipe enhanceRecipe(RecipeId recipeId, UserId userId) {
-        User user = userRepository.findById(userId)
+    public Recipe enhanceRecipe(EnhanceRecipeQuery query) {
+        User user = userRepository.findById(query.userId())
                 .orElseThrow(UserNotFoundException::new);
 
-        Recipe recipe = recipeRepository.findById(recipeId, user.id())
+        Recipe recipe = recipeRepository.findById(query.recipeId(), user.id())
                 .orElseThrow(() -> new NotFoundException("Recipe not found"));
 
         SuggestedRecipeEnhancement suggestion = aiPort.enhanceRecipe(recipe);
