@@ -48,7 +48,7 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
 
     @Override
     public RecipeId suggestRecipeForDay(DayOfWeek dayToSuggestFor, List<WeekSchedule> weekSchedules,
-                                                 List<RecipeSummary> availableRecipes) {
+                                        List<RecipeSummary> availableRecipes) {
         DaySuggestionInput input = buildDaySuggestionInput(dayToSuggestFor, weekSchedules, availableRecipes);
         String daySuggestionJson = serialize(input);
         try {

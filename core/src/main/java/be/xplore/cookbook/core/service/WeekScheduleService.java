@@ -137,10 +137,7 @@ public class WeekScheduleService {
         return targetWeek.assignRecipe(dayToSuggestFor.getDayOfWeek(), recipe);
     }
 
-    private List<WeekSchedule> resolveThreeWeekSchedules(
-            User user,
-            LocalDate targetDate
-    ) {
+    private List<WeekSchedule> resolveThreeWeekSchedules(User user, LocalDate targetDate) {
         LocalDate previousWeekStart = targetDate
                 .with(TemporalAdjusters.previousOrSame(FIRST_DAY_OF_WEEK))
                 .minusWeeks(1);
@@ -148,32 +145,23 @@ public class WeekScheduleService {
         LocalDate currentWeekStart = previousWeekStart.plusWeeks(1);
         LocalDate nextWeekStart = previousWeekStart.plusWeeks(2);
 
-        List<WeekSchedule> persisted =
-                weekScheduleRepository.findAllByUserIdAndDateRange(
-                        user.id(),
-                        previousWeekStart,
-                        nextWeekStart.plusDays(REMAINING_DAYS_IN_WEEK)
-                );
+        List<WeekSchedule> persisted = weekScheduleRepository.findAllByUserIdAndDateRange(
+                user.id(),
+                previousWeekStart,
+                nextWeekStart.plusDays(REMAINING_DAYS_IN_WEEK)
+        );
 
         Map<LocalDate, WeekSchedule> byStartDate = persisted.stream()
-                .collect(Collectors.toMap(
-                        WeekSchedule::weekStartDate,
-                        Function.identity()
-                ));
+                .collect(Collectors.toMap(WeekSchedule::weekStartDate, Function.identity()));
+
+        WeekSchedule currentWeek = byStartDate.containsKey(currentWeekStart)
+                ? byStartDate.get(currentWeekStart)
+                : weekScheduleRepository.save(WeekSchedule.empty(user, currentWeekStart));
 
         return List.of(
-                byStartDate.getOrDefault(
-                        previousWeekStart,
-                        WeekSchedule.empty(user, previousWeekStart)
-                ),
-                byStartDate.getOrDefault(
-                        currentWeekStart,
-                        weekScheduleRepository.save(WeekSchedule.empty(user, currentWeekStart))
-                ),
-                byStartDate.getOrDefault(
-                        nextWeekStart,
-                        WeekSchedule.empty(user, nextWeekStart)
-                )
+                byStartDate.getOrDefault(previousWeekStart, WeekSchedule.empty(user, previousWeekStart)),
+                currentWeek,
+                byStartDate.getOrDefault(nextWeekStart, WeekSchedule.empty(user, nextWeekStart))
         );
     }
 }

@@ -30,13 +30,12 @@ import java.util.List;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -102,7 +101,7 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
 
         Ingredient ingredient = new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG));
         getIngredientRepository().save(ingredient);
-        RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient, 10);
+        RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient, 1);
         Recipe recipe = new Recipe(
                 RECIPE_ID,
                 new RecipeDetails("Recipe", "Description", 1, 1, List.of("Step 1")),
@@ -111,12 +110,44 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
         );
         getRecipeRepository().save(recipe);
 
-        seedWeekSchedule(user,
+        createWeekSchedule(user,
                 Map.of(TARGET_DATE.getDayOfWeek(), recipe),
                 TARGET_MONDAY
         );
 
         // Act & Assert
+        performSuggest(TARGET_DATE.toString())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.weekStartDate", notNullValue()))
+                .andExpect(jsonPath("$.days", not(empty())))
+                .andExpect(jsonPath("$.days[*].recipeSummary.id", hasItem(RECIPE_ID.id().toString())));
+    }
+
+    @Test
+    void suggestRecipeForDay_shouldReturnUpdatedWeekSchedule_whenOverwritingExistingDaySchedule() throws Exception {
+        // Arrange
+        User user = createUser();
+
+        Ingredient ingredient = new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG));
+        getIngredientRepository().save(ingredient);
+        RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient, 1);
+        Recipe recipe = new Recipe(
+                RECIPE_ID,
+                new RecipeDetails("Recipe", "Description", 1, 1, List.of("Step 1")),
+                List.of(recipeIngredient),
+                user
+        );
+        getRecipeRepository().save(recipe);
+
+        createWeekSchedule(user,
+                Map.of(TARGET_DATE.getDayOfWeek(), recipe),
+                TARGET_MONDAY
+        );
+
+        // Act & Assert
+        performSuggest(TARGET_DATE.toString())
+                .andExpect(status().isOk());
+
         performSuggest(TARGET_DATE.toString())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.weekStartDate", notNullValue()))
@@ -131,7 +162,7 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
 
         Ingredient ingredient = new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG));
         getIngredientRepository().save(ingredient);
-        RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient, 10);
+        RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient, 1);
         Recipe recipe = new Recipe(
                 RECIPE_ID,
                 new RecipeDetails("Recipe", "Description", 1, 1, List.of("Step 1")),
@@ -153,7 +184,7 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
         WeekSchedule savedSchedule = getWeekScheduleRepository().findAllByUserId(user.id()).getFirst();
 
         assertThat(savedSchedule.id().id()).isEqualTo(dto.id());
-        assertThat(savedSchedule.dailyRecipes().size()).isEqualTo(0);
+        assertThat(savedSchedule.dailyRecipes()).isEmpty();
     }
 
     @Test
@@ -173,7 +204,7 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
         User user = createUser();
         Recipe recipe = createAndSaveRecipe(user);
 
-        seedWeekSchedule(user,
+        createWeekSchedule(user,
                 Map.of(TARGET_DATE.getDayOfWeek(), recipe),
                 TARGET_MONDAY
         );
@@ -191,7 +222,7 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
         User user = createUser();
         Recipe recipe = createAndSaveRecipe(user);
 
-        seedWeekSchedule(user,
+        createWeekSchedule(user,
                 Map.of(TARGET_DATE.getDayOfWeek(), recipe),
                 TARGET_MONDAY
         );
@@ -205,8 +236,7 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
                         get("/api/schedules/suggest/{date}", date)
                                 .with(validJwt())
                                 .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print());
+        );
     }
 
     private String buildAiResponse() {
