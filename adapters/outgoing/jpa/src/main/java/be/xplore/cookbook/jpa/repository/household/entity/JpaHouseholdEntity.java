@@ -62,4 +62,8 @@ public class JpaHouseholdEntity {
     public UUID getId() {
         return id;
     }
+
+    public List<JpaUserEntity> getMembers() {
+        return members;
+    }
 }
