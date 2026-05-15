@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,8 +33,8 @@ class ValidateTests {
     void validate_ValidUuidAndUserExists_ReturnsSuccess() {
         var userId = UUID.randomUUID();
         var jwt = createJwtWithSubject(userId.toString());
-        when(userService.findById(new FindUserByIdQuery(new UserId(userId)))).thenReturn(Optional.of(
-                new User(new UserId(userId), "test@gmail.com", "test", "google", "google")));
+        when(userService.findById(new FindUserByIdQuery(new UserId(userId)))).thenReturn(
+                new User(new UserId(userId), "test@gmail.com", "test", "google", "google"));
 
         var result = validator.validate(jwt);
 
@@ -50,7 +49,7 @@ class ValidateTests {
     void validate_ValidUuidButUserDoesNotExist_ReturnsFailure() {
         var userId = UUID.randomUUID();
         var jwt = createJwtWithSubject(userId.toString());
-        when(userService.findById(new FindUserByIdQuery(new UserId(userId)))).thenReturn(Optional.empty());
+        when(userService.findById(new FindUserByIdQuery(new UserId(userId)))).thenReturn(null);
 
         var result = validator.validate(jwt);
 

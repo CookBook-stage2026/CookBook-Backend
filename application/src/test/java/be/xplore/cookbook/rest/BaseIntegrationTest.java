@@ -2,7 +2,10 @@ package be.xplore.cookbook.rest;
 
 import be.xplore.cookbook.core.domain.household.Household;
 import be.xplore.cookbook.core.domain.household.HouseholdId;
-import be.xplore.cookbook.core.domain.household.HouseholdRepository;
+import be.xplore.cookbook.core.domain.householdinvite.HouseholdInvite;
+import be.xplore.cookbook.core.domain.householdinvite.HouseholdInviteId;
+import be.xplore.cookbook.core.domain.householdinvite.HouseholdInviteToken;
+import be.xplore.cookbook.core.domain.householdinvite.InviteTokenGenerator;
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
@@ -18,6 +21,8 @@ import be.xplore.cookbook.core.domain.weekschedule.DaySchedule;
 import be.xplore.cookbook.core.domain.weekschedule.DayScheduleId;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
 import be.xplore.cookbook.core.domain.weekschedule.WeekScheduleId;
+import be.xplore.cookbook.core.repository.HouseholdInviteRepository;
+import be.xplore.cookbook.core.repository.HouseholdRepository;
 import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
@@ -35,6 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.time.DayOfWeek;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +90,9 @@ public abstract class BaseIntegrationTest {
     private HouseholdRepository householdRepository;
 
     @Autowired
+    private HouseholdInviteRepository householdInviteRepository;
+
+    @Autowired
     private JsonMapper mapper;
 
     @BeforeEach
@@ -128,7 +138,7 @@ public abstract class BaseIntegrationTest {
 
     protected abstract String[] getTablesToClear();
 
-    protected void seedWeekSchedule(User user, Map<DayOfWeek, Recipe> dailyRecipes, LocalDate weekStartDate) {
+    protected void createWeekSchedule(User user, Map<DayOfWeek, Recipe> dailyRecipes, LocalDate weekStartDate) {
         List<DaySchedule> daySchedules = new ArrayList<>();
         dailyRecipes.forEach((day, recipe) ->
                 daySchedules.add(new DaySchedule(DayScheduleId.create(), recipe, day))
@@ -184,6 +194,25 @@ public abstract class BaseIntegrationTest {
         return ingredientRepository.save(ingredient);
     }
 
+    protected HouseholdInviteToken createHouseholdInvite(HouseholdId householdId, UserId createdBy, Duration duration) {
+        String plainToken = InviteTokenGenerator.generate();
+        String tokenHash = InviteTokenGenerator.hash(plainToken);
+        HouseholdInvite saved = householdInviteRepository.save(
+                new HouseholdInvite(householdId, tokenHash, duration, createdBy)
+        );
+        return new HouseholdInviteToken(saved, plainToken);
+    }
+
+    protected HouseholdInviteToken createExpiredHouseholdInvite(HouseholdId householdId, UserId createdBy) {
+        String plainToken = InviteTokenGenerator.generate();
+        String tokenHash = InviteTokenGenerator.hash(plainToken);
+        HouseholdInvite expired = new HouseholdInvite(
+                HouseholdInviteId.create(), householdId, tokenHash,
+                Instant.now().minus(Duration.ofMinutes(1)), false, createdBy
+        );
+        return new HouseholdInviteToken(householdInviteRepository.save(expired), plainToken);
+    }
+
     protected SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor validJwt() {
         return jwt().jwt(builder -> builder
                 .subject(USER_ID.id().toString())
@@ -197,6 +226,8 @@ public abstract class BaseIntegrationTest {
                 .claim("email", USER_EMAIL)
                 .claim("name", USER_NAME));
     }
+
+
 
     private Recipe createAndSaveRecipe(String name, String description, int durationInMinutes,
                                        int servings, List<String> steps, List<Ingredient> ingredients,

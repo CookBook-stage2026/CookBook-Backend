@@ -1,23 +1,30 @@
 package be.xplore.cookbook.config;
 
-import be.xplore.cookbook.core.domain.household.HouseholdRepository;
+import be.xplore.cookbook.config.properties.HouseholdInviteProperties;
 import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
+import be.xplore.cookbook.core.repository.HouseholdInviteRepository;
+import be.xplore.cookbook.core.repository.HouseholdRepository;
 import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
 import be.xplore.cookbook.core.repository.WeekScheduleRepository;
-import be.xplore.cookbook.core.service.HouseHoldService;
+import be.xplore.cookbook.core.service.HouseholdInviteService;
+import be.xplore.cookbook.core.service.HouseholdService;
 import be.xplore.cookbook.core.service.IngredientService;
 import be.xplore.cookbook.core.service.RecipeService;
 import be.xplore.cookbook.core.service.UserPreferenceService;
 import be.xplore.cookbook.core.service.UserService;
 import be.xplore.cookbook.core.service.WeekScheduleService;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+
 @Configuration
+@EnableConfigurationProperties(HouseholdInviteProperties.class)
 public class AppConfig {
 
     @Bean
@@ -69,10 +76,27 @@ public class AppConfig {
 
     @Bean
     @Transactional(readOnly = true)
-    public HouseHoldService houseHoldService(
+    public HouseholdService householdService(
             HouseholdRepository houseHoldRepository,
             UserRepository userRepository
     ) {
-        return new HouseHoldService(houseHoldRepository, userRepository);
+        return new HouseholdService(houseHoldRepository, userRepository);
+    }
+
+    @Bean
+    public HouseholdInviteService householdInviteService(
+            HouseholdRepository householdRepository,
+            UserRepository userRepository,
+            HouseholdInviteRepository householdInviteRepository,
+            HouseholdInviteProperties properties
+    ) {
+        return new HouseholdInviteService(
+                userRepository,
+                householdInviteRepository,
+                householdRepository,
+                Duration.ofMinutes(properties.defaultDurationMinutes()),
+                Duration.ofMinutes(properties.minDurationMinutes()),
+                Duration.ofMinutes(properties.maxDurationMinutes())
+        );
     }
 }

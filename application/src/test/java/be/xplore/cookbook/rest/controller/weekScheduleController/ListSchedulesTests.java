@@ -33,7 +33,7 @@ class ListSchedulesTests extends BaseIntegrationTest {
     void listSchedules_ExistingSchedule_ShouldReturnListOfSchedules() throws Exception {
         var user = createUser();
         var recipes = seedRecipesForAllDays(user);
-        seedWeekSchedule(user, recipes, MONDAY);
+        createWeekSchedule(user, recipes, MONDAY);
 
         getMockMvc().perform(get("/api/schedules")
                         .with(validJwt())
@@ -63,7 +63,7 @@ class ListSchedulesTests extends BaseIntegrationTest {
         partialSchedule.put(DayOfWeek.MONDAY, recipe);
         partialSchedule.put(DayOfWeek.WEDNESDAY, recipe);
         partialSchedule.put(DayOfWeek.FRIDAY, recipe);
-        seedWeekSchedule(user, partialSchedule, MONDAY);
+        createWeekSchedule(user, partialSchedule, MONDAY);
 
         getMockMvc().perform(get("/api/schedules")
                         .with(validJwt())
@@ -107,8 +107,8 @@ class ListSchedulesTests extends BaseIntegrationTest {
 
         Map<DayOfWeek, Recipe> week1 = Map.of(DayOfWeek.MONDAY, recipe1);
         Map<DayOfWeek, Recipe> week2 = Map.of(DayOfWeek.TUESDAY, recipe2);
-        seedWeekSchedule(user, week1, MONDAY);
-        seedWeekSchedule(user, week2, MONDAY.plusWeeks(1));
+        createWeekSchedule(user, week1, MONDAY);
+        createWeekSchedule(user, week2, MONDAY.plusWeeks(1));
 
         getMockMvc().perform(get("/api/schedules")
                         .with(validJwt())

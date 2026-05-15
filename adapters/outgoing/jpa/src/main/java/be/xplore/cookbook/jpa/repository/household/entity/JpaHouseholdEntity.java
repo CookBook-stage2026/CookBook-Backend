@@ -58,4 +58,8 @@ public class JpaHouseholdEntity {
                 JpaUserEntity.fromDomain(household.creator())
         );
     }
+
+    public UUID getId() {
+        return id;
+    }
 }
