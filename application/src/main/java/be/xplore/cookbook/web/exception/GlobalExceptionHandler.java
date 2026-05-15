@@ -5,7 +5,6 @@ import be.xplore.cookbook.ai.exception.AiInvalidResponseException;
 import be.xplore.cookbook.core.domain.exception.DataIntegrityException;
 import be.xplore.cookbook.core.domain.exception.ForbiddenException;
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
-import be.xplore.cookbook.core.domain.exception.RecipeImportException;
 import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
 import be.xplore.cookbook.security.exception.OAuth2Exception;
 import org.springframework.http.HttpHeaders;
@@ -20,12 +19,6 @@ import java.nio.file.AccessDeniedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-    @ExceptionHandler(RecipeImportException.class)
-    ResponseEntity<Object> handleRecipeImportException(RecipeImportException ex, WebRequest request) {
-        String responseBody = ex.getMessage();
-        return super.handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.BAD_GATEWAY, request);
-    }
-
     @ExceptionHandler({
             ForbiddenException.class
     })
