@@ -8,13 +8,14 @@ import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
+import be.xplore.cookbook.core.port.recipe.ImportedIngredient;
+import be.xplore.cookbook.core.port.recipe.ImportedRecipe;
 import be.xplore.cookbook.core.port.recipe.RecipeImportPort;
 import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
 import be.xplore.cookbook.core.port.recipe.ScheduleSuggestionsPort;
-import be.xplore.cookbook.core.port.recipe.ScrapedIngredient;
-import be.xplore.cookbook.core.port.recipe.ScrapedRecipe;
 import be.xplore.cookbook.core.port.recipe.SuggestedRecipeEnhancement;
 import be.xplore.cookbook.core.port.recipe.SuggestedRecipeId;
+import com.fasterxml.jackson.core.JsonParseException;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -31,12 +32,14 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
     private static final int NEXT_WEEK_INDEX = 2;
 
     private final RecipeAiService recipeAiService;
+    private final ScheduleAiService scheduleAiService;
     private final JsonMapper jsonMapper;
     private final Logger logger = Logger.getLogger(AiAdapter.class.getName());
 
-    public AiAdapter(RecipeAiService recipeAiService,
+    public AiAdapter(RecipeAiService recipeAiService, ScheduleAiService scheduleAiService,
                      JsonMapper jsonMapper) {
         this.recipeAiService = recipeAiService;
+        this.scheduleAiService = scheduleAiService;
         this.jsonMapper = jsonMapper;
     }
 
@@ -56,7 +59,7 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
         DaySuggestionInput input = buildDaySuggestionInput(dayToSuggestFor, weekSchedules, availableRecipes);
         String daySuggestionJson = serialize(input);
         try {
-            SuggestedRecipeId suggestedRecipeId = aiService.suggestRecipeForDay(daySuggestionJson);
+            SuggestedRecipeId suggestedRecipeId = scheduleAiService.suggestRecipeForDay(daySuggestionJson);
             return new RecipeId(suggestedRecipeId.id());
         } catch (RuntimeException e) {
             throw handleException(e);
@@ -64,15 +67,16 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
     }
 
     @Override
-    public ScrapedRecipe scrape(String url) {
+    public ImportedRecipe scrape(String url) {
         try {
             var result = recipeAiService.importFromUrl(url);
 
-            List<ScrapedIngredient> ingredients = result.ingredients().stream()
-                    .map(i -> new ScrapedIngredient(i.name(), i.unit(), i.quantity()))
+            List<ImportedIngredient> ingredients = result.ingredients().stream()
+                    .map(i -> new ImportedIngredient(i.name(), i.unit(), i.quantity(),
+                            i.categories()))
                     .toList();
 
-            return new ScrapedRecipe(
+            return new ImportedRecipe(
                     result.title(),
                     result.description(),
                     result.durationInMinutes(),
@@ -82,7 +86,7 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
             );
         } catch (RuntimeException e) {
             Throwable cause = e.getCause();
-            if (cause instanceof IOException) {
+            if (cause instanceof IOException && !(cause instanceof JsonParseException)) {
                 throw new AiConnectionException("AI service is unavailable", e);
             }
             logger.warning(e.getLocalizedMessage());

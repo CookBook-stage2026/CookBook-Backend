@@ -20,6 +20,12 @@ dependencyManagement {
     }
 }
 
+tasks.named('jacocoTestReport') {
+    classDirectories.setFrom(files(classDirectories.files.collect {
+        fileTree(dir: it, exclude: ['**/config/McpConfig.class'])
+    }))
+}
+
 dependencies {
     implementation project(":core")
 

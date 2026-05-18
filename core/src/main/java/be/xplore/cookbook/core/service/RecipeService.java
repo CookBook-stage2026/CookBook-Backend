@@ -21,18 +21,21 @@ import be.xplore.cookbook.core.domain.recipe.command.SearchRecipesByNameQuery;
 import be.xplore.cookbook.core.domain.recipe.command.UpdateRecipeCommand;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
+import be.xplore.cookbook.core.port.recipe.ImportedIngredient;
+import be.xplore.cookbook.core.port.recipe.ImportedRecipe;
+import be.xplore.cookbook.core.port.recipe.RecipeImportPort;
 import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
 import be.xplore.cookbook.core.port.recipe.SuggestedRecipeEnhancement;
-import be.xplore.cookbook.core.port.recipe.RecipeImportPort;
-import be.xplore.cookbook.core.port.recipe.ScrapedIngredient;
-import be.xplore.cookbook.core.port.recipe.ScrapedRecipe;
 import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class RecipeService {
     private final RecipeRepository recipeRepository;
@@ -57,10 +60,13 @@ public class RecipeService {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(command.userId()::notFound);
 
+        List<RecipeIngredient> raw = mapToRecipeIngredients(command.ingredientQuantities());
+        List<RecipeIngredient> unique = deduplicateIngredients(raw);
+
         return recipeRepository.save(new Recipe(
                 RecipeId.create(),
                 command.details(),
-                mapToRecipeIngredients(command.ingredientQuantities()),
+                unique,
                 user
         ));
     }
@@ -134,10 +140,13 @@ public class RecipeService {
         recipeRepository.findById(command.id(), user.id())
                 .orElseThrow(() -> new NotFoundException("Recipe not found"));
 
+        List<RecipeIngredient> raw = mapToRecipeIngredients(command.ingredientQuantities());
+        List<RecipeIngredient> unique = deduplicateIngredients(raw);
+
         recipeRepository.save(new Recipe(
                 command.id(),
                 command.details(),
-                mapToRecipeIngredients(command.ingredientQuantities()),
+                unique,
                 user
         ));
     }
@@ -146,11 +155,13 @@ public class RecipeService {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(UserNotFoundException::new);
 
-        ScrapedRecipe scraped = recipeImportPort.scrape(command.url());
+        ImportedRecipe scraped = recipeImportPort.scrape(command.url());
 
-        List<RecipeIngredient> recipeIngredients = scraped.ingredients().stream()
+        List<RecipeIngredient> raw = scraped.ingredients().stream()
                 .map(this::resolveRecipeIngredient)
                 .toList();
+
+        List<RecipeIngredient> unique = deduplicateIngredients(raw);
 
         return recipeRepository.save(new Recipe(
                 RecipeId.create(),
@@ -161,18 +172,18 @@ public class RecipeService {
                         scraped.servings(),
                         scraped.steps()
                 ),
-                recipeIngredients,
+                unique,
                 user
         ));
     }
 
-    private RecipeIngredient resolveRecipeIngredient(ScrapedIngredient scraped) {
+    private RecipeIngredient resolveRecipeIngredient(ImportedIngredient scraped) {
         Ingredient ingredient = ingredientRepository.findByNameIgnoreCase(scraped.name())
                 .orElseGet(() -> ingredientRepository.save(new Ingredient(
                         IngredientId.create(),
                         scraped.name(),
                         scraped.unit(),
-                        List.of()
+                        scraped.categories()
                 )));
         return new RecipeIngredient(ingredient, scraped.quantity());
     }
@@ -194,6 +205,18 @@ public class RecipeService {
                                     new DataIntegrityException("Ingredient not found: " + iwq.ingredientId()));
                     return new RecipeIngredient(ingredient, iwq.quantity());
                 })
+                .toList();
+    }
+
+    private static List<RecipeIngredient> deduplicateIngredients(List<RecipeIngredient> ingredients) {
+        return ingredients.stream()
+                .collect(Collectors.toMap(
+                        RecipeIngredient::ingredient,
+                        Function.identity(),
+                        RecipeIngredient::merge,
+                        LinkedHashMap::new
+                ))
+                .values().stream()
                 .toList();
     }
 }

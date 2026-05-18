@@ -1,6 +1,7 @@
 package be.xplore.cookbook.rest.controller.recipeController;
 
 import be.xplore.cookbook.core.domain.ingredient.Unit;
+import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
 import be.xplore.cookbook.rest.dto.request.ImportRecipeRequest;
 import be.xplore.cookbook.rest.dto.response.RecipeDto;
@@ -41,9 +42,11 @@ class ImportRecipeTests extends BaseIntegrationTest {
     private static final String IMPORT_RECIPE_INGREDIENT_1_NAME = "Spaghetti";
     private static final Unit IMPORT_RECIPE_INGREDIENT_1_UNIT = Unit.GRAM;
     private static final double IMPORT_RECIPE_INGREDIENT_1_QUANTITY = 400.0;
+    private static final String IMPORT_RECIPE_INGREDIENT_1_CATEGORY = "GRAIN";
     private static final String IMPORT_RECIPE_INGREDIENT_2_NAME = "Eggs";
     private static final Unit IMPORT_RECIPE_INGREDIENT_2_UNIT = Unit.PIECE;
     private static final double IMPORT_RECIPE_INGREDIENT_2_QUANTITY = 4.0;
+    private static final String IMPORT_RECIPE_INGREDIENT_2_CATEGORY = "EGG";
     private static final String IMPORT_RECIPE_URL = "https://example.com/recipes/spaghetti-carbonara";
 
     private static WireMockServer wireMockServer;
@@ -110,6 +113,7 @@ class ImportRecipeTests extends BaseIntegrationTest {
 
         RecipeDto importedRecipeDto = getMapper().readValue(responseContent, RecipeDto.class);
         assertThat(importedRecipeDto.id()).isNotNull();
+        assertThat(getRecipeRepository().findById(new RecipeId(importedRecipeDto.id()), createUser().id()));
     }
 
     @Test
@@ -130,7 +134,7 @@ class ImportRecipeTests extends BaseIntegrationTest {
     }
 
     @Test
-    void importRecipe_shouldReturn503_whenAiReturnsInvalidJson() throws Exception {
+    void importRecipe_shouldReturn502_whenAiReturnsInvalidJson() throws Exception {
         WireMock.stubFor(WireMock.post(WireMock.urlPathMatching("/api/chat"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
@@ -139,7 +143,7 @@ class ImportRecipeTests extends BaseIntegrationTest {
         createUser();
         ImportRecipeRequest request = new ImportRecipeRequest(IMPORT_RECIPE_URL);
         performImportRecipe(request)
-                .andExpect(status().isServiceUnavailable());
+                .andExpect(status().isBadGateway());
     }
 
     @Test
@@ -209,8 +213,8 @@ class ImportRecipeTests extends BaseIntegrationTest {
                         + "\"servings\": %d,"
                         + "\"steps\": [\"%s\", \"%s\"],"
                         + "\"ingredients\": ["
-                        + "{\"name\": \"%s\", \"unit\": \"%s\", \"quantity\": %.1f},"
-                        + "{\"name\": \"%s\", \"unit\": \"%s\", \"quantity\": %.1f}"
+                        + "{\"name\": \"%s\", \"unit\": \"%s\", \"quantity\": %.1f, \"categories\": [\"%s\"]},"
+                        + "{\"name\": \"%s\", \"unit\": \"%s\", \"quantity\": %.1f, \"categories\": [\"%s\"]}"
                         + "]"
                         + "}",
                 IMPORT_RECIPE_TITLE,
@@ -222,9 +226,11 @@ class ImportRecipeTests extends BaseIntegrationTest {
                 IMPORT_RECIPE_INGREDIENT_1_NAME,
                 IMPORT_RECIPE_INGREDIENT_1_UNIT,
                 IMPORT_RECIPE_INGREDIENT_1_QUANTITY,
+                IMPORT_RECIPE_INGREDIENT_1_CATEGORY,
                 IMPORT_RECIPE_INGREDIENT_2_NAME,
                 IMPORT_RECIPE_INGREDIENT_2_UNIT,
-                IMPORT_RECIPE_INGREDIENT_2_QUANTITY
+                IMPORT_RECIPE_INGREDIENT_2_QUANTITY,
+                IMPORT_RECIPE_INGREDIENT_2_CATEGORY
         );
     }
 }

@@ -1,9 +1,12 @@
 package be.xplore.cookbook.core.port.recipe;
 
+import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 
-public record ScrapedIngredient(String name, Unit unit, double quantity) {
-    public ScrapedIngredient {
+import java.util.List;
+
+public record ImportedIngredient(String name, Unit unit, double quantity, List<Category> categories) {
+    public ImportedIngredient {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Scraped ingredient name cannot be blank");
         }

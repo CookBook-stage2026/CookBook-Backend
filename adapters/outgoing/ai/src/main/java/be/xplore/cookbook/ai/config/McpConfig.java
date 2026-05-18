@@ -2,30 +2,24 @@ package be.xplore.cookbook.ai.config;
 
 import dev.langchain4j.mcp.client.DefaultMcpClient;
 import dev.langchain4j.mcp.client.McpClient;
-import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
+import dev.langchain4j.mcp.client.transport.http.StreamableHttpMcpTransport;
 import dev.langchain4j.service.tool.ToolProvider;
 import dev.langchain4j.service.tool.ToolProviderResult;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @Configuration
+@EnableConfigurationProperties(FirecrawlProperties.class)
 public class McpConfig {
-
     @Bean(destroyMethod = "close")
-    public McpClient firecrawlMcpClient(@Value("${firecrawl.api-key}") String apiKey) {
-        boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
-        List<String> command = isWindows
-                ? List.of("cmd", "/c", "npx", "-y", "firecrawl-mcp")
-                : List.of("npx", "-y", "firecrawl-mcp");
-
-        StdioMcpTransport transport = new StdioMcpTransport.Builder()
-                .command(command)
-                .environment(Map.of("FIRECRAWL_API_KEY", apiKey))
-                .logEvents(true)
+    @ConditionalOnProperty(name = "firecrawl.enabled", havingValue = "true")
+    public McpClient firecrawlMcpClient(FirecrawlProperties properties) {
+        StreamableHttpMcpTransport transport = new StreamableHttpMcpTransport.Builder()
+                .url(properties.mcpUrl())
                 .build();
 
         return new DefaultMcpClient.Builder()
@@ -35,16 +29,16 @@ public class McpConfig {
     }
 
     @Bean
-    public ToolProvider mcpToolProvider(McpClient mcpClient) {
+    public ToolProvider mcpToolProvider(Optional<McpClient> mcpClient) {
         return _ -> {
-            ToolProviderResult.Builder builder = ToolProviderResult.builder();
+            if (mcpClient.isEmpty()) {
+                return ToolProviderResult.builder().build();
+            }
 
-            mcpClient.listTools().stream()
-                    .filter(tool -> tool.name().equals("firecrawl_scrape"))
-                    .forEach(tool -> builder.add(
-                            tool,
-                            (req, _) -> String.valueOf(mcpClient.executeTool(req))
-                    ));
+            ToolProviderResult.Builder builder = ToolProviderResult.builder();
+            mcpClient.get().listTools().forEach(tool ->
+                    builder.add(tool, (req, _) -> String.valueOf(mcpClient.get().executeTool(req)))
+            );
 
             return builder.build();
         };

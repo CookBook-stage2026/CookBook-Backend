@@ -2,15 +2,15 @@ package be.xplore.cookbook.core.port.recipe;
 
 import java.util.List;
 
-public record ScrapedRecipe(
+public record ImportedRecipe(
         String title,
         String description,
         int durationInMinutes,
         int servings,
         List<String> steps,
-        List<ScrapedIngredient> ingredients
+        List<ImportedIngredient> ingredients
 ) {
-    public ScrapedRecipe {
+    public ImportedRecipe {
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("Scraped recipe title cannot be blank");
         }

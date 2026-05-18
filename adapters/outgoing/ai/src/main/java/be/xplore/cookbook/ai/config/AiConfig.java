@@ -1,6 +1,7 @@
 package be.xplore.cookbook.ai.config;
 
 import be.xplore.cookbook.ai.RecipeAiService;
+import be.xplore.cookbook.ai.ScheduleAiService;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.tool.ToolProvider;
@@ -15,6 +16,13 @@ public class AiConfig {
                 .chatModel(chatModel)
                 .toolProvider(toolProvider)
                 .maxSequentialToolsInvocations(2)
+                .build();
+    }
+
+    @Bean
+    public ScheduleAiService scheduleAiService(ChatModel chatModel, ToolProvider toolProvider) {
+        return AiServices.builder(ScheduleAiService.class)
+                .chatModel(chatModel)
                 .build();
     }
 }
