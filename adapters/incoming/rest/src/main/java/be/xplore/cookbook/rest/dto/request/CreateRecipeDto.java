@@ -13,6 +13,7 @@ public record CreateRecipeDto(
         int durationInMinutes,
         @NotEmpty List<@NotBlank String> steps,
         @NotEmpty List<@Valid NewRecipeIngredientDto> ingredients,
+        boolean isPublic,
         @NotNull int servings
 ) {
 }

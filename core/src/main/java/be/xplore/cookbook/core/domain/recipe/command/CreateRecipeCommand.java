@@ -5,6 +5,6 @@ import be.xplore.cookbook.core.domain.user.UserId;
 
 import java.util.List;
 
-public record CreateRecipeCommand(RecipeDetails details,
-                                  List<IngredientWithQuantity> ingredientQuantities, UserId userId) {
+public record CreateRecipeCommand(RecipeDetails details, List<IngredientWithQuantity> ingredientQuantities,
+                                  boolean isPublic, UserId userId) {
 }

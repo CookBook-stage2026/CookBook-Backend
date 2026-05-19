@@ -13,6 +13,7 @@ import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.jpa.repository.recipe.entity.JpaRecipeEntity;
 import be.xplore.cookbook.jpa.repository.user.entity.JpaUserEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -47,6 +48,7 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     public PagedResult<RecipeSummary> findAllSummariesWithFilter(
             List<IngredientId> ingredientIds,
             UserPreferences preferences,
+            boolean includeAccessibleRecipes,
             User user,
             Paging paging
     ) {
@@ -60,14 +62,13 @@ public class RecipeRepositoryImpl implements RecipeRepository {
 
         List<Category> excludedCategories = preferences.excludedCategories();
         Pageable pageable = PageRequest.of(paging.page(), paging.size());
+        JpaUserEntity jpaUser = JpaUserEntity.fromDomain(user);
 
-        var page = jpaRecipeRepository.findAllSummariesWithFilterByCreatorId(
-                ingredientUuids,
-                excludedIngredientUuids,
-                excludedCategories,
-                JpaUserEntity.fromDomain(user),
-                pageable
-        );
+        Page<JpaRecipeEntity> page = includeAccessibleRecipes
+                ? jpaRecipeRepository.findAllSummariesWithFilterIncludingHousehold(
+                ingredientUuids, excludedIngredientUuids, excludedCategories, jpaUser, pageable)
+                : jpaRecipeRepository.findAllSummariesWithFilterOwnOnly(
+                ingredientUuids, excludedIngredientUuids, excludedCategories, jpaUser, pageable);
 
         return new PagedResult<>(
                 page.getContent().stream()

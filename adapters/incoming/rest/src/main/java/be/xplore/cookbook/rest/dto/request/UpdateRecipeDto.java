@@ -13,6 +13,7 @@ public record UpdateRecipeDto(
         int durationInMinutes,
         @NotEmpty List<@NotBlank String> steps,
         @NotEmpty List<@Valid NewRecipeIngredientDto> ingredients,
-        @NotNull int servings
+        @NotNull int servings,
+        boolean isPublic
 ) {
 }

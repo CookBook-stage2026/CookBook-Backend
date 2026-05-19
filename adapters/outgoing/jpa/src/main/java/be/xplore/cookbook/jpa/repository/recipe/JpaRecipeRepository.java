@@ -24,27 +24,36 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
     @EntityGraph(attributePaths = {"user", "steps", "ingredients", "ingredients.ingredient"})
     Optional<JpaRecipeEntity> findByIdAndUserId(UUID id, UUID userId);
 
+    @EntityGraph(attributePaths = {"user"})
     @Query("""
-                SELECT r FROM JpaRecipeEntity r
-                JOIN r.ingredients i
-                WHERE (:#{#ingredientIds.size()} = 0 OR i.id.ingredientId IN :ingredientIds)
-                    AND (:#{#excludedIngredientIds.size()} = 0 OR i.id.ingredientId NOT IN :excludedIngredientIds)
-                    AND (
-                        :#{#excludedCategories.size()} = 0
-                        OR NOT EXISTS (
-                            SELECT c FROM i.ingredient.categories c
-                            WHERE c IN :excludedCategories
-                        )
-                    )
-                    AND (r.user IN (
-                        SELECT hm FROM JpaHouseholdEntity h
-                        JOIN h.members hm
-                        WHERE :user MEMBER OF h.members OR h.creator = :user
-                    ) OR r.user = :user)
-                GROUP BY r.id
-                HAVING :#{#ingredientIds.size()} = 0 OR COUNT(DISTINCT i.id.ingredientId) >= :#{#ingredientIds.size()}
-            """)
-    Page<JpaRecipeEntity> findAllSummariesWithFilterByCreatorId(
+        SELECT r FROM JpaRecipeEntity r
+        JOIN r.ingredients i
+        WHERE (:#{#ingredientIds.size()} = 0 OR i.id.ingredientId IN :ingredientIds)
+            AND (:#{#excludedIngredientIds.size()} = 0 OR i.id.ingredientId NOT IN :excludedIngredientIds)
+            AND (
+                :#{#excludedCategories.size()} = 0
+                OR NOT EXISTS (
+                    SELECT c FROM i.ingredient.categories c
+                    WHERE c IN :excludedCategories
+                )
+            )
+            AND (r.user = :user OR r.user IN (
+                SELECT hm FROM JpaHouseholdEntity h
+                JOIN h.members hm
+                WHERE (
+                    :user MEMBER OF h.members
+                    OR h.creator = :user
+                )
+                AND hm != :user
+            ) OR r.user IN (
+                SELECT h.creator FROM JpaHouseholdEntity h
+                JOIN h.members hm
+                WHERE hm = :user
+            ))
+        GROUP BY r.id
+        HAVING :#{#ingredientIds.size()} = 0 OR COUNT(DISTINCT i.id.ingredientId) >= :#{#ingredientIds.size()}
+    """)
+    Page<JpaRecipeEntity> findAllSummariesWithFilterIncludingHousehold(
             @Param("ingredientIds") List<UUID> ingredientIds,
             @Param("excludedIngredientIds") List<UUID> excludedIngredientIds,
             @Param("excludedCategories") List<Category> excludedCategories,
@@ -52,6 +61,32 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
             Pageable pageable
     );
 
+    @EntityGraph(attributePaths = {"user"})
+    @Query("""
+        SELECT r FROM JpaRecipeEntity r
+        JOIN r.ingredients i
+        WHERE (:#{#ingredientIds.size()} = 0 OR i.id.ingredientId IN :ingredientIds)
+            AND (:#{#excludedIngredientIds.size()} = 0 OR i.id.ingredientId NOT IN :excludedIngredientIds)
+            AND (
+                :#{#excludedCategories.size()} = 0
+                OR NOT EXISTS (
+                    SELECT c FROM i.ingredient.categories c
+                    WHERE c IN :excludedCategories
+                )
+            )
+            AND r.user = :user
+        GROUP BY r.id
+        HAVING :#{#ingredientIds.size()} = 0 OR COUNT(DISTINCT i.id.ingredientId) >= :#{#ingredientIds.size()}
+    """)
+    Page<JpaRecipeEntity> findAllSummariesWithFilterOwnOnly(
+            @Param("ingredientIds") List<UUID> ingredientIds,
+            @Param("excludedIngredientIds") List<UUID> excludedIngredientIds,
+            @Param("excludedCategories") List<Category> excludedCategories,
+            @Param("user") JpaUserEntity user,
+            Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = {"user"})
     @Query("""
             SELECT r FROM JpaRecipeEntity r
             WHERE (

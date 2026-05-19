@@ -5,6 +5,7 @@ import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
+import be.xplore.cookbook.core.domain.recipe.command.ChangeVisibilityCommand;
 import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.EnhanceRecipeQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
@@ -15,6 +16,7 @@ import be.xplore.cookbook.core.domain.recipe.command.SearchRecipesByNameQuery;
 import be.xplore.cookbook.core.domain.recipe.command.UpdateRecipeCommand;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.service.RecipeService;
+import be.xplore.cookbook.rest.dto.request.ChangeRecipeVisibilityRequest;
 import be.xplore.cookbook.rest.dto.request.CreateRecipeDto;
 import be.xplore.cookbook.rest.dto.request.ImportRecipeRequest;
 import be.xplore.cookbook.rest.dto.request.RecipeSearchRequest;
@@ -52,7 +54,10 @@ public class RecipeController {
     @PostMapping
     @Transactional
     @ResponseStatus(HttpStatus.CREATED)
-    public RecipeDto createRecipe(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateRecipeDto dto) {
+    public RecipeDto createRecipe(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody CreateRecipeDto dto
+    ) {
         List<IngredientWithQuantity> ingredientQuantities = dto.ingredients().stream()
                 .map(i -> new IngredientWithQuantity(
                         new IngredientId(i.ingredientId()), i.baseQuantity()))
@@ -61,6 +66,7 @@ public class RecipeController {
         Recipe recipe = recipeService.createRecipe(new CreateRecipeCommand(
                 new RecipeDetails(dto.name(), dto.description(), dto.durationInMinutes(), dto.servings(), dto.steps()),
                 ingredientQuantities,
+                dto.isPublic(),
                 getUserIdFromJwt(jwt)
         ));
 
@@ -81,8 +87,8 @@ public class RecipeController {
         List<IngredientId> ingredients = request.ingredientIds().stream().map(IngredientId::new).toList();
 
         var result = recipeService.findAllSummariesWithFilter(new FilterRecipesQuery(
-                ingredients, new Paging(
-                request.page(), request.size()), request.shouldApplyPreferences(), getUserIdFromJwt(jwt)
+                ingredients, new Paging(request.page(), request.size()), request.shouldApplyPreferences(),
+                request.includeAccessibleRecipes(), getUserIdFromJwt(jwt)
         ));
 
         return new PaginatedResponse<>(
@@ -131,6 +137,7 @@ public class RecipeController {
                 new RecipeId(id),
                 new RecipeDetails(dto.name(), dto.description(), dto.durationInMinutes(), dto.servings(), dto.steps()),
                 ingredientQuantities,
+                dto.isPublic(),
                 getUserIdFromJwt(jwt)
         ));
     }
@@ -145,6 +152,16 @@ public class RecipeController {
                 new ImportRecipeCommand(request.url(), getUserIdFromJwt(jwt))
         ));
         return RecipeDto.fromDomain(recipe);
+    }
+
+    @PutMapping("/{id}/visibility")
+    public void changeVisibility(
+            @PathVariable UUID id,
+            @RequestBody ChangeRecipeVisibilityRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        recipeService.changeVisibility(new ChangeVisibilityCommand(
+                new RecipeId(id), getUserIdFromJwt(jwt), request.isPublic()));
     }
 
     private UserId getUserIdFromJwt(Jwt jwt) {
