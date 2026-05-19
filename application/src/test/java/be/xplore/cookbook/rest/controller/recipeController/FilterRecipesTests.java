@@ -266,6 +266,39 @@ class FilterRecipesTests extends BaseIntegrationTest {
     }
 
     @Test
+    void filterRecipes_shouldReturnPublicRecipesFromHouseholdMembers_whenUserIsInHousehold() throws Exception {
+        // Arrange
+        User user1 = createUser();
+        User user2 = createUserWithId(UserId.create());
+        User user3 = createUserWithId(UserId.create());
+
+        List<User> householdMembers = new ArrayList<>();
+        householdMembers.add(user2);
+        householdMembers.add(user3);
+
+        createHouseholdWithMembers(householdMembers, user1);
+
+        Recipe recipeByUser1 = createAndSaveRecipe(user1);
+        Recipe privateRecipeByUser1 = createAndSaveRecipe(false, user1);
+        Recipe recipeByUser2 = createAndSaveRecipe(user2);
+        Recipe privateRecipeByUser2 = createAndSaveRecipe(false, user2);
+        Recipe recipeByUser3 = createAndSaveRecipe(user3);
+        Recipe privateRecipeByUser3 = createAndSaveRecipe(false, user3);
+
+        List<Recipe> expectedRecipes = List.of(recipeByUser1, recipeByUser2, privateRecipeByUser2, recipeByUser3);
+
+        // Act & Assert
+        performFilterWithPredefinedUserId(defaultRequest(), user2.id())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(expectedRecipes.size())))
+                .andExpect(jsonPath("$.content[*].id", hasItems(
+                        expectedRecipes.stream()
+                                .map(r -> r.getId().id().toString())
+                                .toArray(String[]::new)
+                )));
+    }
+
+    @Test
     void filterRecipes_shouldOnlyReturnOwnRecipes_whenOnlyOwnRequested() throws Exception {
         // Arrange
         User user1 = createUser();

@@ -13,7 +13,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ChangeVisibilityTests extends BaseIntegrationTest {
@@ -63,7 +63,7 @@ class ChangeVisibilityTests extends BaseIntegrationTest {
         ChangeRecipeVisibilityRequest dto = new ChangeRecipeVisibilityRequest(true);
 
         // Act & Assert
-        getMockMvc().perform(patch("/api/recipes/{id}/visibility", recipe.getId().id())
+        getMockMvc().perform(put("/api/recipes/{id}/visibility", recipe.getId().id())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(getMapper().writeValueAsString(dto)))
@@ -87,7 +87,7 @@ class ChangeVisibilityTests extends BaseIntegrationTest {
 
     private ResultActions performChangeVisibility(UUID recipeId,
                                                   ChangeRecipeVisibilityRequest dto) throws Exception {
-        return getMockMvc().perform(patch("/api/recipes/{id}/visibility", recipeId)
+        return getMockMvc().perform(put("/api/recipes/{id}/visibility", recipeId)
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -96,7 +96,7 @@ class ChangeVisibilityTests extends BaseIntegrationTest {
 
     private ResultActions performChangeVisibilityAsUser(User user, UUID recipeId,
                                                         ChangeRecipeVisibilityRequest dto) throws Exception {
-        return getMockMvc().perform(patch("/api/recipes/{id}/visibility", recipeId)
+        return getMockMvc().perform(put("/api/recipes/{id}/visibility", recipeId)
                         .with(validJwtFromUserId(user.id()))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
