@@ -1,7 +1,7 @@
 package be.xplore.cookbook.core.domain.user;
 
 
-import be.xplore.cookbook.core.domain.exception.NotFoundException;
+import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -11,8 +11,8 @@ public record UserId(UUID id) {
         Objects.requireNonNull(id, "User id cannot be null!");
     }
 
-    public NotFoundException notFound() {
-        return new NotFoundException("User [" + id + "] not found");
+    public UserNotFoundException notFound() {
+        return new UserNotFoundException();
     }
 
     public static UserId create() {

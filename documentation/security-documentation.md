@@ -24,6 +24,7 @@ The SecurityConfig class serves as the central definition point for the applicat
 - OAuth2 Login: Configures the application as an OAuth2 client, overriding the default session-based request repository with CookieAuthorizationRequestRepository. It also hooks in the custom OAuth2AuthenticationSuccessHandler to finalize the login process.
 - Resource Server: Enables JWT-based API authorization, relying on a NimbusJwtDecoder bean to validate incoming Bearer tokens using HmacSHA512.
 - CORS: Dynamically configures Cross-Origin Resource Sharing based on the app.cors.allowed-origins environment variable.
+- Account Selection Prompt: A custom `promptCustomizer` bean injects the `prompt=select_account` parameter into every OAuth2 authorization request. This forces the identity provider to always display the account chooser, preventing automatic re‑login with the previously used account.
 
 ### OAuth2AuthenticationSuccessHandler
 Executes immediately after Spring Security successfully exchanges the authorization code for an Identity Provider (IdP) access token.
@@ -35,7 +36,7 @@ Executes immediately after Spring Security successfully exchanges the authorizat
 ### Phase 1: Authentication
 1. Initiation: The frontend redirects the user to /oauth2/authorization/{provider} (e.g., google, github).
 2. State Preservation: Spring Security intercepts the request. CookieAuthorizationRequestRepository serializes the authorization request and saves it as a signed cookie.
-3. User Consent: The backend redirects the user to the IdP's login page.
+3. User Consent & Account Selection: The backend redirects the user to the IdP’s authorization endpoint. The request includes the `prompt=select_account` parameter, which forces the IdP to show the account chooser screen every time—even if the user has previously signed in with that IdP. Consent screens (e.g., for new scopes) still appear only when necessary.
 4. Callback: The IdP redirects back to /login/oauth2/code/{provider} with an authorization code.
 5. Exchange: Spring Security automatically executes the code-to-token exchange with the IdP in the background.
 6. Success Handling: OAuth2AuthenticationSuccessHandler takes over, normalizes the user profile, provisions the internal database account, and attaches the access_token cookie.
