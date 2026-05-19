@@ -11,6 +11,7 @@ import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeIngredient;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
+import be.xplore.cookbook.core.domain.recipe.command.ChangeVisibilityCommand;
 import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.EnhanceRecipeQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
@@ -55,6 +56,7 @@ public class RecipeService {
                 RecipeId.create(),
                 command.details(),
                 mapToRecipeIngredients(command.ingredientQuantities()),
+                command.isPublic(),
                 user
         ));
     }
@@ -68,15 +70,15 @@ public class RecipeService {
         User user = userRepository.findById(query.userId())
                 .orElseThrow(query.userId()::notFound);
 
+        UserPreferences preferences = UserPreferences.empty(user);
+
         if (query.shouldApplyPreferences()) {
-            UserPreferences preferences = userPreferenceRepository.findPreferences(user)
+            preferences = userPreferenceRepository.findPreferences(user)
                     .orElseThrow(query.userId()::notFound);
-            return recipeRepository.findAllSummariesWithFilter(query.ingredientIds(), preferences,
-                    user, query.paging());
         }
 
-        return recipeRepository.findAllSummariesWithFilter(
-                query.ingredientIds(), UserPreferences.empty(user), user, query.paging());
+        return recipeRepository.findAllSummariesWithFilter(query.ingredientIds(), preferences,
+                query.includeAccessibleRecipes(), user, query.paging());
     }
 
     public List<RecipeSummary> searchSummariesByName(SearchRecipesByNameQuery query) {
@@ -104,20 +106,21 @@ public class RecipeService {
 
         RecipeIngredient newRecipeIngredient = new RecipeIngredient(ingredient, suggestion.newIngredient().quantity());
 
-        List<RecipeIngredient> updatedIngredients = new ArrayList<>(recipe.ingredients());
+        List<RecipeIngredient> updatedIngredients = new ArrayList<>(recipe.getIngredients());
         updatedIngredients.add(newRecipeIngredient);
 
         return new Recipe(
-                recipe.id(),
+                recipe.getId(),
                 new RecipeDetails(
-                        recipe.name(),
-                        recipe.description(),
+                        recipe.getName(),
+                        recipe.getDescription(),
                         suggestion.durationInMinutes(),
-                        recipe.servings(),
+                        recipe.getServings(),
                         suggestion.updatedSteps()
                 ),
                 updatedIngredients,
-                recipe.user()
+                recipe.isPublic(),
+                recipe.getUser()
         );
     }
 
@@ -125,15 +128,17 @@ public class RecipeService {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(command.userId()::notFound);
 
-        recipeRepository.findById(command.id(), user.id())
+        Recipe recipe = recipeRepository.findById(command.id(), user.id())
                 .orElseThrow(() -> new NotFoundException("Recipe not found"));
 
-        recipeRepository.save(new Recipe(
-                command.id(),
+        recipe.updateDetails(
                 command.details(),
-                mapToRecipeIngredients(command.ingredientQuantities()),
-                user
-        ));
+                mapToRecipeIngredients(command.ingredientQuantities())
+        );
+
+        recipe.changeVisibility(command.isPublic());
+
+        recipeRepository.save(recipe);
     }
 
     private List<RecipeIngredient> mapToRecipeIngredients(List<IngredientWithQuantity> ingredientQuantities) {
@@ -154,5 +159,17 @@ public class RecipeService {
                     return new RecipeIngredient(ingredient, iwq.quantity());
                 })
                 .toList();
+    }
+
+    public void changeVisibility(ChangeVisibilityCommand command) {
+        User user = userRepository.findById(command.userId())
+                .orElseThrow(UserNotFoundException::new);
+
+        Recipe recipe = recipeRepository.findById(command.recipeId(), user.id())
+                .orElseThrow(command.recipeId()::notFound);
+
+        recipe.changeVisibility(command.isPublic());
+
+        recipeRepository.save(recipe);
     }
 }

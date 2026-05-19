@@ -128,7 +128,7 @@ public class WeekScheduleService {
         UserPreferences preferences = preferenceRepository.findPreferences(user)
                 .orElseThrow(UserNotFoundException::new);
         List<RecipeSummary> availableRecipes = recipeRepository.findAllSummariesWithFilter(
-                List.of(), preferences, user, Paging.unpaged()).content();
+                List.of(), preferences, true, user, Paging.unpaged()).content();
 
         RecipeId recipeId = aiPort.suggestRecipeForDay(dayToSuggestFor.getDayOfWeek(), schedules, availableRecipes);
         Recipe recipe = recipeRepository.findById(recipeId, user.id())

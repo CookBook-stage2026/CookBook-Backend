@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -92,7 +93,7 @@ class FilterRecipesTests extends BaseIntegrationTest {
         long totalElements = getRecipeRepository().count();
 
         // Act & Assert
-        performFilter(new RecipeSearchRequest(List.of(), true, firstPageIndex, pageSize))
+        performFilter(new RecipeSearchRequest(List.of(), true, true, firstPageIndex, pageSize))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(expectedFirstPageCount)))
                 .andExpect(jsonPath("$.page.totalElements").value(totalElements))
@@ -100,7 +101,7 @@ class FilterRecipesTests extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.page.number").value(firstPageIndex))
                 .andExpect(jsonPath("$.page.size").value(pageSize));
 
-        performFilter(new RecipeSearchRequest(List.of(), true, secondPageIndex, pageSize))
+        performFilter(new RecipeSearchRequest(List.of(), true, true, secondPageIndex, pageSize))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(expectedSecondPageCount)))
                 .andExpect(jsonPath("$.page.number").value(secondPageIndex))
@@ -152,7 +153,7 @@ class FilterRecipesTests extends BaseIntegrationTest {
         createAndSaveRecipeWithIngredients(List.of(salt), user);
 
         RecipeSearchRequest dto = new RecipeSearchRequest(List.of(flour.id().id(), sugar.id().id()),
-                true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
+                true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
 
         // Act & Assert
         performFilter(dto)
@@ -173,7 +174,7 @@ class FilterRecipesTests extends BaseIntegrationTest {
         createAndSaveRecipeWithIngredients(List.of(flour), user);
 
         // Act & Assert
-        performFilter(new RecipeSearchRequest(List.of(UUID.randomUUID()), true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE))
+        performFilter(new RecipeSearchRequest(List.of(UUID.randomUUID()), true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)))
                 .andExpect(jsonPath("$.page.totalElements").value(0));
@@ -207,7 +208,7 @@ class FilterRecipesTests extends BaseIntegrationTest {
     }
 
     @Test
-    void filterRecipes_shouldReturnRecipesFromHouseholdMembers_whenUserIsInHousehold() throws Exception {
+    void filterRecipes_shouldReturnRecipesFromHouseholdMembers_whenUserIsInHouseholdAsCreator() throws Exception {
         // Arrange
         User user1 = createUser();
         User user2 = createUserWithId(UserId.create());
@@ -233,6 +234,64 @@ class FilterRecipesTests extends BaseIntegrationTest {
                         recipeByUser3.getId().id().toString()
                 )))
                 .andExpect(jsonPath("$.page.totalElements").value(NUMBER_OF_RECIPES));
+    }
+
+    @Test
+    void filterRecipes_shouldReturnRecipesFromHouseholdMembers_whenUserIsInHouseholdAsMember() throws Exception {
+        // Arrange
+        User user1 = createUser();
+        User user2 = createUserWithId(UserId.create());
+        User user3 = createUserWithId(UserId.create());
+
+        List<User> householdMembers = new ArrayList<>();
+        householdMembers.add(user2);
+        householdMembers.add(user3);
+
+        createHouseholdWithMembers(householdMembers, user1);
+
+        Recipe recipeByUser1 = createAndSaveRecipe(user1);
+        Recipe recipeByUser2 = createAndSaveRecipe(user2);
+        Recipe recipeByUser3 = createAndSaveRecipe(user3);
+
+        // Act & Assert
+        performFilterWithPredefinedUserId(defaultRequest(), user2.id())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(NUMBER_OF_RECIPES)))
+                .andExpect(jsonPath("$.content[*].id", hasItems(
+                        recipeByUser1.getId().id().toString(),
+                        recipeByUser2.getId().id().toString(),
+                        recipeByUser3.getId().id().toString()
+                )))
+                .andExpect(jsonPath("$.page.totalElements").value(NUMBER_OF_RECIPES));
+    }
+
+    @Test
+    void filterRecipes_shouldOnlyReturnOwnRecipes_whenOnlyOwnRequested() throws Exception {
+        // Arrange
+        User user1 = createUser();
+        User user2 = createUserWithId(UserId.create());
+        User user3 = createUserWithId(UserId.create());
+
+        List<User> householdMembers = new ArrayList<>();
+        householdMembers.add(user2);
+        householdMembers.add(user3);
+
+        createHouseholdWithMembers(householdMembers, user1);
+
+        Recipe recipeByUser1 = createAndSaveRecipe(user1);
+        createAndSaveRecipe(user2);
+        createAndSaveRecipe(user3);
+
+        RecipeSearchRequest dto = new RecipeSearchRequest(
+                List.of(), true, false, DEFAULT_PAGE, DEFAULT_PAGE_SIZE
+        );
+
+        // Act & Assert
+        performFilterWithPredefinedUserId(dto, user1.id())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[*].id", hasItem(recipeByUser1.getId().id().toString())))
+                .andExpect(jsonPath("$.page.totalElements").value(1));
     }
 
     @Test
@@ -278,7 +337,7 @@ class FilterRecipesTests extends BaseIntegrationTest {
 
         RecipeSearchRequest dto = new RecipeSearchRequest(
                 List.of(flour.id().id()),
-                true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE
+                true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE
         );
 
         // Act & Assert
@@ -322,7 +381,7 @@ class FilterRecipesTests extends BaseIntegrationTest {
     }
 
     private RecipeSearchRequest defaultRequest() {
-        return new RecipeSearchRequest(List.of(), true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
+        return new RecipeSearchRequest(List.of(), true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
     }
 
     private ResultActions performFilter(RecipeSearchRequest request) throws Exception {

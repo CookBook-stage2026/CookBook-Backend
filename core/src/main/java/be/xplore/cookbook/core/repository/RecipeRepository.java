@@ -19,7 +19,7 @@ public interface RecipeRepository {
     Optional<Recipe> findById(RecipeId id, UserId userId);
 
     PagedResult<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, UserPreferences preferences,
-                                                          User user, Paging pageable);
+                                                          boolean includeAccessibleRecipes, User user, Paging pageable);
 
     List<RecipeSummary> querySummaries(Paging pageable, User user, String query);
 

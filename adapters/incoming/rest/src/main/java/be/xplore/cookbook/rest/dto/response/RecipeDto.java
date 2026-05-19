@@ -12,7 +12,8 @@ public record RecipeDto(
         int durationInMinutes,
         List<String> steps,
         List<RecipeIngredientDto> ingredients,
-        int servings
+        int servings,
+        boolean isPublic
 ) {
     public static RecipeDto fromDomain(Recipe recipe) {
         List<RecipeIngredientDto> ingredientDtos = recipe.getIngredients().stream()
@@ -26,7 +27,8 @@ public record RecipeDto(
                 recipe.getDurationInMinutes(),
                 recipe.getSteps(),
                 ingredientDtos,
-                recipe.getServings()
+                recipe.getServings(),
+                recipe.isPublic()
         );
     }
 }
