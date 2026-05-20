@@ -116,7 +116,8 @@ public class RecipeService {
                         IngredientId.create(),
                         suggestion.newIngredient().name(),
                         suggestion.newIngredient().unit(),
-                        suggestion.newIngredient().categories()
+                        suggestion.newIngredient().categories(),
+                        user
                 )));
 
         RecipeIngredient newRecipeIngredient = new RecipeIngredient(ingredient, suggestion.newIngredient().quantity());
@@ -166,7 +167,7 @@ public class RecipeService {
         ImportedRecipe scraped = recipeImportPort.scrape(command.url());
 
         List<RecipeIngredient> raw = scraped.ingredients().stream()
-                .map(this::resolveRecipeIngredient)
+                .map((i) -> resolveRecipeIngredient(i, user))
                 .toList();
 
         List<RecipeIngredient> unique = deduplicateIngredients(raw);
@@ -186,13 +187,14 @@ public class RecipeService {
         ));
     }
 
-    private RecipeIngredient resolveRecipeIngredient(ImportedIngredient scraped) {
+    private RecipeIngredient resolveRecipeIngredient(ImportedIngredient scraped, User user) {
         Ingredient ingredient = ingredientRepository.findByNameIgnoreCase(scraped.name())
                 .orElseGet(() -> ingredientRepository.save(new Ingredient(
                         IngredientId.create(),
                         scraped.name(),
                         scraped.unit(),
-                        scraped.categories()
+                        scraped.categories(),
+                        user
                 )));
         return new RecipeIngredient(ingredient, scraped.quantity());
     }

@@ -99,7 +99,8 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
         // Arrange
         User user = createUser();
 
-        Ingredient ingredient = new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG));
+        Ingredient ingredient = new Ingredient(
+                IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG), null);
         getIngredientRepository().save(ingredient);
         RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient, 1);
         Recipe recipe = new Recipe(
@@ -129,7 +130,8 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
         // Arrange
         User user = createUser();
 
-        Ingredient ingredient = new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG));
+        Ingredient ingredient = new Ingredient(
+                IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG), null);
         getIngredientRepository().save(ingredient);
         RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient, 1);
         Recipe recipe = new Recipe(
@@ -162,7 +164,8 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
         // Arrange
         User user = createUser();
 
-        Ingredient ingredient = new Ingredient(IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG));
+        Ingredient ingredient = new Ingredient(
+                IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG), null);
         getIngredientRepository().save(ingredient);
         RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient, 1);
         Recipe recipe = new Recipe(

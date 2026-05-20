@@ -194,11 +194,15 @@ public abstract class BaseIntegrationTest {
     }
 
     protected Ingredient createAndSaveIngredient(String name) {
-        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE);
+        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE, null);
     }
 
-    protected Ingredient createAndSaveIngredient(String name, Unit unit, Category category) {
-        Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit, List.of(category));
+    protected Ingredient createAndSaveIngredient(String name, User user) {
+        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE, user);
+    }
+
+    protected Ingredient createAndSaveIngredient(String name, Unit unit, Category category, User user) {
+        Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit, List.of(category), user);
         return ingredientRepository.save(ingredient);
     }
 

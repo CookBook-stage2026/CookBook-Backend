@@ -2,8 +2,8 @@ package be.xplore.cookbook.jpa.repository.ingredient;
 
 import be.xplore.cookbook.core.common.Paging;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
-
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
+import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.jpa.repository.ingredient.entity.JpaIngredientEntity;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +30,7 @@ public class IngredientRepositoryImpl implements IngredientRepository {
     @Override
     public Optional<Ingredient> findById(IngredientId id) {
         return jpaIngredientRepository.findById(id.id())
-                .map(JpaIngredientEntity::toDomainWithoutCategories);
+                .map(JpaIngredientEntity::toDomainWithoutCategoriesAndUser);
     }
 
     @Override
@@ -38,12 +38,13 @@ public class IngredientRepositoryImpl implements IngredientRepository {
         List<UUID> uuids = ids.stream().map(IngredientId::id).toList();
         return jpaIngredientRepository.findAllById(uuids)
                 .stream()
-                .map(JpaIngredientEntity::toDomainWithoutCategories)
+                .map(JpaIngredientEntity::toDomainWithoutCategoriesAndUser)
                 .toList();
     }
 
     @Override
-    public List<Ingredient> searchByNameExcludingIds(String name, List<IngredientId> selectedIds, Paging paging) {
+    public List<Ingredient> searchByNameExcludingIds(String name, List<IngredientId> selectedIds,
+                                                     Paging paging, User user) {
         String searchName = name != null ? name : "";
         List<UUID> selectedUuids = selectedIds != null
                 ? selectedIds.stream().map(IngredientId::id).toList()
@@ -51,15 +52,15 @@ public class IngredientRepositoryImpl implements IngredientRepository {
         Pageable pageable = PageRequest.of(paging.page(), paging.size());
 
         return this.jpaIngredientRepository
-                .searchByNamePrioritizingStartsWith(searchName, selectedUuids, pageable)
+                .searchByNamePrioritizingStartsWith(searchName, selectedUuids, user.id().id(), pageable)
                 .stream()
-                .map(JpaIngredientEntity::toDomainWithoutCategories)
+                .map(JpaIngredientEntity::toDomainWithoutCategoriesAndUser)
                 .toList();
     }
 
     @Override
     public Optional<Ingredient> findByNameIgnoreCase(String name) {
         return jpaIngredientRepository.findByNameIgnoreCase(name)
-                .map(JpaIngredientEntity::toDomainWithoutCategories);
+                .map(JpaIngredientEntity::toDomainWithoutCategoriesAndUser);
     }
 }

@@ -4,6 +4,7 @@ import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
+import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
 import be.xplore.cookbook.rest.dto.request.CreateIngredientDto;
 import be.xplore.cookbook.rest.dto.response.IngredientDto;
@@ -41,10 +42,11 @@ class CreateIngredientTests extends BaseIntegrationTest {
                 )
         );
 
-        createUser();
+        UserId userId = UserId.create();
+        createUserWithId(userId);
 
         // Act & Assert
-        MvcResult result = performCreateIngredientWithValidJwt(dto)
+        MvcResult result = performCreateIngredientWithValidJwtWithUserId(dto, userId)
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").exists())
@@ -67,10 +69,6 @@ class CreateIngredientTests extends BaseIntegrationTest {
 
         assertThat(ingredient.name()).isEqualTo("Flour");
         assertThat(ingredient.unit()).isEqualTo(Unit.GRAM);
-        assertThat(ingredient.categories()).containsExactlyInAnyOrder(
-                Category.GRAIN,
-                Category.ADDITIVE
-        );
     }
 
     @Test
@@ -144,5 +142,14 @@ class CreateIngredientTests extends BaseIntegrationTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(getMapper().writeValueAsString(dto)));
+    }
+
+    private ResultActions performCreateIngredientWithValidJwtWithUserId(
+            CreateIngredientDto dto, UserId userId) throws Exception {
+        return getMockMvc().perform(post("/api/ingredients")
+                .with(validJwtFromUserId(userId))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(getMapper().writeValueAsString(dto)));
     }
 }

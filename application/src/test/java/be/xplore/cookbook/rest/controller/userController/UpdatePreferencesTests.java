@@ -32,7 +32,7 @@ class UpdatePreferencesTests extends BaseIntegrationTest {
         // Arrange
         User user = createUser();
 
-        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG);
+        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG, null);
 
         UpdateUserPreferencesRequest request = new UpdateUserPreferencesRequest(
                 List.of(Category.DAIRY),
@@ -62,7 +62,7 @@ class UpdatePreferencesTests extends BaseIntegrationTest {
         // Arrange
         User user = createUser();
 
-        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG);
+        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG, null);
 
         getUserPreferenceRepository().save(new UserPreferences(
                 user,
