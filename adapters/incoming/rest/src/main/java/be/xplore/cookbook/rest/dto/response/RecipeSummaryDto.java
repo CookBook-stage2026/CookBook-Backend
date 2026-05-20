@@ -8,14 +8,16 @@ public record RecipeSummaryDto(
         UUID id,
         String name,
         String description,
-        int durationInMinutes
+        int durationInMinutes,
+        String creator
 ) {
     public static RecipeSummaryDto fromDomain(RecipeSummary recipe) {
         return new RecipeSummaryDto(
                 recipe.id().id(),
                 recipe.name(),
                 recipe.description(),
-                recipe.durationInMinutes()
+                recipe.durationInMinutes(),
+                recipe.user().displayName()
         );
     }
 }

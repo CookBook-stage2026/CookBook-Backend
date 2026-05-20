@@ -17,7 +17,6 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -66,6 +65,38 @@ class GetRecipeByIdTests extends BaseIntegrationTest {
     }
 
     @Test
+    void getRecipeById_shouldReturnRecipe_whenRecipeExistsAndIsAccessible() throws Exception {
+        // Arrange
+        User user1 = createUser();
+        User user2 = createUserWithId(UserId.create());
+
+        createHouseholdWithMembers(List.of(user2), user1);
+
+        Recipe recipeByOtherUser = createAndSaveRecipe(true, user2);
+
+        // Act & Assert
+        performGetRecipeByIdWithPredefinedUserId(recipeByOtherUser.getId().id(), user1.id())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(recipeByOtherUser.getId().id().toString()));
+    }
+
+    @Test
+    void getRecipeById_shouldReturn404_whenRecipeExistsAndIsPrivate() throws Exception {
+        // Arrange
+        User user1 = createUser();
+        User user2 = createUserWithId(UserId.create());
+
+        createHouseholdWithMembers(List.of(user2), user1);
+
+        Recipe recipeByOtherUser = createAndSaveRecipe(false, user2);
+
+        // Act & Assert
+        performGetRecipeByIdWithPredefinedUserId(recipeByOtherUser.getId().id(), user1.id())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void getRecipeById_shouldReturn404_whenRecipeDoesNotExist() throws Exception {
         // Arrange
         createUser();
@@ -108,7 +139,12 @@ class GetRecipeByIdTests extends BaseIntegrationTest {
     private ResultActions performGetRecipeById(UUID id) throws Exception {
         return getMockMvc().perform(get("/api/recipes/{id}", id)
                         .with(validJwt())
-                        .with(csrf()))
-                .andDo(print());
+                        .with(csrf()));
+    }
+
+    private ResultActions performGetRecipeByIdWithPredefinedUserId(UUID id, UserId userId) throws Exception {
+        return getMockMvc().perform(get("/api/recipes/{id}", id)
+                .with(validJwtFromUserId(userId))
+                .with(csrf()));
     }
 }

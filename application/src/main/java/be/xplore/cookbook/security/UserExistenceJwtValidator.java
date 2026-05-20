@@ -34,10 +34,10 @@ public class UserExistenceJwtValidator implements OAuth2TokenValidator<Jwt> {
             if (user != null) {
                 return OAuth2TokenValidatorResult.success();
             }
-        } catch (RuntimeException _) {
-            throw new OAuth2Exception("Invalid JWT subject");
         } catch (UserNotFoundException _) {
             // Ignored
+        } catch (RuntimeException _) {
+            throw new OAuth2Exception("Invalid JWT subject");
         }
 
         OAuth2Error error = new OAuth2Error(

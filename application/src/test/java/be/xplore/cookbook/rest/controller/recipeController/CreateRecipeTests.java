@@ -72,7 +72,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
         RecipeDto response = getMapper().readValue(result.getResponse().getContentAsString(), RecipeDto.class);
 
         RecipeId recipeId = new RecipeId(response.id());
-        getRecipeRepository().findById(recipeId, user.id())
+        getRecipeRepository().findById(recipeId, user)
                 .orElseThrow(() -> new Exception("Recipe with id " + recipeId + " not found!"));
 
         assertThat(getRecipeRepository().count()).isEqualTo(1);
@@ -87,6 +87,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
                 MINUTES_IN_HOUR,
                 List.of("This is step 1", "This is step 2"),
                 List.of(),
+                true,
                 2
         );
 
@@ -108,6 +109,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
                 MINUTES_IN_HOUR,
                 List.of("This is step 1", "This is step 2"),
                 List.of(new NewRecipeIngredientDto(flour.id().id(), -1.0)),
+                true,
                 2
         );
 
@@ -156,6 +158,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
                 MINUTES_IN_HOUR,
                 List.of("This is step 1", "This is step 2"),
                 ingredients,
+                true,
                 2
         );
     }

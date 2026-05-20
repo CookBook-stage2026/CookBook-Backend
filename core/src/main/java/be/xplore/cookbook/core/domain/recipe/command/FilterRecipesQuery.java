@@ -6,6 +6,6 @@ import be.xplore.cookbook.core.domain.user.UserId;
 
 import java.util.List;
 
-public record FilterRecipesQuery(List<IngredientId> ingredientIds,
-                          Paging paging, boolean shouldApplyPreferences, UserId userId) {
+public record FilterRecipesQuery(List<IngredientId> ingredientIds, Paging paging, boolean shouldApplyPreferences,
+                                 boolean includeAccessibleRecipes, UserId userId) {
 }

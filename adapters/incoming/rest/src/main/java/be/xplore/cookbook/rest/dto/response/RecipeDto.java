@@ -1,6 +1,7 @@
 package be.xplore.cookbook.rest.dto.response;
 
 import be.xplore.cookbook.core.domain.recipe.Recipe;
+import be.xplore.cookbook.core.domain.user.UserId;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,9 +13,11 @@ public record RecipeDto(
         int durationInMinutes,
         List<String> steps,
         List<RecipeIngredientDto> ingredients,
-        int servings
+        int servings,
+        boolean isPublic,
+        boolean isCreator
 ) {
-    public static RecipeDto fromDomain(Recipe recipe) {
+    public static RecipeDto fromDomain(Recipe recipe, UserId userId) {
         List<RecipeIngredientDto> ingredientDtos = recipe.getIngredients().stream()
                 .map(RecipeIngredientDto::fromDomain)
                 .toList();
@@ -26,7 +29,9 @@ public record RecipeDto(
                 recipe.getDurationInMinutes(),
                 recipe.getSteps(),
                 ingredientDtos,
-                recipe.getServings()
+                recipe.getServings(),
+                recipe.isPublic(),
+                userId == recipe.getUser().id()
         );
     }
 }

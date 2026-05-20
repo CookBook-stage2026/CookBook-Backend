@@ -93,12 +93,12 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
         Recipe originalRecipe = createAndSaveRecipe(user);
 
         // Act & Assert
-        String responseContent = performEnhanceRecipe(originalRecipe.id().id().toString())
+        String responseContent = performEnhanceRecipe(originalRecipe.getId().id().toString())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(originalRecipe.id().id().toString())))
-                .andExpect(jsonPath("$.name", is(originalRecipe.name())))
+                .andExpect(jsonPath("$.id", is(originalRecipe.getId().id().toString())))
+                .andExpect(jsonPath("$.name", is(originalRecipe.getName())))
                 .andExpect(jsonPath("$.durationInMinutes", is(ENHANCED_DURATION)))
-                .andExpect(jsonPath("$.ingredients", hasSize(originalRecipe.ingredients().size() + 1)))
+                .andExpect(jsonPath("$.ingredients", hasSize(originalRecipe.getIngredients().size() + 1)))
                 .andExpect(jsonPath("$.steps", hasSize(2)))
                 .andExpect(jsonPath("$.steps[0]", is(ENHANCED_STEP_1)))
                 .andExpect(jsonPath("$.steps[1]", is(ENHANCED_STEP_2)))
@@ -109,10 +109,10 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
         RecipeDto enhancedRecipeDto = getMapper().readValue(responseContent, RecipeDto.class);
 
         Recipe savedRecipe = getRecipeRepository()
-                .findById(originalRecipe.id(), user.id())
+                .findById(originalRecipe.getId(), user)
                 .orElseThrow();
 
-        assertThat(savedRecipe.id().id()).isEqualTo(enhancedRecipeDto.id());
+        assertThat(savedRecipe.getId().id()).isEqualTo(enhancedRecipeDto.id());
         assertThat(savedRecipe.getSteps()).isNotEqualTo(enhancedRecipeDto.steps());
     }
 
@@ -128,9 +128,9 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
                 .size();
 
         // Act & Assert
-        performEnhanceRecipe(recipe.id().id().toString())
+        performEnhanceRecipe(recipe.getId().id().toString())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ingredients", hasSize(recipe.ingredients().size() + 1)));
+                .andExpect(jsonPath("$.ingredients", hasSize(recipe.getIngredients().size() + 1)));
 
         int ingredientCountAfter = getIngredientRepository()
                 .searchByNameExcludingIds("", List.of(), FIND_ALL_INGREDIENTS_PAGING)
@@ -158,7 +158,7 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
         createUser();
 
         // Act & Assert
-        performEnhanceRecipe(recipe.id().id().toString())
+        performEnhanceRecipe(recipe.getId().id().toString())
                 .andExpect(status().isNotFound());
     }
 
@@ -180,7 +180,7 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
         User user = createUser();
         Recipe recipe = createAndSaveRecipe(user);
 
-        performEnhanceRecipe(recipe.id().id().toString())
+        performEnhanceRecipe(recipe.getId().id().toString())
                 .andExpect(status().isBadGateway());
     }
 
@@ -195,7 +195,7 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
         Recipe recipe = createAndSaveRecipe(user);
 
         // Act & Assert
-        performEnhanceRecipe(recipe.id().id().toString())
+        performEnhanceRecipe(recipe.getId().id().toString())
                 .andExpect(status().isServiceUnavailable());
     }
 

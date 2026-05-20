@@ -106,6 +106,7 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
                 RECIPE_ID,
                 new RecipeDetails("Recipe", "Description", 1, 1, List.of("Step 1")),
                 List.of(recipeIngredient),
+                true,
                 user
         );
         getRecipeRepository().save(recipe);
@@ -135,6 +136,7 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
                 RECIPE_ID,
                 new RecipeDetails("Recipe", "Description", 1, 1, List.of("Step 1")),
                 List.of(recipeIngredient),
+                true,
                 user
         );
         getRecipeRepository().save(recipe);
@@ -167,6 +169,7 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
                 RECIPE_ID,
                 new RecipeDetails("Recipe", "Description", 1, 1, List.of("Step 1")),
                 List.of(recipeIngredient),
+                true,
                 user
         );
         getRecipeRepository().save(recipe);
