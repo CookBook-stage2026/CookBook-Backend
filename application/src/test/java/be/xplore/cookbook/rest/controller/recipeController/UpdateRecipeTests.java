@@ -51,7 +51,7 @@ class UpdateRecipeTests extends BaseIntegrationTest {
                 .andExpect(status().isNoContent());
 
         Recipe updatedRecipe = getRecipeRepository()
-                .findById(recipe.getId(), user.id())
+                .findById(recipe.getId(), user)
                 .orElseThrow();
 
         assertThat(updatedRecipe.getName()).isEqualTo(UPDATED_NAME);

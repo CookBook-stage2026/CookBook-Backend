@@ -74,7 +74,10 @@ public class RecipeService {
     }
 
     public Recipe findById(FindRecipeByIdQuery query) {
-        return recipeRepository.findById(query.recipeId(), query.userId())
+        User user = userRepository.findById(query.userId())
+                .orElseThrow(UserNotFoundException::new);
+
+        return recipeRepository.findById(query.recipeId(), user)
                 .orElseThrow(query.recipeId()::notFound);
     }
 
@@ -102,7 +105,7 @@ public class RecipeService {
         User user = userRepository.findById(query.userId())
                 .orElseThrow(UserNotFoundException::new);
 
-        Recipe recipe = recipeRepository.findById(query.recipeId(), user.id())
+        Recipe recipe = recipeRepository.findById(query.recipeId(), user)
                 .orElseThrow(() -> new NotFoundException("Recipe not found"));
 
         SuggestedRecipeEnhancement suggestion = aiPort.enhanceRecipe(recipe);
@@ -140,7 +143,7 @@ public class RecipeService {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(command.userId()::notFound);
 
-        Recipe recipe = recipeRepository.findById(command.id(), user.id())
+        Recipe recipe = recipeRepository.findById(command.id(), user)
                 .orElseThrow(() -> new NotFoundException("Recipe not found"));
 
         List<RecipeIngredient> raw = mapToRecipeIngredients(command.ingredientQuantities());
@@ -178,6 +181,7 @@ public class RecipeService {
                         scraped.steps()
                 ),
                 unique,
+                false,
                 user
         ));
     }
@@ -217,7 +221,7 @@ public class RecipeService {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(UserNotFoundException::new);
 
-        Recipe recipe = recipeRepository.findById(command.recipeId(), user.id())
+        Recipe recipe = recipeRepository.findOwnById(command.recipeId(), user)
                 .orElseThrow(command.recipeId()::notFound);
 
         recipe.changeVisibility(command.isPublic());

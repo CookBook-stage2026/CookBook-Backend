@@ -109,7 +109,7 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
         RecipeDto enhancedRecipeDto = getMapper().readValue(responseContent, RecipeDto.class);
 
         Recipe savedRecipe = getRecipeRepository()
-                .findById(originalRecipe.getId(), user.id())
+                .findById(originalRecipe.getId(), user)
                 .orElseThrow();
 
         assertThat(savedRecipe.getId().id()).isEqualTo(enhancedRecipeDto.id());

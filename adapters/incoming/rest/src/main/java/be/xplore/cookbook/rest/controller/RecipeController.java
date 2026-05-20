@@ -58,6 +58,8 @@ public class RecipeController {
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CreateRecipeDto dto
     ) {
+        UserId userId = getUserIdFromJwt(jwt);
+
         List<IngredientWithQuantity> ingredientQuantities = dto.ingredients().stream()
                 .map(i -> new IngredientWithQuantity(
                         new IngredientId(i.ingredientId()), i.baseQuantity()))
@@ -67,16 +69,22 @@ public class RecipeController {
                 new RecipeDetails(dto.name(), dto.description(), dto.durationInMinutes(), dto.servings(), dto.steps()),
                 ingredientQuantities,
                 dto.isPublic(),
-                getUserIdFromJwt(jwt)
+                userId
         ));
 
-        return RecipeDto.fromDomain(recipe);
+        return RecipeDto.fromDomain(recipe, userId);
     }
 
     @GetMapping("/{id}")
-    public RecipeDto getRecipeById(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID id) {
-        Recipe recipe = recipeService.findById(new FindRecipeByIdQuery(new RecipeId(id), getUserIdFromJwt(jwt)));
-        return RecipeDto.fromDomain(recipe);
+    public RecipeDto getRecipeById(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID id
+    ) {
+        UserId userId = getUserIdFromJwt(jwt);
+
+        Recipe recipe = recipeService.findById(new FindRecipeByIdQuery(new RecipeId(id), userId));
+
+        return RecipeDto.fromDomain(recipe, userId);
     }
 
     @PostMapping("/filter")
@@ -116,9 +124,11 @@ public class RecipeController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID id
     ) {
-        Recipe recipe = recipeService.enhanceRecipe(new EnhanceRecipeQuery(new RecipeId(id), getUserIdFromJwt(jwt)));
+        UserId userId = getUserIdFromJwt(jwt);
 
-        return RecipeDto.fromDomain(recipe);
+        Recipe recipe = recipeService.enhanceRecipe(new EnhanceRecipeQuery(new RecipeId(id), userId));
+
+        return RecipeDto.fromDomain(recipe, userId);
     }
 
     @PutMapping("/{id}")
@@ -148,10 +158,11 @@ public class RecipeController {
             @Valid @RequestBody ImportRecipeRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        Recipe recipe = recipeService.importRecipe((
-                new ImportRecipeCommand(request.url(), getUserIdFromJwt(jwt))
-        ));
-        return RecipeDto.fromDomain(recipe);
+        UserId userId = getUserIdFromJwt(jwt);
+
+        Recipe recipe = recipeService.importRecipe((new ImportRecipeCommand(request.url(), userId)));
+
+        return RecipeDto.fromDomain(recipe, userId);
     }
 
     @PutMapping("/{id}/visibility")
