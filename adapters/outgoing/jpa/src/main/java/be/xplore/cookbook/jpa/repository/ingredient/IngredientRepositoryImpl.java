@@ -24,7 +24,7 @@ public class IngredientRepositoryImpl implements IngredientRepository {
 
     public Ingredient save(Ingredient ingredient) {
         return this.jpaIngredientRepository.save(JpaIngredientEntity.fromDomain(ingredient))
-                .toDomainWithoutCategories();
+                .toDomain();
     }
 
     @Override
