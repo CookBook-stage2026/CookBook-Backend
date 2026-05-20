@@ -279,11 +279,11 @@ class FilterRecipesTests extends BaseIntegrationTest {
         createHouseholdWithMembers(householdMembers, user1);
 
         Recipe recipeByUser1 = createAndSaveRecipe(user1);
-        Recipe privateRecipeByUser1 = createAndSaveRecipe(false, user1);
+        createAndSaveRecipe(false, user1);
         Recipe recipeByUser2 = createAndSaveRecipe(user2);
         Recipe privateRecipeByUser2 = createAndSaveRecipe(false, user2);
         Recipe recipeByUser3 = createAndSaveRecipe(user3);
-        Recipe privateRecipeByUser3 = createAndSaveRecipe(false, user3);
+        createAndSaveRecipe(false, user3);
 
         List<Recipe> expectedRecipes = List.of(recipeByUser1, recipeByUser2, privateRecipeByUser2, recipeByUser3);
 
