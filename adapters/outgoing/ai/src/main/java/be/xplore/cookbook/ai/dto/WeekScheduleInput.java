@@ -30,8 +30,8 @@ public record WeekScheduleInput(
         public static DayScheduleInput fromDomain(DaySchedule daySchedule) {
             return new DayScheduleInput(
                     daySchedule.day(),
-                    daySchedule.recipe().name(),
-                    daySchedule.recipe().description()
+                    daySchedule.recipe().getName(),
+                    daySchedule.recipe().getDescription()
             );
         }
     }

@@ -4,45 +4,40 @@ import be.xplore.cookbook.core.domain.user.User;
 
 import java.util.List;
 
-public record Recipe(
-        RecipeId id,
-        String name,
-        String description,
-        int durationInMinutes,
-        int servings,
-        List<String> steps,
-        List<RecipeIngredient> ingredients,
-        User user
-) {
-    public Recipe(RecipeId id, RecipeDetails details, List<RecipeIngredient> ingredients, User user) {
-        this(id,
-             details.name(),
-             details.description(),
-             details.durationInMinutes(),
-             details.servings(),
-             details.steps(),
-             ingredients,
-             user);
-    }
+public class Recipe {
 
-    public Recipe {
+    private final RecipeId id;
+    private RecipeDetails details;
+    private List<RecipeIngredient> ingredients;
+    private boolean isPublic;
+    private final User user;
+
+    public Recipe(
+            RecipeId id,
+            RecipeDetails details,
+            List<RecipeIngredient> ingredients,
+            boolean isPublic,
+            User user
+    ) {
         if (id == null) {
             throw new IllegalArgumentException("A recipe must have an id");
         }
-
         if (ingredients == null || ingredients.isEmpty()) {
             throw new IllegalArgumentException("A recipe must have at least one ingredient");
         }
-
         if (user == null) {
             throw new IllegalArgumentException("A recipe must have a creator");
         }
 
-        ingredients = List.copyOf(ingredients);
+        this.id = id;
+        this.details = details;
+        this.ingredients = List.copyOf(ingredients);
+        this.isPublic = isPublic;
+        this.user = user;
     }
 
     public RecipeSummary summarize() {
-        return new RecipeSummary(id, name, description, durationInMinutes);
+        return new RecipeSummary(id, details.name(), details.description(), details.durationInMinutes(), user);
     }
 
     public RecipeId getId() {
@@ -50,30 +45,43 @@ public record Recipe(
     }
 
     public String getName() {
-        return name;
+        return details.name();
     }
 
     public String getDescription() {
-        return description;
+        return details.description();
     }
 
     public int getDurationInMinutes() {
-        return durationInMinutes;
+        return details.durationInMinutes();
+    }
+
+    public int getServings() {
+        return details.servings();
     }
 
     public List<String> getSteps() {
-        return steps;
+        return details.steps();
     }
 
     public List<RecipeIngredient> getIngredients() {
         return ingredients;
     }
 
-    public int getServings() {
-        return servings;
+    public boolean isPublic() {
+        return isPublic;
     }
 
     public User getUser() {
         return user;
+    }
+
+    public void changeVisibility(boolean newIsPublic) {
+        this.isPublic = newIsPublic;
+    }
+
+    public void updateDetails(RecipeDetails newDetails, List<RecipeIngredient> newIngredients) {
+        this.details = newDetails;
+        this.ingredients = List.copyOf(newIngredients);
     }
 }

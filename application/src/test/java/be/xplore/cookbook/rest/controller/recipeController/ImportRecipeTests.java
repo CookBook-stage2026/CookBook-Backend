@@ -113,7 +113,7 @@ class ImportRecipeTests extends BaseIntegrationTest {
 
         RecipeDto importedRecipeDto = getMapper().readValue(responseContent, RecipeDto.class);
         assertThat(importedRecipeDto.id()).isNotNull();
-        assertThat(getRecipeRepository().findById(new RecipeId(importedRecipeDto.id()), createUser().id()));
+        assertThat(getRecipeRepository().findById(new RecipeId(importedRecipeDto.id()), createUser()));
     }
 
     @Test

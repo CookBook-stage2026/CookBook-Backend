@@ -47,19 +47,19 @@ class UpdateRecipeTests extends BaseIntegrationTest {
         ));
 
         // Act & Assert
-        performUpdateRecipe(recipe.id().id().toString(), dto)
+        performUpdateRecipe(recipe.getId().id().toString(), dto)
                 .andExpect(status().isNoContent());
 
         Recipe updatedRecipe = getRecipeRepository()
-                .findById(recipe.id(), user.id())
+                .findById(recipe.getId(), user)
                 .orElseThrow();
 
-        assertThat(updatedRecipe.name()).isEqualTo(UPDATED_NAME);
-        assertThat(updatedRecipe.description()).isEqualTo(UPDATED_DESCRIPTION);
-        assertThat(updatedRecipe.durationInMinutes()).isEqualTo(MINUTES_IN_HOUR);
-        assertThat(updatedRecipe.steps()).containsExactly(UPDATED_STEP_1, UPDATED_STEP_2);
-        assertThat(updatedRecipe.servings()).isEqualTo(UPDATED_SERVINGS);
-        assertThat(updatedRecipe.ingredients()).hasSize(1);
+        assertThat(updatedRecipe.getName()).isEqualTo(UPDATED_NAME);
+        assertThat(updatedRecipe.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
+        assertThat(updatedRecipe.getDurationInMinutes()).isEqualTo(MINUTES_IN_HOUR);
+        assertThat(updatedRecipe.getSteps()).containsExactly(UPDATED_STEP_1, UPDATED_STEP_2);
+        assertThat(updatedRecipe.getServings()).isEqualTo(UPDATED_SERVINGS);
+        assertThat(updatedRecipe.getIngredients()).hasSize(1);
     }
 
     @Test
@@ -73,7 +73,7 @@ class UpdateRecipeTests extends BaseIntegrationTest {
         ));
 
         // Act & Assert
-        performUpdateRecipe(recipe.id().id().toString(), dto)
+        performUpdateRecipe(recipe.getId().id().toString(), dto)
                 .andExpect(status().isBadRequest());
     }
 
@@ -106,7 +106,7 @@ class UpdateRecipeTests extends BaseIntegrationTest {
         ));
 
         // Act & Assert
-        performUpdateRecipe(recipe.id().id().toString(), dto)
+        performUpdateRecipe(recipe.getId().id().toString(), dto)
                 .andExpect(status().isNotFound());
     }
 
@@ -134,7 +134,8 @@ class UpdateRecipeTests extends BaseIntegrationTest {
                 MINUTES_IN_HOUR,
                 List.of(UPDATED_STEP_1, UPDATED_STEP_2),
                 ingredients,
-                UPDATED_SERVINGS
+                UPDATED_SERVINGS,
+                true
         );
     }
 

@@ -59,7 +59,7 @@ public class WeekScheduleService {
         var user = userRepository.findById(command.userId())
                 .orElseThrow(UserNotFoundException::new);
 
-        List<DaySchedule> daySchedules = extractDaySchedulesFromDayEntries(command.days(), command.userId());
+        List<DaySchedule> daySchedules = extractDaySchedulesFromDayEntries(command.days(), user);
 
         weekScheduleRepository.findByUserIdAndWeekStartDate(command.userId(), command.weekStartDate())
                 .ifPresent(existing -> weekScheduleRepository.deleteById(existing.id()));
@@ -69,6 +69,9 @@ public class WeekScheduleService {
     }
 
     public WeekSchedule updateWeekSchedule(UpdateWeekScheduleCommand command) {
+        User user = userRepository.findById(command.userId())
+                .orElseThrow(UserNotFoundException::new);
+
         var existingSchedule = weekScheduleRepository.findById(command.weekScheduleId())
                 .orElseThrow(() -> new NotFoundException("Week schedule not found"));
 
@@ -76,7 +79,7 @@ public class WeekScheduleService {
             throw new NotFoundException("Week schedule not found");
         }
 
-        List<DaySchedule> daySchedules = extractDaySchedulesFromDayEntries(command.days(), command.userId());
+        List<DaySchedule> daySchedules = extractDaySchedulesFromDayEntries(command.days(), user);
 
         var updatedSchedule = new WeekSchedule(
                 existingSchedule.id(),
@@ -94,16 +97,6 @@ public class WeekScheduleService {
                     query.userId(), query.from(), query.to());
         }
         return weekScheduleRepository.findAllByUserId(query.userId());
-    }
-
-    private List<DaySchedule> extractDaySchedulesFromDayEntries(List<DayEntry> dayEntries, UserId userId) {
-        return dayEntries.stream()
-                .map(entry -> {
-                    Recipe recipe = recipeRepository.findById(entry.recipeId(), userId)
-                            .orElseThrow(entry.recipeId()::notFound);
-                    return new DaySchedule(DayScheduleId.create(), recipe, entry.day());
-                })
-                .toList();
     }
 
     public void deleteWeekSchedule(WeekScheduleId id, UserId userId) {
@@ -128,13 +121,23 @@ public class WeekScheduleService {
         UserPreferences preferences = preferenceRepository.findPreferences(user)
                 .orElseThrow(UserNotFoundException::new);
         List<RecipeSummary> availableRecipes = recipeRepository.findAllSummariesWithFilter(
-                List.of(), preferences, user, Paging.unpaged()).content();
+                List.of(), preferences, true, user, Paging.unpaged()).content();
 
         RecipeId recipeId = aiPort.suggestRecipeForDay(dayToSuggestFor.getDayOfWeek(), schedules, availableRecipes);
-        Recipe recipe = recipeRepository.findById(recipeId, user.id())
+        Recipe recipe = recipeRepository.findById(recipeId, user)
                 .orElseThrow(recipeId::notFound);
 
         return targetWeek.assignRecipe(dayToSuggestFor.getDayOfWeek(), recipe);
+    }
+
+    private List<DaySchedule> extractDaySchedulesFromDayEntries(List<DayEntry> dayEntries, User user) {
+        return dayEntries.stream()
+                .map(entry -> {
+                    Recipe recipe = recipeRepository.findById(entry.recipeId(), user)
+                            .orElseThrow(entry.recipeId()::notFound);
+                    return new DaySchedule(DayScheduleId.create(), recipe, entry.day());
+                })
+                .toList();
     }
 
     private List<WeekSchedule> resolveThreeWeekSchedules(User user, LocalDate targetDate) {

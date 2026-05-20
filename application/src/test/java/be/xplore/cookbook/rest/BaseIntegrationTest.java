@@ -63,6 +63,7 @@ public abstract class BaseIntegrationTest {
     private static final int DEFAULT_DURATION_IN_MINUTES = 60;
     private static final int DEFAULT_SERVINGS = 2;
     private static final List<String> DEFAULT_STEPS = List.of("This is step 1", "This is step 2");
+    private static final boolean DEFAULT_IS_PUBLIC = true;
     private static final double DEFAULT_QUANTITY = 1.0;
 
     @Autowired
@@ -167,22 +168,29 @@ public abstract class BaseIntegrationTest {
 
     protected Recipe createAndSaveRecipe(User user) {
         Ingredient ingredient = createAndSaveIngredient("Ingredient");
-        return createAndSaveRecipe(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
-                DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS,
-                List.of(ingredient), user);
+        return createAndSaveRecipe(new RecipeDetails(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
+                        DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS),
+                List.of(ingredient), DEFAULT_IS_PUBLIC, user);
     }
 
     protected Recipe createAndSaveRecipe(String name, User user) {
         Ingredient ingredient = createAndSaveIngredient("Ingredient");
-        return createAndSaveRecipe(name, DEFAULT_RECIPE_DESCRIPTION,
-                DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS,
-                List.of(ingredient), user);
+        return createAndSaveRecipe(new RecipeDetails(name, DEFAULT_RECIPE_DESCRIPTION,
+                        DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS),
+                List.of(ingredient), DEFAULT_IS_PUBLIC, user);
+    }
+
+    protected Recipe createAndSaveRecipe(boolean isPublic, User user) {
+        Ingredient ingredient = createAndSaveIngredient("Ingredient");
+        return createAndSaveRecipe(new RecipeDetails(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
+                        DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS),
+                List.of(ingredient), isPublic, user);
     }
 
     protected Recipe createAndSaveRecipeWithIngredients(List<Ingredient> ingredients, User user) {
-        return createAndSaveRecipe(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
-                DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS,
-                ingredients, user);
+        return createAndSaveRecipe(new RecipeDetails(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
+                        DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS),
+                ingredients, DEFAULT_IS_PUBLIC, user);
     }
 
     protected Ingredient createAndSaveIngredient(String name) {
@@ -227,19 +235,17 @@ public abstract class BaseIntegrationTest {
                 .claim("name", USER_NAME));
     }
 
-
-
-    private Recipe createAndSaveRecipe(String name, String description, int durationInMinutes,
-                                       int servings, List<String> steps, List<Ingredient> ingredients,
-                                       User user) {
+    private Recipe createAndSaveRecipe(RecipeDetails details, List<Ingredient> ingredients,
+                                       boolean isPublic, User user) {
         List<RecipeIngredient> recipeIngredients = ingredients.stream()
                 .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY))
                 .toList();
 
         Recipe recipe = new Recipe(
                 RecipeId.create(),
-                new RecipeDetails(name, description, durationInMinutes, servings, steps),
+                details,
                 recipeIngredients,
+                isPublic,
                 user
         );
         return recipeRepository.save(recipe);
