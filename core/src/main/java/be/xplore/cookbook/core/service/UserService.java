@@ -1,6 +1,5 @@
 package be.xplore.cookbook.core.service;
 
-import be.xplore.cookbook.core.domain.exception.NotFoundException;
 import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
@@ -22,9 +21,6 @@ public class UserService {
     }
 
     public User findById(FindUserByIdQuery query) {
-        if (query.userId() == null) {
-            throw new NotFoundException("User ID cannot be null");
-        }
         return userRepository.findById(query.userId()).orElseThrow(UserNotFoundException::new);
     }
 

@@ -12,8 +12,12 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -28,6 +32,7 @@ import org.springframework.web.util.WebUtils;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Configuration
 @EnableWebSecurity
@@ -55,7 +60,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) {
+    public Consumer<OAuth2AuthorizationRequest.Builder> promptCustomizer() {
+        return builder -> builder.additionalParameters(params -> params.put("prompt", "select_account"));
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           ClientRegistrationRepository clientRegistrationRepository,
+                                           Consumer<OAuth2AuthorizationRequest.Builder> promptCustomizer) {
         http
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -71,6 +83,8 @@ public class SecurityConfig {
                         .authorizationEndpoint(authEndpoint -> authEndpoint
                                 .baseUri("/oauth2/authorization")
                                 .authorizationRequestRepository(cookieAuthorizationRequestRepository)
+                                .authorizationRequestResolver(authorizationRequestResolver(
+                                        clientRegistrationRepository, promptCustomizer))
                         )
                         .redirectionEndpoint(redirectionEndpoint -> redirectionEndpoint
                                 .baseUri("/login/oauth2/code/*")
@@ -82,6 +96,15 @@ public class SecurityConfig {
                         .jwt(Customizer.withDefaults())
                 );
         return http.build();
+    }
+
+    private OAuth2AuthorizationRequestResolver authorizationRequestResolver(
+            ClientRegistrationRepository clientRegistrationRepository,
+            Consumer<OAuth2AuthorizationRequest.Builder> customizer) {
+        DefaultOAuth2AuthorizationRequestResolver resolver = new DefaultOAuth2AuthorizationRequestResolver(
+                clientRegistrationRepository, "/oauth2/authorization");
+        resolver.setAuthorizationRequestCustomizer(customizer);
+        return resolver;
     }
 
     @Bean
