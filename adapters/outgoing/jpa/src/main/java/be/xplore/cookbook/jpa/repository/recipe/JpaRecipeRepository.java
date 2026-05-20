@@ -26,6 +26,41 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
 
     @Query("""
         SELECT r FROM JpaRecipeEntity r
+        WHERE r.id = :id
+        AND (
+            r.user = :user
+
+            OR (
+                r.isPublic = true
+                AND r.user IN (
+                    SELECT hm FROM JpaHouseholdEntity h
+                    JOIN h.members hm
+                    WHERE (
+                        :user MEMBER OF h.members
+                        OR h.creator = :user
+                    )
+                    AND hm != :user
+                )
+            )
+
+            OR (
+                r.isPublic = true
+                AND r.user IN (
+                    SELECT h.creator FROM JpaHouseholdEntity h
+                    JOIN h.members hm
+                    WHERE hm = :user
+                )
+            )
+        )
+    """)
+    @EntityGraph(attributePaths = {"user", "steps", "ingredients", "ingredients.ingredient"})
+    Optional<JpaRecipeEntity> findByIdAndAccessibleByUser(
+            @Param("id") UUID id,
+            @Param("user") JpaUserEntity user
+    );
+
+    @Query("""
+        SELECT r FROM JpaRecipeEntity r
         JOIN r.ingredients i
         WHERE (:#{#ingredientIds.size()} = 0 OR i.id.ingredientId IN :ingredientIds)
             AND (:#{#excludedIngredientIds.size()} = 0 OR i.id.ingredientId NOT IN :excludedIngredientIds)
@@ -44,10 +79,12 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
                     OR h.creator = :user
                 )
                 AND hm != :user
+                AND r.isPublic IS TRUE
             ) OR r.user IN (
                 SELECT h.creator FROM JpaHouseholdEntity h
                 JOIN h.members hm
                 WHERE hm = :user
+                AND r.isPublic IS TRUE
             ))
         GROUP BY r.id
         HAVING :#{#ingredientIds.size()} = 0 OR COUNT(DISTINCT i.id.ingredientId) >= :#{#ingredientIds.size()}

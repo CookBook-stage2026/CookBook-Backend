@@ -1,5 +1,6 @@
 package be.xplore.cookbook.security;
 
+import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.command.FindUserByIdQuery;
@@ -33,7 +34,9 @@ public class UserExistenceJwtValidator implements OAuth2TokenValidator<Jwt> {
             if (user != null) {
                 return OAuth2TokenValidatorResult.success();
             }
-        } catch (IllegalArgumentException _) {
+        } catch (UserNotFoundException _) {
+            // Ignored
+        } catch (RuntimeException _) {
             throw new OAuth2Exception("Invalid JWT subject");
         }
 

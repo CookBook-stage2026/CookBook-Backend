@@ -36,7 +36,7 @@ class ChangeVisibilityTests extends BaseIntegrationTest {
                 .andExpect(status().isOk());
 
         Recipe updated = getRecipeRepository()
-                .findById(recipe.getId(), user.id())
+                .findById(recipe.getId(), user)
                 .orElseThrow(recipe.getId()::notFound);
 
         assertThat(updated.isPublic()).isTrue();

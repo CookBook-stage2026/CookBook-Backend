@@ -8,7 +8,6 @@ import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.user.User;
-import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.jpa.repository.recipe.entity.JpaRecipeEntity;
@@ -39,8 +38,14 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public Optional<Recipe> findById(RecipeId id, UserId userId) {
-        return jpaRecipeRepository.findByIdAndUserId(id.id(), userId.id())
+    public Optional<Recipe> findById(RecipeId id, User user) {
+        return jpaRecipeRepository.findByIdAndAccessibleByUser(id.id(), JpaUserEntity.fromDomain(user))
+                .map(JpaRecipeEntity::toDomain);
+    }
+
+    @Override
+    public Optional<Recipe> findOwnById(RecipeId id, User user) {
+        return jpaRecipeRepository.findByIdAndUserId(id.id(), user.id().id())
                 .map(JpaRecipeEntity::toDomain);
     }
 

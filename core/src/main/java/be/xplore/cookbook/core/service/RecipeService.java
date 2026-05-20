@@ -16,11 +16,15 @@ import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.EnhanceRecipeQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FindRecipeByIdQuery;
+import be.xplore.cookbook.core.domain.recipe.command.ImportRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.IngredientWithQuantity;
 import be.xplore.cookbook.core.domain.recipe.command.SearchRecipesByNameQuery;
 import be.xplore.cookbook.core.domain.recipe.command.UpdateRecipeCommand;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
+import be.xplore.cookbook.core.port.recipe.ImportedIngredient;
+import be.xplore.cookbook.core.port.recipe.ImportedRecipe;
+import be.xplore.cookbook.core.port.recipe.RecipeImportPort;
 import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
 import be.xplore.cookbook.core.port.recipe.SuggestedRecipeEnhancement;
 import be.xplore.cookbook.core.repository.IngredientRepository;
@@ -29,7 +33,10 @@ import be.xplore.cookbook.core.repository.UserPreferenceRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class RecipeService {
     private final RecipeRepository recipeRepository;
@@ -37,32 +44,40 @@ public class RecipeService {
     private final UserRepository userRepository;
     private final UserPreferenceRepository userPreferenceRepository;
     private final RecipeSuggestionsPort aiPort;
+    private final RecipeImportPort recipeImportPort;
 
     public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository,
                          UserRepository userRepository, UserPreferenceRepository userPreferenceRepository,
-                         RecipeSuggestionsPort aiPort) {
+                         RecipeSuggestionsPort aiPort, RecipeImportPort recipeImportPort) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
         this.userRepository = userRepository;
         this.userPreferenceRepository = userPreferenceRepository;
         this.aiPort = aiPort;
+        this.recipeImportPort = recipeImportPort;
     }
 
     public Recipe createRecipe(CreateRecipeCommand command) {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(command.userId()::notFound);
 
+        List<RecipeIngredient> raw = mapToRecipeIngredients(command.ingredientQuantities());
+        List<RecipeIngredient> unique = deduplicateIngredients(raw);
+
         return recipeRepository.save(new Recipe(
                 RecipeId.create(),
                 command.details(),
-                mapToRecipeIngredients(command.ingredientQuantities()),
+                unique,
                 command.isPublic(),
                 user
         ));
     }
 
     public Recipe findById(FindRecipeByIdQuery query) {
-        return recipeRepository.findById(query.recipeId(), query.userId())
+        User user = userRepository.findById(query.userId())
+                .orElseThrow(UserNotFoundException::new);
+
+        return recipeRepository.findById(query.recipeId(), user)
                 .orElseThrow(query.recipeId()::notFound);
     }
 
@@ -90,7 +105,7 @@ public class RecipeService {
         User user = userRepository.findById(query.userId())
                 .orElseThrow(UserNotFoundException::new);
 
-        Recipe recipe = recipeRepository.findById(query.recipeId(), user.id())
+        Recipe recipe = recipeRepository.findById(query.recipeId(), user)
                 .orElseThrow(() -> new NotFoundException("Recipe not found"));
 
         SuggestedRecipeEnhancement suggestion = aiPort.enhanceRecipe(recipe);
@@ -128,17 +143,58 @@ public class RecipeService {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(command.userId()::notFound);
 
-        Recipe recipe = recipeRepository.findById(command.id(), user.id())
+        Recipe recipe = recipeRepository.findById(command.id(), user)
                 .orElseThrow(() -> new NotFoundException("Recipe not found"));
+
+        List<RecipeIngredient> raw = mapToRecipeIngredients(command.ingredientQuantities());
+        List<RecipeIngredient> unique = deduplicateIngredients(raw);
 
         recipe.updateDetails(
                 command.details(),
-                mapToRecipeIngredients(command.ingredientQuantities())
+                unique
         );
 
         recipe.changeVisibility(command.isPublic());
 
         recipeRepository.save(recipe);
+    }
+
+    public Recipe importRecipe(ImportRecipeCommand command) {
+        User user = userRepository.findById(command.userId())
+                .orElseThrow(UserNotFoundException::new);
+
+        ImportedRecipe scraped = recipeImportPort.scrape(command.url());
+
+        List<RecipeIngredient> raw = scraped.ingredients().stream()
+                .map(this::resolveRecipeIngredient)
+                .toList();
+
+        List<RecipeIngredient> unique = deduplicateIngredients(raw);
+
+        return recipeRepository.save(new Recipe(
+                RecipeId.create(),
+                new RecipeDetails(
+                        scraped.title(),
+                        scraped.description(),
+                        scraped.durationInMinutes(),
+                        scraped.servings(),
+                        scraped.steps()
+                ),
+                unique,
+                false,
+                user
+        ));
+    }
+
+    private RecipeIngredient resolveRecipeIngredient(ImportedIngredient scraped) {
+        Ingredient ingredient = ingredientRepository.findByNameIgnoreCase(scraped.name())
+                .orElseGet(() -> ingredientRepository.save(new Ingredient(
+                        IngredientId.create(),
+                        scraped.name(),
+                        scraped.unit(),
+                        scraped.categories()
+                )));
+        return new RecipeIngredient(ingredient, scraped.quantity());
     }
 
     private List<RecipeIngredient> mapToRecipeIngredients(List<IngredientWithQuantity> ingredientQuantities) {
@@ -165,11 +221,23 @@ public class RecipeService {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(UserNotFoundException::new);
 
-        Recipe recipe = recipeRepository.findById(command.recipeId(), user.id())
+        Recipe recipe = recipeRepository.findOwnById(command.recipeId(), user)
                 .orElseThrow(command.recipeId()::notFound);
 
         recipe.changeVisibility(command.isPublic());
 
         recipeRepository.save(recipe);
+    }
+
+    private static List<RecipeIngredient> deduplicateIngredients(List<RecipeIngredient> ingredients) {
+        return ingredients.stream()
+                .collect(Collectors.toMap(
+                        RecipeIngredient::ingredient,
+                        Function.identity(),
+                        RecipeIngredient::merge,
+                        LinkedHashMap::new
+                ))
+                .values().stream()
+                .toList();
     }
 }

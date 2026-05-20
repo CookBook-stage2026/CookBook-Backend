@@ -45,11 +45,12 @@ This image is tagged as: `ghcr.io/cookbook-stage2026/cookbook-backend:<branch>`
 the application uses Spring Boot’s externalized configuration. The application.properties file in the repository contains default values suitable for local development and testing, but sensitive or environment-specific settings are overridden at runtime using environment variables in the deployment environment (Elastic Beanstalk, GitHub Actions, etc.).
 
 ### Environment-Specific Overrides
-For local development, a developer can set ai.provider=OLLAMA and point to a local Ollama instance using their own application-local.properties or environment variables.
+For local development, a developer can set the run profile to "dev" and point to a local Ollama instance using their own application-local.properties or environment variables.
 In production (AWS Elastic Beanstalk), the application uses the following configuration, which is bundled in the deploy-files/ directory as part of the deployment package:
 You can view the properties for deployment here: [application-deploy.properties](../application/src/main/resources/application-deploy.properties)
 For local development, you have to create a file with the name `application-dev.properties` in the same directory as `application-deploy.properties` and add the following content:
 ```spring.datasource.driver-class-name=org.sqlite.JDBC
+spring.datasource.driver-class-name=org.sqlite.JDBC
 spring.datasource.url=jdbc:sqlite:myDatabase.db
 spring.datasource.username=Developer
 spring.datasource.password=Developer
@@ -63,13 +64,21 @@ spring.security.oauth2.client.registration.google.redirect-uri={baseUrl}/login/o
 spring.security.oauth2.client.registration.github.redirect-uri={baseUrl}/login/oauth2/code/{registrationId}
 spring.security.oauth2.client.registration.microsoft.redirect-uri={baseUrl}/login/oauth2/code/{registrationId}
 
-ai.provider=OLLAMA
+bedrock.region=eu-north-1
+bedrock.model-id=eu.anthropic.claude-haiku-4-5-20251001-v1:0
 
-ollama.model=llama3.2:3b
+ollama.model-name=finetuned_llama
 ollama.base-url=http://localhost:11434/
+
+ollama.max-response-time-in-minutes=15
+
+firecrawl.mcp-url=http://localhost:3001/mcp
+
+firecrawl.enabled=true
 ```
 This configuration allows developers to run the application locally with a SQLite database and use Ollama as the AI provider, while the production environment can use a different database and AI provider without changing the codebase.
 You can also add bedrock properties but for that you need an AWS account with access to Bedrock and the necessary credentials.
+This application also uses Firecrawl for web crawling, and the configuration for that is included in the properties file as well. Just like with running the ollama AI instance, you can also run a local instance of Firecrawl for development and testing purposes. The `firecrawl.enabled` property can be set to `true` to enable the integration, and the `firecrawl.mcp-url` property should point to the local instance of Firecrawl. Both of these things are started in this docker compose file: [docker-compose.yml](../docker-compose.yml).
 There is also a `secret.properties` file in the directory with the other files. Here, you have to configure the secrets for the application. This file is not included in the repository for security reasons, but you can create it locally with the following content:
 ``` 
 spring.security.oauth2.client.registration.google.client-id=YourGoogleClientId
@@ -80,6 +89,7 @@ spring.security.oauth2.client.registration.microsoft.client-id=YourMicrosoftClie
 spring.security.oauth2.client.registration.microsoft.client-secret=YourMicrosoftClientSecret
 app.jwt.secret=YourJWTSecretKey
 app.cors.allowed-origins=your-allowed-origin
+firecrawl.api-key=YourFirecrawlApiKey
 ```
 For more information on security you can refer to the [security documentation](./security-documentation.md).
 Here you can also set the credentials for Bedrock if you have access to it, but make sure to keep this file secure and do not commit it to version control.
@@ -119,6 +129,7 @@ The following environment variables are configured in the Elastic Beanstalk envi
 - `JWT_SECRET`: Secret key for signing JWT tokens.
 - `CORS_ALLOWED_ORIGINS`: Allowed origins for CORS configuration.
 - `BASE_URL`: Base URL for the application, used in OAuth2 redirect URIs.
+- `FIRECRAWL_API_KEY`: API key for Firecrawl integration.
 
 These are set manually in the Elastic Beanstalk console under Configuration → Software → Environment properties, except for RDS variables which are automatically provided when an RDS instance is associated with the environment.
 
