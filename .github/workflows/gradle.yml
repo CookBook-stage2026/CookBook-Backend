@@ -27,14 +27,11 @@ jobs:
     - name: Change wrapper permissions
       run: chmod +x ./gradlew
 
-    - name: Build with Gradle (compile first to catch errors)
-      run: ./gradlew clean compileJava compileTestJava --no-daemon
-
     - name: Run checkstyle with Gradle
       run: ./gradlew checkstyleMain checkstyleTest --no-daemon
 
     - name: Run with coverage
-      run: ./gradlew test jacocoTestReport testCodeCoverageReport --no-daemon -x checkstyleMain -x checkstyleTest
+      run: ./gradlew build jacocoTestReport testCodeCoverageReport --no-daemon -x checkstyleMain -x checkstyleTest
 
     - name: Upload JaCoCo XML report
       if: always()
