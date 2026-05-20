@@ -27,9 +27,6 @@ jobs:
     - name: Change wrapper permissions
       run: chmod +x ./gradlew
 
-    - name: Debug - Check file content on runner
-      run: cat application/src/main/java/be/xplore/cookbook/security/UserExistenceJwtValidator.java
-
     - name: Run checkstyle with Gradle
       run: ./gradlew checkstyleMain checkstyleTest --no-daemon
 
