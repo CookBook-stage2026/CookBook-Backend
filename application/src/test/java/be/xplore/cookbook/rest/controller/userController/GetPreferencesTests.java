@@ -28,7 +28,7 @@ class GetPreferencesTests extends BaseIntegrationTest {
     void getPreferences_shouldReturnPreferences_whenPreferencesAreSet() throws Exception {
         User user = createUser();
 
-        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG);
+        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG, null);
 
         getUserPreferenceRepository().save(new UserPreferences(
                 user,

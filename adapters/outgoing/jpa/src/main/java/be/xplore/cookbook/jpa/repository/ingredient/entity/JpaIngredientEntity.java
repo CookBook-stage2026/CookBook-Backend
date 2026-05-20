@@ -4,6 +4,7 @@ import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
+import be.xplore.cookbook.jpa.repository.user.entity.JpaUserEntity;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -12,6 +13,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.util.ArrayList;
@@ -41,11 +43,16 @@ public class JpaIngredientEntity {
     @Column(name = "category", nullable = false)
     private List<Category> categories = new ArrayList<>();
 
-    public JpaIngredientEntity(UUID id, String name, Unit unit, List<Category> categories) {
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private JpaUserEntity user;
+
+    public JpaIngredientEntity(UUID id, String name, Unit unit, List<Category> categories, JpaUserEntity user) {
         this.id = id;
         this.name = name;
         this.unit = unit;
         this.categories = categories;
+        this.user = user;
     }
 
     protected JpaIngredientEntity() {
@@ -56,7 +63,8 @@ public class JpaIngredientEntity {
                 ingredient.id().id(),
                 ingredient.name(),
                 ingredient.unit(),
-                ingredient.categories()
+                ingredient.categories(),
+                ingredient.user() != null ? JpaUserEntity.fromDomain(ingredient.user()) : null
         );
     }
 
@@ -65,16 +73,18 @@ public class JpaIngredientEntity {
                 new IngredientId(id),
                 name,
                 unit,
-                categories
+                categories,
+                user != null ? user.toDomain() : null
         );
     }
 
-    public Ingredient toDomainWithoutCategories() {
+    public Ingredient toDomainWithoutCategoriesAndUser() {
         return new Ingredient(
                 new IngredientId(id),
                 name,
                 unit,
-                List.of()
+                List.of(),
+                null
         );
     }
 

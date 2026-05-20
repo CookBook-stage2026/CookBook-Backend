@@ -124,7 +124,7 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
         Recipe recipe = createAndSaveRecipe(user);
 
         int ingredientCountBefore = getIngredientRepository()
-                .searchByNameExcludingIds("", List.of(), FIND_ALL_INGREDIENTS_PAGING)
+                .searchByNameExcludingIds("", List.of(), FIND_ALL_INGREDIENTS_PAGING, user)
                 .size();
 
         // Act & Assert
@@ -133,7 +133,7 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.ingredients", hasSize(recipe.getIngredients().size() + 1)));
 
         int ingredientCountAfter = getIngredientRepository()
-                .searchByNameExcludingIds("", List.of(), FIND_ALL_INGREDIENTS_PAGING)
+                .searchByNameExcludingIds("", List.of(), FIND_ALL_INGREDIENTS_PAGING, user)
                 .size();
 
         assertThat(ingredientCountAfter).isEqualTo(ingredientCountBefore);
