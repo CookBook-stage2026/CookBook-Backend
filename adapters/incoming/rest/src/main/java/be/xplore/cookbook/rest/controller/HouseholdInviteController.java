@@ -4,10 +4,12 @@ import be.xplore.cookbook.core.domain.household.HouseholdId;
 import be.xplore.cookbook.core.domain.householdinvite.HouseholdInviteId;
 import be.xplore.cookbook.core.domain.householdinvite.command.AcceptInviteCommand;
 import be.xplore.cookbook.core.domain.householdinvite.command.CreateInviteCommand;
+import be.xplore.cookbook.core.domain.householdinvite.command.FindHouseholdInvitationByTokenQuery;
 import be.xplore.cookbook.core.domain.householdinvite.command.RevokeInviteCommand;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.service.HouseholdInviteService;
 import be.xplore.cookbook.rest.dto.request.CreateInviteRequestDto;
+import be.xplore.cookbook.rest.dto.response.HouseholdInviteDto;
 import be.xplore.cookbook.rest.dto.response.HouseholdInviteResponseDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,6 +35,15 @@ public class HouseholdInviteController {
 
     public HouseholdInviteController(HouseholdInviteService householdInviteService) {
         this.householdInviteService = householdInviteService;
+    }
+
+    @GetMapping("/{token}")
+    public HouseholdInviteDto getInviteByToken(
+            @PathVariable String token
+    ) {
+        var invite = householdInviteService.findByToken(
+                new FindHouseholdInvitationByTokenQuery(token));
+        return new HouseholdInviteDto(invite.id().id(), invite.revoked());
     }
 
     @PostMapping("/{householdId}/invites")
