@@ -24,7 +24,6 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
     @EntityGraph(attributePaths = {"user", "steps", "ingredients", "ingredients.ingredient"})
     Optional<JpaRecipeEntity> findByIdAndUserId(UUID id, UUID userId);
 
-    @EntityGraph(attributePaths = {"user"})
     @Query("""
         SELECT r FROM JpaRecipeEntity r
         JOIN r.ingredients i
@@ -61,7 +60,6 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
             Pageable pageable
     );
 
-    @EntityGraph(attributePaths = {"user"})
     @Query("""
         SELECT r FROM JpaRecipeEntity r
         JOIN r.ingredients i
@@ -86,7 +84,6 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
             Pageable pageable
     );
 
-    @EntityGraph(attributePaths = {"user"})
     @Query("""
             SELECT r FROM JpaRecipeEntity r
             WHERE (
