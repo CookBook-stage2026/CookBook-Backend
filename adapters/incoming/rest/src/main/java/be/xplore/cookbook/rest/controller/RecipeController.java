@@ -9,12 +9,14 @@ import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.EnhanceRecipeQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FindRecipeByIdQuery;
+import be.xplore.cookbook.core.domain.recipe.command.ImportRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.IngredientWithQuantity;
 import be.xplore.cookbook.core.domain.recipe.command.SearchRecipesByNameQuery;
 import be.xplore.cookbook.core.domain.recipe.command.UpdateRecipeCommand;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.service.RecipeService;
 import be.xplore.cookbook.rest.dto.request.CreateRecipeDto;
+import be.xplore.cookbook.rest.dto.request.ImportRecipeRequest;
 import be.xplore.cookbook.rest.dto.request.RecipeSearchRequest;
 import be.xplore.cookbook.rest.dto.request.UpdateRecipeDto;
 import be.xplore.cookbook.rest.dto.response.PaginatedResponse;
@@ -131,6 +133,18 @@ public class RecipeController {
                 ingredientQuantities,
                 getUserIdFromJwt(jwt)
         ));
+    }
+
+    @PostMapping("/import")
+    @ResponseStatus(HttpStatus.CREATED)
+    public RecipeDto importRecipe(
+            @Valid @RequestBody ImportRecipeRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        Recipe recipe = recipeService.importRecipe((
+                new ImportRecipeCommand(request.url(), getUserIdFromJwt(jwt))
+        ));
+        return RecipeDto.fromDomain(recipe);
     }
 
     private UserId getUserIdFromJwt(Jwt jwt) {

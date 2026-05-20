@@ -1,6 +1,7 @@
 package be.xplore.cookbook.config;
 
 import be.xplore.cookbook.config.properties.HouseholdInviteProperties;
+import be.xplore.cookbook.core.port.recipe.RecipeImportPort;
 import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
 import be.xplore.cookbook.core.port.recipe.ScheduleSuggestionsPort;
 import be.xplore.cookbook.core.repository.HouseholdInviteRepository;
@@ -41,10 +42,11 @@ public class AppConfig {
             IngredientRepository ingredientRepository,
             UserRepository userRepository,
             UserPreferenceRepository userPreferenceRepository,
-            RecipeSuggestionsPort recipeSuggestionsPort
+            RecipeSuggestionsPort recipeSuggestionsPort,
+            RecipeImportPort recipeImportPort
     ) {
         return new RecipeService(recipeRepository, ingredientRepository, userRepository,
-                userPreferenceRepository, recipeSuggestionsPort);
+                userPreferenceRepository, recipeSuggestionsPort, recipeImportPort);
     }
 
     @Bean
