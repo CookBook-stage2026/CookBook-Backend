@@ -2,100 +2,107 @@
 -- INGREDIENTS
 -- ---------------------------------------------------------
 INSERT INTO ingredients (ingredient_id, name, unit)
-VALUES
-    ('91b60a9d-be30-46e1-8499-ee668a4c2d7d', 'Spaghetti', 'GRAM'),
-    ('df2e8703-4a38-45a7-a747-bb3f28afbf82', 'Pancetta', 'GRAM'),
-    ('1f821767-f0a9-4e03-ad70-c288f73efd9a', 'Eggs', 'PIECE'),
-    ('046835e1-0e45-424f-9885-68b228b6f00b', 'Chicken breast', 'GRAM'),
-    ('fca5db5d-f38f-4d59-96a2-7c06200748eb', 'Yogurt', 'GRAM'),
-    ('ff1ac84b-ee97-40d2-9f38-ae919d48f9e8', 'Tomato sauce', 'GRAM'),
-    ('fcc8d46c-780b-484c-bfe6-5b677805ca3c', 'Heavy cream', 'MILLILITER'),
-    ('b89b2345-fc75-44c0-89b3-3e04d74124b4', 'Garam masala', 'TEASPOON'),
-    ('eade830d-1bc4-47de-8052-d1b91df42f1d', 'Ground beef', 'GRAM'),
-    ('3f03ff9b-31e5-4d48-a6a4-28d5fd81c898', 'Tortillas', 'PIECE'),
-    ('3eddeece-5867-4416-824d-c627f2aa5979', 'Cheddar cheese', 'GRAM'),
-    ('307f5492-e16a-431a-9cdb-75c9c6815a3f', 'Salsa', 'GRAM'),
-    ('4b434f28-cef0-4d8b-82a3-01fbf534cf22', 'Sour cream', 'GRAM'),
-    ('09b582cb-a0ea-4c18-bd4f-c814e66c50dd', 'Bell peppers', 'PIECE'),
-    ('f6e83d4b-4d67-4044-9ee8-eedd8b347d4a', 'Broccoli', 'GRAM'),
-    ('683a34ed-13d9-4c92-bf04-27e852716210', 'Carrots', 'PIECE'),
-    ('69639b8d-d1e8-4cb7-879f-5a9bf362d87c', 'Soy sauce', 'TABLESPOON'),
-    ('39d1ac57-8bf9-478e-ac53-3036a240610a', 'Sesame oil', 'TABLESPOON'),
-    ('cb2e829b-fa70-4a66-a667-5473e3e8b723', 'Onions', 'PIECE'),
-    ('cffb78b8-2cd4-4658-91ca-1da17e4f7a3a', 'Beef broth', 'LITER'),
-    ('246de5df-8917-4530-8b91-06f7d7d32412', 'Gruyere cheese', 'GRAM'),
-    ('6cd4fe2d-c2c0-4e1e-aa5a-ed773e116747', 'Baguette', 'PIECE'),
-    ('1b194de6-4e86-4b46-b3a0-bebcbad0e15e', 'Butter', 'GRAM'),
-    ('cc95f369-dda7-42d4-8035-bbaaacea963c', 'Bananas', 'PIECE'),
-    ('b83a4fc3-e819-4edc-9f40-6841beaa3b80', 'Flour', 'GRAM'),
-    ('48b21301-e07c-4118-92b9-f173336093ba', 'Milk', 'MILLILITER'),
-    ('8ea17cd5-fea4-45f4-bfb6-35f0f04e583c', 'Tomatoes', 'PIECE'),
-    ('1834b787-3ceb-49e2-9207-e3de61020049', 'Cucumber', 'PIECE'),
-    ('4725715a-2570-4737-a62c-ac43cbd7ea90', 'Feta cheese', 'GRAM'),
-    ('7cf382d1-b6c9-4424-93b8-59ad6e3c879e', 'Kalamata olives', 'GRAM'),
-    ('a4378573-1d8d-44f5-80f6-22175b0c4f9c', 'Olive oil', 'TABLESPOON'),
-    ('f63a1464-ce64-44e7-9088-046f044645e7', 'Beef chuck', 'GRAM'),
-    ('084ed9bf-48c4-42c7-afd1-ca63e6a95b0d', 'Red wine', 'MILLILITER'),
-    ('5245895d-bffe-4af2-89eb-7ed5e729d394', 'Mushrooms', 'GRAM'),
-    ('655c0e6e-a675-4a10-a0e7-55cde4ec19c6', 'Bacon', 'GRAM'),
-    ('332343ec-3fde-4ef0-ae83-97d42ab8f861', 'Pizza dough', 'GRAM'),
-    ('373507a5-b659-4ca9-868c-8f39319946b2', 'Fresh mozzarella', 'GRAM'),
-    ('6c81d1a3-66f7-42de-9ad1-05a5d748bcc8', 'Fresh basil', 'GRAM'),
-    ('00885e1e-20a0-4c3d-aa23-ce1bd5ddc385', 'Dark chocolate', 'GRAM'),
-    ('78223711-7e76-4f37-99c1-6c80daa63f2e', 'Sugar', 'GRAM');
+VALUES ('91b60a9d-be30-46e1-8499-ee668a4c2d7d', 'Spaghetti', 'GRAM'),
+       ('df2e8703-4a38-45a7-a747-bb3f28afbf82', 'Pancetta', 'GRAM'),
+       ('1f821767-f0a9-4e03-ad70-c288f73efd9a', 'Eggs', 'PIECE'),
+       ('046835e1-0e45-424f-9885-68b228b6f00b', 'Chicken breast', 'GRAM'),
+       ('fca5db5d-f38f-4d59-96a2-7c06200748eb', 'Yogurt', 'GRAM'),
+       ('ff1ac84b-ee97-40d2-9f38-ae919d48f9e8', 'Tomato sauce', 'GRAM'),
+       ('fcc8d46c-780b-484c-bfe6-5b677805ca3c', 'Heavy cream', 'MILLILITER'),
+       ('b89b2345-fc75-44c0-89b3-3e04d74124b4', 'Garam masala', 'TEASPOON'),
+       ('eade830d-1bc4-47de-8052-d1b91df42f1d', 'Ground beef', 'GRAM'),
+       ('3f03ff9b-31e5-4d48-a6a4-28d5fd81c898', 'Tortillas', 'PIECE'),
+       ('3eddeece-5867-4416-824d-c627f2aa5979', 'Cheddar cheese', 'GRAM'),
+       ('307f5492-e16a-431a-9cdb-75c9c6815a3f', 'Salsa', 'GRAM'),
+       ('4b434f28-cef0-4d8b-82a3-01fbf534cf22', 'Sour cream', 'GRAM'),
+       ('09b582cb-a0ea-4c18-bd4f-c814e66c50dd', 'Bell peppers', 'PIECE'),
+       ('f6e83d4b-4d67-4044-9ee8-eedd8b347d4a', 'Broccoli', 'GRAM'),
+       ('683a34ed-13d9-4c92-bf04-27e852716210', 'Carrots', 'PIECE'),
+       ('69639b8d-d1e8-4cb7-879f-5a9bf362d87c', 'Soy sauce', 'TABLESPOON'),
+       ('39d1ac57-8bf9-478e-ac53-3036a240610a', 'Sesame oil', 'TABLESPOON'),
+       ('cb2e829b-fa70-4a66-a667-5473e3e8b723', 'Onions', 'PIECE'),
+       ('cffb78b8-2cd4-4658-91ca-1da17e4f7a3a', 'Beef broth', 'LITER'),
+       ('246de5df-8917-4530-8b91-06f7d7d32412', 'Gruyere cheese', 'GRAM'),
+       ('6cd4fe2d-c2c0-4e1e-aa5a-ed773e116747', 'Baguette', 'PIECE'),
+       ('1b194de6-4e86-4b46-b3a0-bebcbad0e15e', 'Butter', 'GRAM'),
+       ('cc95f369-dda7-42d4-8035-bbaaacea963c', 'Bananas', 'PIECE'),
+       ('b83a4fc3-e819-4edc-9f40-6841beaa3b80', 'Flour', 'GRAM'),
+       ('48b21301-e07c-4118-92b9-f173336093ba', 'Milk', 'MILLILITER'),
+       ('8ea17cd5-fea4-45f4-bfb6-35f0f04e583c', 'Tomatoes', 'PIECE'),
+       ('1834b787-3ceb-49e2-9207-e3de61020049', 'Cucumber', 'PIECE'),
+       ('4725715a-2570-4737-a62c-ac43cbd7ea90', 'Feta cheese', 'GRAM'),
+       ('7cf382d1-b6c9-4424-93b8-59ad6e3c879e', 'Kalamata olives', 'GRAM'),
+       ('a4378573-1d8d-44f5-80f6-22175b0c4f9c', 'Olive oil', 'TABLESPOON'),
+       ('f63a1464-ce64-44e7-9088-046f044645e7', 'Beef chuck', 'GRAM'),
+       ('084ed9bf-48c4-42c7-afd1-ca63e6a95b0d', 'Red wine', 'MILLILITER'),
+       ('5245895d-bffe-4af2-89eb-7ed5e729d394', 'Mushrooms', 'GRAM'),
+       ('655c0e6e-a675-4a10-a0e7-55cde4ec19c6', 'Bacon', 'GRAM'),
+       ('332343ec-3fde-4ef0-ae83-97d42ab8f861', 'Pizza dough', 'GRAM'),
+       ('373507a5-b659-4ca9-868c-8f39319946b2', 'Fresh mozzarella', 'GRAM'),
+       ('6c81d1a3-66f7-42de-9ad1-05a5d748bcc8', 'Fresh basil', 'GRAM'),
+       ('00885e1e-20a0-4c3d-aa23-ce1bd5ddc385', 'Dark chocolate', 'GRAM'),
+       ('78223711-7e76-4f37-99c1-6c80daa63f2e', 'Sugar', 'GRAM'),
+       ('5008d28b-a36b-41de-a6e0-2a9dd0db9feb', 'Water', 'MILLILITER'),
+       ('66052757-9a96-4ee4-841d-2a8ab973c91a', 'Minced meat', 'GRAM'),
+       ('bc516cd6-e283-4efe-969a-40d6a6021033', 'Cereal', 'GRAM'),
+       ('6e6c67ba-dbdb-4d51-a523-af54d3523c16', 'Vanilla ice cream', 'GRAM');
 
 -- ---------------------------------------------------------
 -- INGREDIENT CATEGORIES
 -- ---------------------------------------------------------
 INSERT INTO ingredient_categories (ingredient_id, category)
-VALUES
-    ('91b60a9d-be30-46e1-8499-ee668a4c2d7d', 'GRAIN'),
-    ('df2e8703-4a38-45a7-a747-bb3f28afbf82', 'MEAT'),
-    ('1f821767-f0a9-4e03-ad70-c288f73efd9a', 'EGG'),
-    ('046835e1-0e45-424f-9885-68b228b6f00b', 'POULTRY'),
-    ('fca5db5d-f38f-4d59-96a2-7c06200748eb', 'DAIRY'),
-    ('ff1ac84b-ee97-40d2-9f38-ae919d48f9e8', 'SAUCE_CONDIMENT'),
-    ('fcc8d46c-780b-484c-bfe6-5b677805ca3c', 'DAIRY'),
-    ('b89b2345-fc75-44c0-89b3-3e04d74124b4', 'SPICE'),
-    ('eade830d-1bc4-47de-8052-d1b91df42f1d', 'MEAT'),
-    ('3f03ff9b-31e5-4d48-a6a4-28d5fd81c898', 'GRAIN'),
-    ('3eddeece-5867-4416-824d-c627f2aa5979', 'DAIRY'),
-    ('307f5492-e16a-431a-9cdb-75c9c6815a3f', 'SAUCE_CONDIMENT'),
-    ('4b434f28-cef0-4d8b-82a3-01fbf534cf22', 'DAIRY'),
-    ('09b582cb-a0ea-4c18-bd4f-c814e66c50dd', 'VEGETABLE'),
-    ('f6e83d4b-4d67-4044-9ee8-eedd8b347d4a', 'VEGETABLE'),
-    ('683a34ed-13d9-4c92-bf04-27e852716210', 'VEGETABLE'),
-    ('69639b8d-d1e8-4cb7-879f-5a9bf362d87c', 'SAUCE_CONDIMENT'),
-    ('39d1ac57-8bf9-478e-ac53-3036a240610a', 'OIL_FAT'),
-    ('cb2e829b-fa70-4a66-a667-5473e3e8b723', 'VEGETABLE'),
-    ('cffb78b8-2cd4-4658-91ca-1da17e4f7a3a', 'SAUCE_CONDIMENT'),
-    ('246de5df-8917-4530-8b91-06f7d7d32412', 'DAIRY'),
-    ('6cd4fe2d-c2c0-4e1e-aa5a-ed773e116747', 'GRAIN'),
-    ('1b194de6-4e86-4b46-b3a0-bebcbad0e15e', 'DAIRY'),
-    ('cc95f369-dda7-42d4-8035-bbaaacea963c', 'FRUIT'),
-    ('b83a4fc3-e819-4edc-9f40-6841beaa3b80', 'GRAIN'),
-    ('48b21301-e07c-4118-92b9-f173336093ba', 'DAIRY'),
-    ('8ea17cd5-fea4-45f4-bfb6-35f0f04e583c', 'VEGETABLE'),
-    ('1834b787-3ceb-49e2-9207-e3de61020049', 'VEGETABLE'),
-    ('4725715a-2570-4737-a62c-ac43cbd7ea90', 'DAIRY'),
-    ('7cf382d1-b6c9-4424-93b8-59ad6e3c879e', 'VEGETABLE'),
-    ('a4378573-1d8d-44f5-80f6-22175b0c4f9c', 'OIL_FAT'),
-    ('f63a1464-ce64-44e7-9088-046f044645e7', 'MEAT'),
-    ('084ed9bf-48c4-42c7-afd1-ca63e6a95b0d', 'BEVERAGE'),
-    ('5245895d-bffe-4af2-89eb-7ed5e729d394', 'FUNGI'),
-    ('655c0e6e-a675-4a10-a0e7-55cde4ec19c6', 'MEAT'),
-    ('332343ec-3fde-4ef0-ae83-97d42ab8f861', 'GRAIN'),
-    ('373507a5-b659-4ca9-868c-8f39319946b2', 'DAIRY'),
-    ('6c81d1a3-66f7-42de-9ad1-05a5d748bcc8', 'HERB'),
-    ('00885e1e-20a0-4c3d-aa23-ce1bd5ddc385', 'SWEETENER'),
-    ('78223711-7e76-4f37-99c1-6c80daa63f2e', 'SWEETENER');
-
+VALUES ('91b60a9d-be30-46e1-8499-ee668a4c2d7d', 'GRAIN'),
+       ('df2e8703-4a38-45a7-a747-bb3f28afbf82', 'MEAT'),
+       ('1f821767-f0a9-4e03-ad70-c288f73efd9a', 'EGG'),
+       ('046835e1-0e45-424f-9885-68b228b6f00b', 'POULTRY'),
+       ('fca5db5d-f38f-4d59-96a2-7c06200748eb', 'DAIRY'),
+       ('ff1ac84b-ee97-40d2-9f38-ae919d48f9e8', 'SAUCE_CONDIMENT'),
+       ('fcc8d46c-780b-484c-bfe6-5b677805ca3c', 'DAIRY'),
+       ('b89b2345-fc75-44c0-89b3-3e04d74124b4', 'SPICE'),
+       ('eade830d-1bc4-47de-8052-d1b91df42f1d', 'MEAT'),
+       ('3f03ff9b-31e5-4d48-a6a4-28d5fd81c898', 'GRAIN'),
+       ('3eddeece-5867-4416-824d-c627f2aa5979', 'DAIRY'),
+       ('307f5492-e16a-431a-9cdb-75c9c6815a3f', 'SAUCE_CONDIMENT'),
+       ('4b434f28-cef0-4d8b-82a3-01fbf534cf22', 'DAIRY'),
+       ('09b582cb-a0ea-4c18-bd4f-c814e66c50dd', 'VEGETABLE'),
+       ('f6e83d4b-4d67-4044-9ee8-eedd8b347d4a', 'VEGETABLE'),
+       ('683a34ed-13d9-4c92-bf04-27e852716210', 'VEGETABLE'),
+       ('69639b8d-d1e8-4cb7-879f-5a9bf362d87c', 'SAUCE_CONDIMENT'),
+       ('39d1ac57-8bf9-478e-ac53-3036a240610a', 'OIL_FAT'),
+       ('cb2e829b-fa70-4a66-a667-5473e3e8b723', 'VEGETABLE'),
+       ('cffb78b8-2cd4-4658-91ca-1da17e4f7a3a', 'SAUCE_CONDIMENT'),
+       ('246de5df-8917-4530-8b91-06f7d7d32412', 'DAIRY'),
+       ('6cd4fe2d-c2c0-4e1e-aa5a-ed773e116747', 'GRAIN'),
+       ('1b194de6-4e86-4b46-b3a0-bebcbad0e15e', 'DAIRY'),
+       ('cc95f369-dda7-42d4-8035-bbaaacea963c', 'FRUIT'),
+       ('b83a4fc3-e819-4edc-9f40-6841beaa3b80', 'GRAIN'),
+       ('48b21301-e07c-4118-92b9-f173336093ba', 'DAIRY'),
+       ('8ea17cd5-fea4-45f4-bfb6-35f0f04e583c', 'VEGETABLE'),
+       ('1834b787-3ceb-49e2-9207-e3de61020049', 'VEGETABLE'),
+       ('4725715a-2570-4737-a62c-ac43cbd7ea90', 'DAIRY'),
+       ('7cf382d1-b6c9-4424-93b8-59ad6e3c879e', 'VEGETABLE'),
+       ('a4378573-1d8d-44f5-80f6-22175b0c4f9c', 'OIL_FAT'),
+       ('f63a1464-ce64-44e7-9088-046f044645e7', 'MEAT'),
+       ('084ed9bf-48c4-42c7-afd1-ca63e6a95b0d', 'BEVERAGE'),
+       ('5245895d-bffe-4af2-89eb-7ed5e729d394', 'FUNGI'),
+       ('655c0e6e-a675-4a10-a0e7-55cde4ec19c6', 'MEAT'),
+       ('332343ec-3fde-4ef0-ae83-97d42ab8f861', 'GRAIN'),
+       ('373507a5-b659-4ca9-868c-8f39319946b2', 'DAIRY'),
+       ('6c81d1a3-66f7-42de-9ad1-05a5d748bcc8', 'HERB'),
+       ('00885e1e-20a0-4c3d-aa23-ce1bd5ddc385', 'SWEETENER'),
+       ('78223711-7e76-4f37-99c1-6c80daa63f2e', 'SWEETENER'),
+       ('66052757-9a96-4ee4-841d-2a8ab973c91a', 'MEAT'),
+       ('bc516cd6-e283-4efe-969a-40d6a6021033', 'GRAIN'),
+       ('6e6c67ba-dbdb-4d51-a523-af54d3523c16', 'DAIRY');
+/*
 -- ---------------------------------------------------------
 -- RECIPES
 -- ---------------------------------------------------------
 INSERT INTO recipes (recipe_id, name, description, duration_in_minutes, servings)
-VALUES ('1ecba55b-a63c-43f6-a849-d736e6773f2d', 'A classic Italian pasta dish originating from Rome, made with spaghetti, eggs, aged cheese, pancetta, and freshly ground black pepper, known for its rich texture and simple, traditional ingredients',
-        'Spaghetti Carbonara prepared with al dente pasta, crisp pancetta, eggs, Pecorino Romano cheese, black pepper, and a silky sauce created by emulsifying the ingredients without using cream', 30, 2),
+VALUES ('1ecba55b-a63c-43f6-a849-d736e6773f2d',
+        'A classic Italian pasta dish originating from Rome, made with spaghetti, eggs, aged cheese, pancetta, and freshly ground black pepper, known for its rich texture and simple, traditional ingredients',
+        'Spaghetti Carbonara prepared with al dente pasta, crisp pancetta, eggs, Pecorino Romano cheese, black pepper, and a silky sauce created by emulsifying the ingredients without using cream',
+        30, 2),
        ('8d96d734-11ea-408d-adc5-763311de5573', 'Chicken Tikka Masala',
         'Creamy and spiced Indian curry with tender chicken', 45, 4),
        ('3265de7a-3053-4e5c-97e6-5050e68aa8d0', 'Beef Tacos', 'Mexican street-style tacos with seasoned ground beef',
@@ -111,7 +118,12 @@ VALUES ('1ecba55b-a63c-43f6-a849-d736e6773f2d', 'A classic Italian pasta dish or
        ('89b1dcef-112f-4226-9cb8-727a57cee5ca', 'Margherita Pizza',
         'Simple Neapolitan pizza with fresh basil and mozzarella', 40, 2),
        ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', 'Chocolate Lava Cake',
-        'Decadent warm chocolate cake with a molten center', 25, 4);
+        'Decadent warm chocolate cake with a molten center', 25, 4),
+       ('c36cf075-1ef3-4d31-b835-20dad2ed5de9', 'Cevapi', 'Grilled Balkan minced meat sausages', 35, 4),
+       ('9a31274b-00f8-4d76-be78-743208dcaa2b', 'Glass of Water', 'Refreshing glass of cold water', 1, 1),
+       ('334765e0-9a97-48f7-9085-6988ab5f8fec', 'Bowl of Cereal', 'Quick breakfast with cereal and milk', 3, 1),
+       ('35a52c50-446c-4dba-8f8e-b0ef3e591ff4', 'Banana Split', 'Classic dessert with bananas and ice cream', 10, 2),
+       ('5ad53fc9-04a3-4bdd-b4b1-250168faf391', 'Goulash', 'Slow-cooked hearty beef stew', 120, 6);
 
 -- ---------------------------------------------------------
 -- RECIPE INGREDIENTS
@@ -184,7 +196,25 @@ VALUES
     ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', '1b194de6-4e86-4b46-b3a0-bebcbad0e15e', 100),
     ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', '1f821767-f0a9-4e03-ad70-c288f73efd9a', 3),
     ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', '78223711-7e76-4f37-99c1-6c80daa63f2e', 80),
-    ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', 'b83a4fc3-e819-4edc-9f40-6841beaa3b80', 50);
+    ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', 'b83a4fc3-e819-4edc-9f40-6841beaa3b80', 50),
+
+    -- Cevapi
+    ('c36cf075-1ef3-4d31-b835-20dad2ed5de9', '66052757-9a96-4ee4-841d-2a8ab973c91a', 500),
+
+    -- Glass of Water
+    ('9a31274b-00f8-4d76-be78-743208dcaa2b', '5008d28b-a36b-41de-a6e0-2a9dd0db9feb', 250),
+
+    -- Bowl of Cereal
+    ('334765e0-9a97-48f7-9085-6988ab5f8fec', 'bc516cd6-e283-4efe-969a-40d6a6021033', 100),
+    ('334765e0-9a97-48f7-9085-6988ab5f8fec', '48b21301-e07c-4118-92b9-f173336093ba', 200),
+
+    -- Banana Split
+    ('35a52c50-446c-4dba-8f8e-b0ef3e591ff4', 'cc95f369-dda7-42d4-8035-bbaaacea963c', 2),
+    ('35a52c50-446c-4dba-8f8e-b0ef3e591ff4', '6e6c67ba-dbdb-4d51-a523-af54d3523c16', 300),
+
+    -- Goulash
+    ('5ad53fc9-04a3-4bdd-b4b1-250168faf391', 'f63a1464-ce64-44e7-9088-046f044645e7', 800),
+    ('5ad53fc9-04a3-4bdd-b4b1-250168faf391', 'cb2e829b-fa70-4a66-a667-5473e3e8b723', 3);
 
 -- ---------------------------------------------------------
 -- RECIPE STEPS
@@ -192,7 +222,8 @@ VALUES
 INSERT INTO recipe_steps (recipe_id, step_order, steps)
 VALUES
     -- Spaghetti Carbonara
-    ('1ecba55b-a63c-43f6-a849-d736e6773f2d', 0, 'Bring a large pot of well-salted water to a rolling boil, add the pasta, and cook until al dente according to the package instructions, stirring occasionally to prevent sticking and reserving about 1 cup of the pasta water before draining'),
+    ('1ecba55b-a63c-43f6-a849-d736e6773f2d', 0,
+     'Bring a large pot of well-salted water to a rolling boil, add the pasta, and cook until al dente according to the package instructions, stirring occasionally to prevent sticking and reserving about 1 cup of the pasta water before draining'),
     ('1ecba55b-a63c-43f6-a849-d736e6773f2d', 1, 'Fry pancetta'),
     ('1ecba55b-a63c-43f6-a849-d736e6773f2d', 2, 'Mix eggs and cheese'),
     ('1ecba55b-a63c-43f6-a849-d736e6773f2d', 3, 'Combine all'),
@@ -256,16 +287,34 @@ VALUES
     ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', 1, 'Whisk eggs and sugar'),
     ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', 2, 'Fold in flour'),
     ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', 3, 'Pour into ramekins'),
-    ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', 4, 'Bake for 12 minutes and serve immediately');
+    ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', 4, 'Bake for 12 minutes and serve immediately'),
+
+    -- Cevapi
+    ('c36cf075-1ef3-4d31-b835-20dad2ed5de9', 0, 'Shape meat into sausages'),
+    ('c36cf075-1ef3-4d31-b835-20dad2ed5de9', 1, 'Grill until browned'),
+
+    -- Glass of Water
+    ('9a31274b-00f8-4d76-be78-743208dcaa2b', 0, 'Pour water into glass'),
+
+    -- Bowl of Cereal
+    ('334765e0-9a97-48f7-9085-6988ab5f8fec', 0, 'Add cereal to bowl'),
+    ('334765e0-9a97-48f7-9085-6988ab5f8fec', 1, 'Pour milk over cereal'),
+
+    -- Banana Split
+    ('35a52c50-446c-4dba-8f8e-b0ef3e591ff4', 0, 'Slice bananas'),
+    ('35a52c50-446c-4dba-8f8e-b0ef3e591ff4', 1, 'Add scoops of ice cream'),
+
+    -- Goulash
+    ('5ad53fc9-04a3-4bdd-b4b1-250168faf391', 0, 'Brown the beef'),
+    ('5ad53fc9-04a3-4bdd-b4b1-250168faf391', 1, 'Add onions and simmer slowly');
 
 -- ---------------------------------------------------------
 -- USER
 -- ---------------------------------------------------------
 INSERT INTO users (user_id, email, display_name, provider, provider_id)
-VALUES (
-           'b0311fb0-533c-40b0-be48-2bd0ba1f33a8',
-           'seeduser@cookbook.com',
-           'Seed User',
+VALUES ('b0311fb0-533c-40b0-be48-2bd0ba1f33a8',
+        'seeduser@cookbook.com',
+        'Seed User',
         'google',
-        'google'
-       );
+        'google');
+*/

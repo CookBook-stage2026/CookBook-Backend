@@ -1,23 +1,18 @@
-# Stage 1: Build the application
+# Stage 1: Build
 FROM gradle:jdk25-alpine AS builder
-
 WORKDIR /app
-
-COPY build.gradle settings.gradle ./
-
-RUN gradle dependencies --no-daemon || true
-
 COPY . .
+RUN gradle :application:bootJar --no-daemon -x test
 
-RUN gradle build --no-daemon -x test
-
-# Stage 2: Run the application
+# Stage 2: Run
 FROM eclipse-temurin:25-jre-alpine
 
-WORKDIR /app
+RUN apk add --no-cache nodejs npm \
+    && npm install -g firecrawl-mcp \
+    && npm cache clean --force
 
-COPY --from=builder /app/build/libs/*.jar app.jar
+WORKDIR /app
+COPY --from=builder /app/application/build/libs/application-*.jar app.jar
 
 EXPOSE 8080
-
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=deploy"]

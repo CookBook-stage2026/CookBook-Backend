@@ -1,5 +1,3 @@
-name: cookbook
-
 services:
   backend:
     image: cookbook-backend
@@ -9,8 +7,10 @@ services:
       - DB_USERNAME=username
       - DB_PASSWORD=password
       - SPRING_PROFILES_ACTIVE=deploy
+      - FIRECRAWL_API_KEY=${FIRECRAWL_API_KEY}
     volumes:
       - db-data:/app/data
+    profiles: [ "deploy" ]
 
   frontend:
     image: cookbook-frontend
@@ -18,6 +18,35 @@ services:
       - "80:8081"
     depends_on:
       - backend
+    profiles: [ "deploy" ]
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+      - ./model_files:/model_files
+      - ./scripts:/scripts
+    tty: true
+    entrypoint: [ "/bin/sh", "/scripts/run_ollama.sh" ]
+    profiles: [ "dev" ]
+
+  firecrawl-mcp:
+    image: node:26-alpine
+    command: sh -c "npx -y supergateway --port 3001 --outputTransport streamableHttp --stdio 'npx -y firecrawl-mcp'"
+    environment:
+      - FIRECRAWL_API_KEY=${FIRECRAWL_API_KEY}
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "3001" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+    profiles: [ "dev", "deploy" ]
 
 volumes:
   db-data:
+  ollama-data:

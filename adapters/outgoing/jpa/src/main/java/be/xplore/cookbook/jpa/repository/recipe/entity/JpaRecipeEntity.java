@@ -27,6 +27,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "recipes")
 public class JpaRecipeEntity {
+    private static final int MAX_LENGTH_DESCRIPTION = 512;
+    private static final int MAX_LENGTH_STEPS = 1024;
 
     @Id
     @Column(name = "recipe_id")
@@ -35,7 +37,7 @@ public class JpaRecipeEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = MAX_LENGTH_DESCRIPTION)
     private String description;
 
     @Column(nullable = false)
@@ -49,6 +51,7 @@ public class JpaRecipeEntity {
             name = "recipe_steps",
             joinColumns = @JoinColumn(name = "recipe_id")
     )
+    @Column(name = "step", length = MAX_LENGTH_STEPS, nullable = false)
     @OrderColumn(name = "step_order")
     private List<String> steps;
 

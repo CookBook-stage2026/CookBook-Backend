@@ -1,5 +1,6 @@
 package be.xplore.cookbook.security;
 
+import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.command.FindUserByIdQuery;
 import be.xplore.cookbook.core.service.UserService;
@@ -27,11 +28,12 @@ public class UserExistenceJwtValidator implements OAuth2TokenValidator<Jwt> {
 
         try {
             UUID userId = UUID.fromString(subject);
+            User user = userService.findById(new FindUserByIdQuery(new UserId(userId)));
 
-            if (userService.findById(new FindUserByIdQuery(new UserId(userId))).isPresent()) {
+            if (user != null) {
                 return OAuth2TokenValidatorResult.success();
             }
-        } catch (IllegalArgumentException _) {
+        } catch (RuntimeException _) {
             throw new OAuth2Exception("Invalid JWT subject");
         }
 

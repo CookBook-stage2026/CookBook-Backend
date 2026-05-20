@@ -12,7 +12,7 @@ public record CreateRecipeDto(
         @NotBlank String description,
         int durationInMinutes,
         @NotEmpty List<@NotBlank String> steps,
-        @NotEmpty List<@Valid CreateRecipeIngredientDto> ingredients,
+        @NotEmpty List<@Valid NewRecipeIngredientDto> ingredients,
         @NotNull int servings
 ) {
 }

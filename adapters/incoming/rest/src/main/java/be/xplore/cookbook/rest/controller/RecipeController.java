@@ -6,14 +6,19 @@ import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
+import be.xplore.cookbook.core.domain.recipe.command.EnhanceRecipeQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FindRecipeByIdQuery;
+import be.xplore.cookbook.core.domain.recipe.command.ImportRecipeCommand;
+import be.xplore.cookbook.core.domain.recipe.command.IngredientWithQuantity;
 import be.xplore.cookbook.core.domain.recipe.command.SearchRecipesByNameQuery;
+import be.xplore.cookbook.core.domain.recipe.command.UpdateRecipeCommand;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.service.RecipeService;
 import be.xplore.cookbook.rest.dto.request.CreateRecipeDto;
-import be.xplore.cookbook.rest.dto.request.CreateRecipeIngredientDto;
+import be.xplore.cookbook.rest.dto.request.ImportRecipeRequest;
 import be.xplore.cookbook.rest.dto.request.RecipeSearchRequest;
+import be.xplore.cookbook.rest.dto.request.UpdateRecipeDto;
 import be.xplore.cookbook.rest.dto.response.PaginatedResponse;
 import be.xplore.cookbook.rest.dto.response.RecipeDto;
 import be.xplore.cookbook.rest.dto.response.RecipeSummaryDto;
@@ -25,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,9 +38,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/recipes")
@@ -49,10 +53,10 @@ public class RecipeController {
     @Transactional
     @ResponseStatus(HttpStatus.CREATED)
     public RecipeDto createRecipe(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateRecipeDto dto) {
-        Map<IngredientId, Double> ingredientQuantities = dto.ingredients().stream()
-                .collect(Collectors.toMap(
-                        i -> new IngredientId(i.ingredientId()), CreateRecipeIngredientDto::baseQuantity
-                ));
+        List<IngredientWithQuantity> ingredientQuantities = dto.ingredients().stream()
+                .map(i -> new IngredientWithQuantity(
+                        new IngredientId(i.ingredientId()), i.baseQuantity()))
+                .toList();
 
         Recipe recipe = recipeService.createRecipe(new CreateRecipeCommand(
                 new RecipeDetails(dto.name(), dto.description(), dto.durationInMinutes(), dto.servings(), dto.steps()),
@@ -78,7 +82,7 @@ public class RecipeController {
 
         var result = recipeService.findAllSummariesWithFilter(new FilterRecipesQuery(
                 ingredients, new Paging(
-                        request.page(), request.size()), request.shouldApplyPreferences(), getUserIdFromJwt(jwt)
+                request.page(), request.size()), request.shouldApplyPreferences(), getUserIdFromJwt(jwt)
         ));
 
         return new PaginatedResponse<>(
@@ -99,6 +103,48 @@ public class RecipeController {
         return recipeService.searchSummariesByName(
                 new SearchRecipesByNameQuery(new Paging(page, size), getUserIdFromJwt(jwt), query)
         ).stream().map(RecipeSummaryDto::fromDomain).toList();
+    }
+
+    @GetMapping("/{id}/enhance")
+    public RecipeDto enhanceRecipe(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID id
+    ) {
+        Recipe recipe = recipeService.enhanceRecipe(new EnhanceRecipeQuery(new RecipeId(id), getUserIdFromJwt(jwt)));
+
+        return RecipeDto.fromDomain(recipe);
+    }
+
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateRecipe(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateRecipeDto dto
+    ) {
+        List<IngredientWithQuantity> ingredientQuantities = dto.ingredients().stream()
+                .map(i -> new IngredientWithQuantity(
+                        new IngredientId(i.ingredientId()), i.baseQuantity()))
+                .toList();
+
+        recipeService.updateRecipe(new UpdateRecipeCommand(
+                new RecipeId(id),
+                new RecipeDetails(dto.name(), dto.description(), dto.durationInMinutes(), dto.servings(), dto.steps()),
+                ingredientQuantities,
+                getUserIdFromJwt(jwt)
+        ));
+    }
+
+    @PostMapping("/import")
+    @ResponseStatus(HttpStatus.CREATED)
+    public RecipeDto importRecipe(
+            @Valid @RequestBody ImportRecipeRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        Recipe recipe = recipeService.importRecipe((
+                new ImportRecipeCommand(request.url(), getUserIdFromJwt(jwt))
+        ));
+        return RecipeDto.fromDomain(recipe);
     }
 
     private UserId getUserIdFromJwt(Jwt jwt) {
