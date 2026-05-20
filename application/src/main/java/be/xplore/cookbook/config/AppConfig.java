@@ -3,7 +3,7 @@ package be.xplore.cookbook.config;
 import be.xplore.cookbook.config.properties.HouseholdInviteProperties;
 import be.xplore.cookbook.core.port.recipe.RecipeImportPort;
 import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
-import be.xplore.cookbook.core.port.recipe.ScheduleSuggestionsPort;
+import be.xplore.cookbook.core.port.weekschedule.ScheduleSuggestionsPort;
 import be.xplore.cookbook.core.repository.HouseholdInviteRepository;
 import be.xplore.cookbook.core.repository.HouseholdRepository;
 import be.xplore.cookbook.core.repository.IngredientRepository;

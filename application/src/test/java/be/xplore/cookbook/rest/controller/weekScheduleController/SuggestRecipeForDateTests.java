@@ -192,7 +192,7 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
 
     @Test
     void suggestRecipeForDay_shouldReturn401_whenNotAuthenticated() throws Exception {
-        getMockMvc().perform(get("/api/schedules/suggest/{date}", TARGET_DATE)
+        getMockMvc().perform(get("/api/schedules/suggest/day/{date}", TARGET_DATE)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
     }
@@ -236,7 +236,7 @@ class SuggestRecipeForDateTests extends BaseIntegrationTest {
 
     private ResultActions performSuggest(String date) throws Exception {
         return getMockMvc().perform(
-                        get("/api/schedules/suggest/{date}", date)
+                        get("/api/schedules/suggest/day/{date}", date)
                                 .with(validJwt())
                                 .contentType(MediaType.APPLICATION_JSON)
         );
