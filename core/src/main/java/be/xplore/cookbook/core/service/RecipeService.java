@@ -112,7 +112,7 @@ public class RecipeService {
         SuggestedRecipeEnhancement suggestion = aiPort.enhanceRecipe(recipe);
 
         Ingredient ingredient = ingredientRepository
-                .findByNameIgnoreCase(suggestion.newIngredient().name())
+                .findByNameIgnoreCaseGlobalOrUser(suggestion.newIngredient().name(), user)
                 .orElseGet(() -> ingredientRepository.save(new Ingredient(
                         IngredientId.create(),
                         suggestion.newIngredient().name(),
@@ -168,7 +168,7 @@ public class RecipeService {
         ImportedRecipe scraped = recipeImportPort.scrape(command.url());
 
         List<RecipeIngredient> raw = scraped.ingredients().stream()
-                .map((i) -> resolveRecipeIngredient(i, user))
+                .map(i -> resolveRecipeIngredient(i, user))
                 .toList();
 
         List<RecipeIngredient> unique = deduplicateIngredients(raw);
@@ -211,7 +211,7 @@ public class RecipeService {
     }
 
     private RecipeIngredient resolveRecipeIngredient(ImportedIngredient scraped, User user) {
-        Ingredient ingredient = ingredientRepository.findByNameIgnoreCase(scraped.name())
+        Ingredient ingredient = ingredientRepository.findByNameIgnoreCaseGlobalOrUser(scraped.name(), user)
                 .orElseGet(() -> ingredientRepository.save(new Ingredient(
                         IngredientId.create(),
                         scraped.name(),

@@ -24,5 +24,7 @@ public record Ingredient(
         if (categories == null) {
             throw new IllegalArgumentException("Ingredient category cannot be null!");
         }
+
+        name = Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
     }
 }

@@ -204,9 +204,9 @@ class SearchIngredientsTests extends BaseIntegrationTest {
         // Arrange
         createUser();
 
-        createAndSaveIngredient("Dark Chocolate");
-        createAndSaveIngredient("Chocolate Milk");
-        createAndSaveIngredient("White Chocolate");
+        createAndSaveIngredient("Dark chocolate");
+        createAndSaveIngredient("Chocolate milk");
+        createAndSaveIngredient("White chocolate");
 
         IngredientSearchRequest dto = new IngredientSearchRequest(
                 "Choc",
@@ -219,7 +219,7 @@ class SearchIngredientsTests extends BaseIntegrationTest {
         performSearch(dto)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(EXPECTED_3_ITEMS)))
-                .andExpect(jsonPath("$[0].name").value("Chocolate Milk"));
+                .andExpect(jsonPath("$[0].name").value("Chocolate milk"));
     }
 
     @Test

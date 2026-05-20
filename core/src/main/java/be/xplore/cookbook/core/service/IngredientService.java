@@ -24,8 +24,18 @@ public class IngredientService {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(UserNotFoundException::new);
 
-        return ingredientRepository.save(new Ingredient(IngredientId.create(), command.name(),
-                command.defaultUnit(), command.categories(), user));
+        return ingredientRepository.findByNameIgnoreCaseAndUser(command.name(), user)
+                .orElseGet(() ->
+                        ingredientRepository.save(
+                                new Ingredient(
+                                        IngredientId.create(),
+                                        command.name(),
+                                        command.defaultUnit(),
+                                        command.categories(),
+                                        user
+                                )
+                        )
+                );
     }
 
     public List<Ingredient> searchByNameExcludingIds(SearchIngredientsQuery query) {

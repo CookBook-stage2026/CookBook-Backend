@@ -17,5 +17,7 @@ public interface IngredientRepository {
 
     List<Ingredient> searchByNameExcludingIds(String name, List<IngredientId> excludedIds, Paging paging, User user);
 
-    Optional<Ingredient> findByNameIgnoreCase(String name);
+    Optional<Ingredient> findByNameIgnoreCaseGlobalOrUser(String name, User user);
+
+    Optional<Ingredient> findByNameIgnoreCaseAndUser(String name, User user);
 }

@@ -43,5 +43,26 @@ public interface JpaIngredientRepository extends JpaRepository<JpaIngredientEnti
             @Param("userId") UUID userId,
             Pageable pageable);
 
-    Optional<JpaIngredientEntity> findByNameIgnoreCase(String name);
+    @Query("""
+        SELECT i FROM JpaIngredientEntity i
+        WHERE LOWER(i.name) = LOWER(:name)
+        AND (
+            i.user IS NULL
+            OR i.user.id = :userId
+        )
+        AND NOT (
+            i.user IS NULL
+            AND EXISTS (
+                SELECT i2 FROM JpaIngredientEntity i2
+                WHERE i2.user.id = :userId
+                AND LOWER(i2.name) = LOWER(i.name)
+            )
+        )
+    """)
+    Optional<JpaIngredientEntity> findExactByNameIgnoreCaseGlobalOrUser(
+            @Param("name") String name,
+            @Param("userId") UUID userId
+    );
+
+    Optional<JpaIngredientEntity> findExactByNameIgnoreCaseAndUser_Id(String name, UUID userId);
 }
