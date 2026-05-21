@@ -98,4 +98,9 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     public long count() {
         return jpaRecipeRepository.count();
     }
+
+    @Override
+    public void delete(Recipe recipe) {
+        jpaRecipeRepository.delete(JpaRecipeEntity.fromDomain(recipe));
+    }
 }

@@ -13,6 +13,7 @@ import be.xplore.cookbook.core.domain.recipe.RecipeIngredient;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.recipe.command.ChangeVisibilityCommand;
 import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
+import be.xplore.cookbook.core.domain.recipe.command.DeleteRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.EnhanceRecipeQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FindRecipeByIdQuery;
@@ -186,6 +187,28 @@ public class RecipeService {
         ));
     }
 
+    public void changeVisibility(ChangeVisibilityCommand command) {
+        User user = userRepository.findById(command.userId())
+                .orElseThrow(UserNotFoundException::new);
+
+        Recipe recipe = recipeRepository.findOwnById(command.recipeId(), user)
+                .orElseThrow(command.recipeId()::notFound);
+
+        recipe.changeVisibility(command.isPublic());
+
+        recipeRepository.save(recipe);
+    }
+
+    public void deleteRecipe(DeleteRecipeCommand command) {
+        User user = userRepository.findById(command.userId())
+                .orElseThrow(UserNotFoundException::new);
+
+        Recipe recipe = recipeRepository.findOwnById(command.recipeId(), user)
+                .orElseThrow(command.recipeId()::notFound);
+
+        recipeRepository.delete(recipe);
+    }
+
     private RecipeIngredient resolveRecipeIngredient(ImportedIngredient scraped) {
         Ingredient ingredient = ingredientRepository.findByNameIgnoreCase(scraped.name())
                 .orElseGet(() -> ingredientRepository.save(new Ingredient(
@@ -215,18 +238,6 @@ public class RecipeService {
                     return new RecipeIngredient(ingredient, iwq.quantity());
                 })
                 .toList();
-    }
-
-    public void changeVisibility(ChangeVisibilityCommand command) {
-        User user = userRepository.findById(command.userId())
-                .orElseThrow(UserNotFoundException::new);
-
-        Recipe recipe = recipeRepository.findOwnById(command.recipeId(), user)
-                .orElseThrow(command.recipeId()::notFound);
-
-        recipe.changeVisibility(command.isPublic());
-
-        recipeRepository.save(recipe);
     }
 
     private static List<RecipeIngredient> deduplicateIngredients(List<RecipeIngredient> ingredients) {

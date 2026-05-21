@@ -25,4 +25,6 @@ public interface RecipeRepository {
     long count();
 
     Optional<Recipe> findOwnById(RecipeId recipeId, User user);
+
+    void delete(Recipe recipe);
 }
