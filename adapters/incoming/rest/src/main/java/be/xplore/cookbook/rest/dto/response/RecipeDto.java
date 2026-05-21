@@ -31,7 +31,7 @@ public record RecipeDto(
                 ingredientDtos,
                 recipe.getServings(),
                 recipe.isPublic(),
-                userId == recipe.getUser().id()
+                userId.equals(recipe.getUser().id())
         );
     }
 }
