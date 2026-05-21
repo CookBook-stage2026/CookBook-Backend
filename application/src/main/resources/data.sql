@@ -94,6 +94,7 @@ VALUES ('91b60a9d-be30-46e1-8499-ee668a4c2d7d', 'GRAIN'),
        ('66052757-9a96-4ee4-841d-2a8ab973c91a', 'MEAT'),
        ('bc516cd6-e283-4efe-969a-40d6a6021033', 'GRAIN'),
        ('6e6c67ba-dbdb-4d51-a523-af54d3523c16', 'DAIRY');
+
 /*
 -- ---------------------------------------------------------
 -- RECIPES
@@ -219,7 +220,7 @@ VALUES
 -- ---------------------------------------------------------
 -- RECIPE STEPS
 -- ---------------------------------------------------------
-INSERT INTO recipe_steps (recipe_id, step_order, steps)
+INSERT INTO recipe_steps (recipe_id, step_order, step)
 VALUES
     -- Spaghetti Carbonara
     ('1ecba55b-a63c-43f6-a849-d736e6773f2d', 0,

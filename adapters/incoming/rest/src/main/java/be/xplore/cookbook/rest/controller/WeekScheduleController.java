@@ -8,6 +8,7 @@ import be.xplore.cookbook.core.domain.weekschedule.command.CreateWeekScheduleCom
 import be.xplore.cookbook.core.domain.weekschedule.command.DayEntry;
 import be.xplore.cookbook.core.domain.weekschedule.command.FindWeekSchedulesByUserQuery;
 import be.xplore.cookbook.core.domain.weekschedule.command.SuggestRecipeForDayQuery;
+import be.xplore.cookbook.core.domain.weekschedule.command.SuggestWeekScheduleQuery;
 import be.xplore.cookbook.core.domain.weekschedule.command.UpdateWeekScheduleCommand;
 import be.xplore.cookbook.core.service.WeekScheduleService;
 import be.xplore.cookbook.rest.dto.request.CreateWeekScheduleDto;
@@ -89,14 +90,22 @@ public class WeekScheduleController {
                 .toList();
     }
 
-    @GetMapping("/suggest/{date}")
+    @GetMapping("/suggest/day/{date}")
     public WeekScheduleDto suggestRecipeForDate(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable LocalDate date
     ) {
         WeekSchedule schedule = service.suggestRecipeForDay(new SuggestRecipeForDayQuery(date, getUserIdFromJwt(jwt)));
-
         return WeekScheduleDto.fromDomain(schedule);
+    }
+
+    @GetMapping("/suggest/week")
+    public WeekScheduleDto suggestWeekSchedule(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStartDate
+    ) {
+        return WeekScheduleDto.fromDomain(
+                service.suggestWeekSchedule(new SuggestWeekScheduleQuery(getUserIdFromJwt(jwt), weekStartDate)));
     }
 
     @DeleteMapping("/{id}")

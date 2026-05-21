@@ -2,6 +2,8 @@ package be.xplore.cookbook.ai;
 
 import be.xplore.cookbook.ai.dto.DaySuggestionInput;
 import be.xplore.cookbook.ai.dto.RecipeInput;
+import be.xplore.cookbook.ai.dto.SuggestedWeekScheduleIds;
+import be.xplore.cookbook.ai.dto.WeekScheduleInput;
 import be.xplore.cookbook.ai.exception.AiConnectionException;
 import be.xplore.cookbook.ai.exception.AiInvalidResponseException;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
@@ -12,15 +14,17 @@ import be.xplore.cookbook.core.port.recipe.ImportedIngredient;
 import be.xplore.cookbook.core.port.recipe.ImportedRecipe;
 import be.xplore.cookbook.core.port.recipe.RecipeImportPort;
 import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
-import be.xplore.cookbook.core.port.recipe.ScheduleSuggestionsPort;
 import be.xplore.cookbook.core.port.recipe.SuggestedRecipeEnhancement;
 import be.xplore.cookbook.core.port.recipe.SuggestedRecipeId;
+import be.xplore.cookbook.core.port.weekschedule.ScheduleSuggestionsPort;
+import be.xplore.cookbook.core.port.weekschedule.SuggestedDayRecipe;
 import com.fasterxml.jackson.core.JsonParseException;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -61,6 +65,21 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
         try {
             SuggestedRecipeId suggestedRecipeId = scheduleAiService.suggestRecipeForDay(daySuggestionJson);
             return new RecipeId(suggestedRecipeId.id());
+        } catch (RuntimeException e) {
+            throw handleException(e);
+        }
+    }
+
+    @Override
+    public List<SuggestedDayRecipe> suggestWeekSchedule(LocalDate weekStartDate, List<WeekSchedule> weekSchedules,
+                                                        List<RecipeSummary> availableRecipes) {
+        WeekScheduleInput input = buildWeekScheduleInput(weekStartDate, weekSchedules, availableRecipes);
+        String json = serialize(input);
+        try {
+            SuggestedWeekScheduleIds result = scheduleAiService.suggestWeekSchedule(json);
+            return result.days().stream()
+                    .map(entry -> new SuggestedDayRecipe(entry.day(), new RecipeId(entry.recipeId())))
+                    .toList();
         } catch (RuntimeException e) {
             throw handleException(e);
         }
@@ -108,6 +127,17 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
         }
         logger.warning(e.getLocalizedMessage());
         return new AiInvalidResponseException("AI returned an unexpected response", e);
+    }
+
+    private WeekScheduleInput buildWeekScheduleInput(LocalDate weekStartDate, List<WeekSchedule> weekSchedules,
+                                                     List<RecipeSummary> availableRecipes) {
+        return WeekScheduleInput.fromDomain(
+                weekStartDate,
+                availableRecipes,
+                weekSchedules.get(PREVIOUS_WEEK_INDEX),
+                weekSchedules.get(CURRENT_WEEK_INDEX),
+                weekSchedules.get(NEXT_WEEK_INDEX)
+        );
     }
 
     private DaySuggestionInput buildDaySuggestionInput(DayOfWeek dayToSuggestFor, List<WeekSchedule> weekSchedules,

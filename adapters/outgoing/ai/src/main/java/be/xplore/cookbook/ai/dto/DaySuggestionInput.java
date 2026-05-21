@@ -4,6 +4,7 @@ import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,9 +21,9 @@ public record DaySuggestionInput(
                 .toList();
 
         List<WeekScheduleInput> schedules = List.of(
-                WeekScheduleInput.fromDomain(previousWeek),
-                WeekScheduleInput.fromDomain(currentWeek, dayToSuggestFor),
-                WeekScheduleInput.fromDomain(nextWeek)
+                WeekScheduleInput.fromDomain(LocalDate.now(), availableRecipes, null, previousWeek, null),
+                WeekScheduleInput.fromDomain(LocalDate.now(), availableRecipes, previousWeek, currentWeek, nextWeek),
+                WeekScheduleInput.fromDomain(LocalDate.now(), availableRecipes, null, nextWeek, null)
         );
 
         return new DaySuggestionInput(dayToSuggestFor, schedules, recipes);

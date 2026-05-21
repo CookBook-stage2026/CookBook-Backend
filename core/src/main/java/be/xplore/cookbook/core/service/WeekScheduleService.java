@@ -17,8 +17,10 @@ import be.xplore.cookbook.core.domain.weekschedule.command.CreateWeekScheduleCom
 import be.xplore.cookbook.core.domain.weekschedule.command.DayEntry;
 import be.xplore.cookbook.core.domain.weekschedule.command.FindWeekSchedulesByUserQuery;
 import be.xplore.cookbook.core.domain.weekschedule.command.SuggestRecipeForDayQuery;
+import be.xplore.cookbook.core.domain.weekschedule.command.SuggestWeekScheduleQuery;
 import be.xplore.cookbook.core.domain.weekschedule.command.UpdateWeekScheduleCommand;
-import be.xplore.cookbook.core.port.recipe.ScheduleSuggestionsPort;
+import be.xplore.cookbook.core.port.weekschedule.ScheduleSuggestionsPort;
+import be.xplore.cookbook.core.port.weekschedule.SuggestedDayRecipe;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
@@ -166,5 +168,34 @@ public class WeekScheduleService {
                 currentWeek,
                 byStartDate.getOrDefault(nextWeekStart, WeekSchedule.empty(user, nextWeekStart))
         );
+    }
+
+    public WeekSchedule suggestWeekSchedule(SuggestWeekScheduleQuery query) {
+        if (query.weekStartDate().getDayOfWeek() != FIRST_DAY_OF_WEEK) {
+            throw new IllegalArgumentException("Week start date must be a Monday");
+        }
+
+        User user = userRepository.findById(query.userId())
+                .orElseThrow(UserNotFoundException::new);
+
+        List<WeekSchedule> schedules = resolveThreeWeekSchedules(user, query.weekStartDate());
+        WeekSchedule targetWeek = schedules.get(1);
+
+        UserPreferences preferences = preferenceRepository.findPreferences(user)
+                .orElseThrow(UserNotFoundException::new);
+        List<RecipeSummary> availableRecipes = recipeRepository.findAllSummariesWithFilter(
+                List.of(), preferences, true, user, Paging.unpaged()).content();
+
+        List<SuggestedDayRecipe> suggestions = aiPort.suggestWeekSchedule(
+                query.weekStartDate(), schedules, availableRecipes);
+
+        WeekSchedule result = targetWeek;
+        for (SuggestedDayRecipe suggestion : suggestions) {
+            Recipe recipe = recipeRepository.findById(suggestion.recipeId(), user)
+                    .orElseThrow(suggestion.recipeId()::notFound);
+            result = result.assignRecipe(suggestion.day(), recipe);
+        }
+
+        return result;
     }
 }
