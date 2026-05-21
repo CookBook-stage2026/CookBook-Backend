@@ -6,9 +6,10 @@
 version: 2
 updates:
   - package-ecosystem: "gradle"
-    directories:
-      - "/"
-      - "/**/"
+    directory: "/"
     schedule:
       interval: "weekly"
     target-branch: "development"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
