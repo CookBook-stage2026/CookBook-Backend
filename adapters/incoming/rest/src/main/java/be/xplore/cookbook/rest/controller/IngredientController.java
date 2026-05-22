@@ -2,14 +2,21 @@ package be.xplore.cookbook.rest.controller;
 
 import be.xplore.cookbook.core.common.Paging;
 import be.xplore.cookbook.core.domain.ingredient.Category;
+import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
+import be.xplore.cookbook.core.domain.ingredient.command.CreateIngredientCommand;
 import be.xplore.cookbook.core.domain.ingredient.command.SearchIngredientsQuery;
+import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.service.IngredientService;
+import be.xplore.cookbook.rest.dto.request.CreateIngredientDto;
 import be.xplore.cookbook.rest.dto.request.IngredientSearchRequest;
 import be.xplore.cookbook.rest.dto.response.IngredientDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/ingredients")
@@ -29,16 +37,35 @@ public class IngredientController {
         this.ingredientService = ingredientService;
     }
 
+    @PostMapping
+    @Transactional
+    @ResponseStatus(HttpStatus.CREATED)
+    public IngredientDto createIngredient(
+            @Valid @RequestBody CreateIngredientDto dto,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        Ingredient ingredient = ingredientService.createIngredient(new CreateIngredientCommand(
+                dto.name(), dto.unit(), dto.categories(), getUserIdFromJwt(jwt)
+        ));
+
+        return IngredientDto.fromDomain(ingredient);
+    }
+
     @PostMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<IngredientDto> searchIngredients(@RequestBody @Valid IngredientSearchRequest request) {
+    public List<IngredientDto> searchIngredients(
+            @RequestBody @Valid IngredientSearchRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
         List<IngredientId> excludedIds = request.alreadySelectedIds().stream()
                 .map(IngredientId::new)
                 .toList();
 
-        return ingredientService.searchByNameExcludingIds(
-                new SearchIngredientsQuery(request.query(), excludedIds, new Paging(request.page(), request.size()))
-        ).stream().map(IngredientDto::fromDomain).toList();
+        return ingredientService.searchByNameExcludingIds(new SearchIngredientsQuery(
+                request.query(), excludedIds, new Paging(request.page(), request.size()), getUserIdFromJwt(jwt)))
+                .stream()
+                .map(IngredientDto::fromDomain)
+                .toList();
     }
 
     @GetMapping("/categories")
@@ -55,5 +82,9 @@ public class IngredientController {
         return Arrays.stream(Unit.values())
                 .map(Unit::name)
                 .toList();
+    }
+
+    private UserId getUserIdFromJwt(Jwt jwt) {
+        return new UserId(UUID.fromString(jwt.getSubject()));
     }
 }

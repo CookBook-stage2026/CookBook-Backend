@@ -61,7 +61,8 @@ class GetRecipeByIdTests extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.ingredients[*].name", hasItems(
                         DEFAULT_INGREDIENT_NAME, DEFAULT_INGREDIENT_NAME_2)))
                 .andExpect(jsonPath("$.ingredients[*].baseQuantity", hasItem(1.0)))
-                .andExpect(jsonPath("$.ingredients[*].unit", hasItem(DEFAULT_UNIT.toString())));
+                .andExpect(jsonPath("$.ingredients[*].unit", hasItem(DEFAULT_UNIT.toString())))
+                .andExpect(jsonPath("$.isCreator").value(true));
     }
 
     @Test
@@ -78,7 +79,8 @@ class GetRecipeByIdTests extends BaseIntegrationTest {
         performGetRecipeByIdWithPredefinedUserId(recipeByOtherUser.getId().id(), user1.id())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(recipeByOtherUser.getId().id().toString()));
+                .andExpect(jsonPath("$.id").value(recipeByOtherUser.getId().id().toString()))
+                .andExpect(jsonPath("$.isCreator").value(false));
     }
 
     @Test

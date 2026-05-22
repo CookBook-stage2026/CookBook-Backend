@@ -1,12 +1,15 @@
 package be.xplore.cookbook.core.domain.ingredient;
 
+import be.xplore.cookbook.core.domain.user.User;
+
 import java.util.List;
 
 public record Ingredient(
         IngredientId id,
         String name,
         Unit unit,
-        List<Category> categories
+        List<Category> categories,
+        User user
 ) {
     public Ingredient {
         if (id == null) {
@@ -16,10 +19,12 @@ public record Ingredient(
             throw new IllegalArgumentException("Ingredient name cannot be null or blank!");
         }
         if (unit == null) {
-            throw new IllegalArgumentException("Ingredient unit cannot be null!");
+            throw new IllegalArgumentException("Ingredient default unit cannot be null!");
         }
         if (categories == null) {
             throw new IllegalArgumentException("Ingredient category cannot be null!");
         }
+
+        name = Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
     }
 }

@@ -31,8 +31,11 @@ public class AppConfig {
 
     @Bean
     @Transactional(readOnly = true)
-    public IngredientService ingredientService(IngredientRepository ingredientRepository) {
-        return new IngredientService(ingredientRepository);
+    public IngredientService ingredientService(
+            IngredientRepository ingredientRepository,
+            UserRepository userRepository
+    ) {
+        return new IngredientService(ingredientRepository, userRepository);
     }
 
     @Bean

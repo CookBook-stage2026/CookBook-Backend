@@ -141,9 +141,9 @@ class FilterRecipesTests extends BaseIntegrationTest {
     @Test
     void filterRecipes_shouldFilterByIngredients_whenIngredientIdsProvided() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN);
-        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN);
-        Ingredient salt = createAndSaveIngredient("Salt", Unit.GRAM, Category.GRAIN);
+        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null);
+        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN, null);
+        Ingredient salt = createAndSaveIngredient("Salt", Unit.GRAM, Category.GRAIN, null);
 
         User user = createUser();
 
@@ -169,7 +169,7 @@ class FilterRecipesTests extends BaseIntegrationTest {
     @Test
     void filterRecipes_shouldReturnEmptyResults_whenNoRecipesMatchIngredientFilter() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN);
+        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null);
         User user = createUser();
         createAndSaveRecipeWithIngredients(List.of(flour), user);
 
@@ -183,9 +183,9 @@ class FilterRecipesTests extends BaseIntegrationTest {
     @Test
     void filterRecipes_shouldExcludeRecipesConflictingWithPreferences_whenPreferencesAreSet() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN);
-        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN);
-        Ingredient milk = createAndSaveIngredient("Milk", Unit.LITER, Category.DAIRY);
+        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null);
+        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN, null);
+        Ingredient milk = createAndSaveIngredient("Milk", Unit.LITER, Category.DAIRY, null);
 
         User user = createUser();
 
@@ -353,8 +353,8 @@ class FilterRecipesTests extends BaseIntegrationTest {
     @Test
     void filterRecipes_shouldApplyIngredientFilterAcrossHouseholdMembers() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN);
-        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN);
+        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null);
+        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN, null);
 
         User user1 = createUser();
         User user2 = createUserWithId(UserId.create());
@@ -384,8 +384,8 @@ class FilterRecipesTests extends BaseIntegrationTest {
     @Test
     void filterRecipes_shouldApplyExclusionPreferencesAcrossHouseholdMembers() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN);
-        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN);
+        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null);
+        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN, null);
 
         User user1 = createUser();
         User user2 = createUserWithId(UserId.create());
