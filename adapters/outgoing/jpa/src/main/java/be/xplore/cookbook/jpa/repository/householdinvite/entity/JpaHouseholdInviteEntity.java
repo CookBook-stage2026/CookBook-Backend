@@ -11,6 +11,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -34,6 +36,7 @@ public class JpaHouseholdInviteEntity {
     private UUID createdBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private JpaHouseholdEntity household;
 
     protected JpaHouseholdInviteEntity() {
