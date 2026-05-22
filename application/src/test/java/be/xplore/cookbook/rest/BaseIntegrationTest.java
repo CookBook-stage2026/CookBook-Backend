@@ -133,6 +133,10 @@ public abstract class BaseIntegrationTest {
         return householdRepository;
     }
 
+    public HouseholdInviteRepository getHouseholdInviteRepository() {
+        return householdInviteRepository;
+    }
+
     public JsonMapper getMapper() {
         return mapper;
     }

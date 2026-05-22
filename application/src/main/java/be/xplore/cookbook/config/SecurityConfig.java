@@ -77,6 +77,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/oauth2/authorization/**").permitAll()
                         .requestMatchers("/login/oauth2/code/**").permitAll()
+                        .requestMatchers("/api/household-invites/{token}").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

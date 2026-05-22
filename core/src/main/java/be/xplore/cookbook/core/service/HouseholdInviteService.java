@@ -10,6 +10,7 @@ import be.xplore.cookbook.core.domain.householdinvite.HouseholdInviteToken;
 import be.xplore.cookbook.core.domain.householdinvite.InviteTokenGenerator;
 import be.xplore.cookbook.core.domain.householdinvite.command.AcceptInviteCommand;
 import be.xplore.cookbook.core.domain.householdinvite.command.CreateInviteCommand;
+import be.xplore.cookbook.core.domain.householdinvite.command.FindHouseholdInvitationByTokenQuery;
 import be.xplore.cookbook.core.domain.householdinvite.command.RevokeInviteCommand;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.repository.HouseholdInviteRepository;
@@ -38,6 +39,11 @@ public class HouseholdInviteService {
         this.maxInviteDuration = maxInviteDuration;
     }
 
+    public HouseholdInvite findByToken(FindHouseholdInvitationByTokenQuery query) {
+        return householdInviteRepository.findByTokenHash(InviteTokenGenerator.hash(query.token()))
+                .orElseThrow(() ->
+                        new NotFoundException("Invite not found."));
+    }
 
     public HouseholdInviteToken createInvite(CreateInviteCommand command) {
         Duration duration = resolveDuration(command.duration());
