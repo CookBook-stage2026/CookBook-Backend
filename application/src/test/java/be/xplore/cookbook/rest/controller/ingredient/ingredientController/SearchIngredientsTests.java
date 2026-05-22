@@ -2,6 +2,8 @@ package be.xplore.cookbook.rest.controller.ingredient.ingredientController;
 
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
+import be.xplore.cookbook.core.domain.ingredient.Macro;
+import be.xplore.cookbook.core.domain.ingredient.MacroType;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
@@ -27,6 +29,7 @@ class SearchIngredientsTests extends BaseIntegrationTest {
 
     private static final int DEFAULT_PAGE_SIZE = 10;
     private static final int EXPECTED_3_ITEMS = 3;
+    private static final double DEFAULT_CALORIES = 50;
 
     @Override
     protected String[] getTablesToClear() {
@@ -250,8 +253,20 @@ class SearchIngredientsTests extends BaseIntegrationTest {
         // Arrange
         User user = createUserWithId(UserId.create());
 
-        createAndSaveIngredient("Flour", Unit.CUP, Category.EGG, null);
-        createAndSaveIngredient("Flour", Unit.GRAM, Category.DAIRY, user);
+        createAndSaveIngredient("Flour", Unit.CUP, Category.EGG, null,
+                List.of(
+                        new Macro(
+                                MacroType.CALORIES,
+                                DEFAULT_CALORIES
+                        )
+                ));
+        createAndSaveIngredient("Flour", Unit.GRAM, Category.DAIRY, user,
+                List.of(
+                        new Macro(
+                                MacroType.CALORIES,
+                                DEFAULT_CALORIES
+                        )
+                ));
 
         IngredientSearchRequest dto = new IngredientSearchRequest(
                 "",

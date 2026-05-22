@@ -3,7 +3,8 @@ Suggest 1 new ingredient and update the steps accordingly.
 
 Instructions:
 1. Add a new ingredient to the ingredients list.
-Determine appropriate 'quantity', 'unit', and 'categories' based on culinary best practices.
+Determine appropriate 'quantity', 'unit', 'categories', and 'macros' based on culinary best practices.
+Macros contain a macroType and a valuePerUnit
 2. Fully update the 'steps' array to seamlessly incorporate the preparation and cooking of this new ingredient.
 3. Adjust the quantities of existing ingredients if necessary to maintain flavor balance.
 4. Determine a new durationInMinutes if applicable
@@ -11,3 +12,4 @@ Determine appropriate 'quantity', 'unit', and 'categories' based on culinary bes
 Units: GRAM,KILOGRAM, MILLILITER, LITER, TEASPOON, TABLESPOON, CUP, PIECE, PINCH
 Categories: VEGETABLE, FRUIT, MEAT, POULTRY, FISH, SHELLFISH, EGG, DAIRY, GRAIN, LEGUME, NUT,
 SEED, HERB, SPICE, OIL_FAT, SWEETENER, FUNGI, SEAWEED, SAUCE_CONDIMENT, BEVERAGE, ADDITIVE
+Macrotypes: CALORIES, FAT, PROTEIN, CARBS, SUGARS

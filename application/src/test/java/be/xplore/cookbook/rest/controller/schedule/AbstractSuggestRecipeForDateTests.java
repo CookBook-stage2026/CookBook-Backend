@@ -3,6 +3,8 @@ package be.xplore.cookbook.rest.controller.schedule;
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
+import be.xplore.cookbook.core.domain.ingredient.Macro;
+import be.xplore.cookbook.core.domain.ingredient.MacroType;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
@@ -42,6 +44,7 @@ public abstract class AbstractSuggestRecipeForDateTests extends BaseIntegrationT
     private static final LocalDate TARGET_DATE = LocalDate.now().plusDays(2);
     private static final LocalDate TARGET_MONDAY = TARGET_DATE.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
     private static final RecipeId RECIPE_ID = RecipeId.create();
+    private static final double DEFAULT_CALORIES = 50;
 
     @BeforeEach
     void stubAi() {
@@ -76,7 +79,23 @@ public abstract class AbstractSuggestRecipeForDateTests extends BaseIntegrationT
     void suggestRecipeForDay_shouldReturnUpdatedWeekSchedule_whenValidRequest() throws Exception {
         // Arrange
         User user = createUser();
-        Recipe recipe = createRecipe(user);
+        Ingredient ingredient = new Ingredient(
+                IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG), null,
+                List.of(
+                        new Macro(
+                                MacroType.CALORIES,
+                                DEFAULT_CALORIES
+                        )));
+        getIngredientRepository().save(ingredient);
+        RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient, 1);
+        Recipe recipe = new Recipe(
+                RECIPE_ID,
+                new RecipeDetails("Recipe", "Description", 1, 1, List.of("Step 1")),
+                List.of(recipeIngredient),
+                true,
+                user
+        );
+        getRecipeRepository().save(recipe);
         ScheduleOwner owner = setupOwner(user);
 
         createWeekSchedule(owner,
@@ -99,6 +118,24 @@ public abstract class AbstractSuggestRecipeForDateTests extends BaseIntegrationT
         Recipe recipe = createRecipe(user);
         ScheduleOwner owner = setupOwner(user);
 
+        Ingredient ingredient = new Ingredient(
+                IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG), null,
+                List.of(
+                        new Macro(
+                                MacroType.CALORIES,
+                                DEFAULT_CALORIES
+                        )));
+        getIngredientRepository().save(ingredient);
+        RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient, 1);
+        Recipe recipe = new Recipe(
+                RECIPE_ID,
+                new RecipeDetails("Recipe", "Description", 1, 1, List.of("Step 1")),
+                List.of(recipeIngredient),
+                true,
+                user
+        );
+        getRecipeRepository().save(recipe);
+
         createWeekSchedule(owner,
                 Map.of(TARGET_DATE.getDayOfWeek(), recipe),
                 TARGET_MONDAY
@@ -119,7 +156,24 @@ public abstract class AbstractSuggestRecipeForDateTests extends BaseIntegrationT
     void suggestRecipeForDay_shouldSaveNewEmptyWeekSchedule_whenValidRequestAndNoExistingSchedule() throws Exception {
         // Arrange
         User user = createUser();
-        createRecipe(user);
+
+        Ingredient ingredient = new Ingredient(
+                IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG), null,
+                List.of(
+                        new Macro(
+                                MacroType.CALORIES,
+                                DEFAULT_CALORIES
+                        )));
+        getIngredientRepository().save(ingredient);
+        RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient, 1);
+        Recipe recipe = new Recipe(
+                RECIPE_ID,
+                new RecipeDetails("Recipe", "Description", 1, 1, List.of("Step 1")),
+                List.of(recipeIngredient),
+                true,
+                user
+        );
+        getRecipeRepository().save(recipe);
         ScheduleOwner owner = setupOwner(user);
 
         // Act & Assert

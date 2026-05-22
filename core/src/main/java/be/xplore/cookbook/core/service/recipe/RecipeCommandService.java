@@ -148,7 +148,8 @@ public class RecipeCommandService {
                         scraped.name(),
                         scraped.unit(),
                         scraped.categories(),
-                        user
+                        user,
+                        scraped.macros()
                 )));
         return new RecipeIngredient(ingredient, scraped.quantity());
     }

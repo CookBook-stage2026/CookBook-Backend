@@ -9,7 +9,8 @@ public record Ingredient(
         String name,
         Unit unit,
         List<Category> categories,
-        User user
+        User user,
+        List<Macro> macros
 ) {
     public Ingredient {
         if (id == null) {
@@ -22,9 +23,14 @@ public record Ingredient(
             throw new IllegalArgumentException("Ingredient default unit cannot be null!");
         }
         if (categories == null) {
-            throw new IllegalArgumentException("Ingredient category cannot be null!");
+            throw new IllegalArgumentException("Ingredient categories cannot be null!");
+        }
+        if (macros == null) {
+            throw new IllegalArgumentException("Ingredient macros cannot be null!");
         }
 
         name = Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
+        categories = List.copyOf(categories);
+        macros = List.copyOf(macros);
     }
 }

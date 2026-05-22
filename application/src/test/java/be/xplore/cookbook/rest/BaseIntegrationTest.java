@@ -9,6 +9,8 @@ import be.xplore.cookbook.core.domain.householdinvite.InviteTokenGenerator;
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
+import be.xplore.cookbook.core.domain.ingredient.Macro;
+import be.xplore.cookbook.core.domain.ingredient.MacroType;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
@@ -66,6 +68,7 @@ public abstract class BaseIntegrationTest {
     private static final List<String> DEFAULT_STEPS = List.of("This is step 1", "This is step 2");
     private static final boolean DEFAULT_IS_PUBLIC = true;
     private static final double DEFAULT_QUANTITY = 1.0;
+    private static final double DEFAULT_CALORIES = 50;
 
     @Autowired
     private MockMvc mockMvc;
@@ -217,15 +220,23 @@ public abstract class BaseIntegrationTest {
     }
 
     protected Ingredient createAndSaveIngredient(String name) {
-        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE, null);
+        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE, null, List.of(new Macro(MacroType.CALORIES,
+                DEFAULT_CALORIES)));
     }
 
     protected Ingredient createAndSaveIngredient(String name, User user) {
-        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE, user);
+        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE, user,
+                List.of(new Macro(MacroType.CALORIES,
+                        DEFAULT_CALORIES)));
     }
 
-    protected Ingredient createAndSaveIngredient(String name, Unit unit, Category category, User user) {
-        Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit, List.of(category), user);
+    protected Ingredient createAndSaveIngredientWithMacros(String name, List<Macro> macros) {
+        return createAndSaveIngredient(name, Unit.GRAM, Category.GRAIN, null, macros);
+    }
+
+    protected Ingredient createAndSaveIngredient(String name, Unit unit, Category category, User user,
+                                                 List<Macro> macros) {
+        Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit, List.of(category), user, macros);
         return ingredientRepository.save(ingredient);
     }
 

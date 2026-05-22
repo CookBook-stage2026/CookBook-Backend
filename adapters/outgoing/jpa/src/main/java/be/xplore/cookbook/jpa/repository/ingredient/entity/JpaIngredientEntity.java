@@ -23,6 +23,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "ingredients")
 public class JpaIngredientEntity {
+
     @Id
     @Column(name = "ingredient_id")
     private UUID id;
@@ -43,15 +44,24 @@ public class JpaIngredientEntity {
     @Column(name = "category", nullable = false)
     private List<Category> categories = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(
+            name = "ingredient_macros",
+            joinColumns = @JoinColumn(name = "ingredient_id")
+    )
+    private List<JpaMacroEmbeddable> macros = new ArrayList<>();
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private JpaUserEntity user;
 
-    public JpaIngredientEntity(UUID id, String name, Unit unit, List<Category> categories, JpaUserEntity user) {
+    public JpaIngredientEntity(UUID id, String name, Unit unit, List<Category> categories,
+                               List<JpaMacroEmbeddable> macros, JpaUserEntity user) {
         this.id = id;
         this.name = name;
         this.unit = unit;
         this.categories = categories;
+        this.macros = macros;
         this.user = user;
     }
 
@@ -64,6 +74,7 @@ public class JpaIngredientEntity {
                 ingredient.name(),
                 ingredient.unit(),
                 ingredient.categories(),
+                ingredient.macros().stream().map(JpaMacroEmbeddable::fromDomain).toList(),
                 ingredient.user() != null ? JpaUserEntity.fromDomain(ingredient.user()) : null
         );
     }
@@ -74,7 +85,8 @@ public class JpaIngredientEntity {
                 name,
                 unit,
                 categories,
-                user != null ? user.toDomain() : null
+                user != null ? user.toDomain() : null,
+                macros.stream().map(JpaMacroEmbeddable::toDomain).toList()
         );
     }
 
@@ -84,7 +96,8 @@ public class JpaIngredientEntity {
                 name,
                 unit,
                 List.of(),
-                null
+                null,
+                macros.stream().map(JpaMacroEmbeddable::toDomain).toList()
         );
     }
 

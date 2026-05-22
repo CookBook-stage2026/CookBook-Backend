@@ -1,8 +1,11 @@
 package be.xplore.cookbook.core.domain.recipe;
 
+import be.xplore.cookbook.core.domain.ingredient.MacroType;
 import be.xplore.cookbook.core.domain.user.User;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Recipe {
 
@@ -34,6 +37,16 @@ public class Recipe {
         this.ingredients = List.copyOf(ingredients);
         this.isPublic = isPublic;
         this.user = user;
+    }
+
+    public Map<MacroType, Double> calculateMacros() {
+        return ingredients.stream()
+                .flatMap(ri -> ri.ingredient().macros().stream()
+                        .map(m -> Map.entry(m.type(), m.valuePerUnit() * ri.baseQuantity())))
+                .collect(Collectors.groupingBy(
+                        Map.Entry::getKey,
+                        Collectors.summingDouble(Map.Entry::getValue)
+                ));
     }
 
     public RecipeSummary summarize() {

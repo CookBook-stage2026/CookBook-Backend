@@ -48,6 +48,10 @@ class ImportRecipeTests extends BaseIntegrationTest {
     private static final double IMPORT_RECIPE_INGREDIENT_2_QUANTITY = 4.0;
     private static final String IMPORT_RECIPE_INGREDIENT_2_CATEGORY = "EGG";
     private static final String IMPORT_RECIPE_URL = "https://example.com/recipes/spaghetti-carbonara";
+    private static final double TOTAL_PROTEIN = 10.0;
+    private static final double TOTAL_CALORIES = 75.0;
+    private static final double TOTAL_FAT = 5.0;
+    private static final int AMOUNT_OF_MACROS = 3;
 
     private static WireMockServer wireMockServer;
     private static String mockAiBaseUrl;
@@ -107,6 +111,7 @@ class ImportRecipeTests extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.steps[0]", is(IMPORT_RECIPE_STEP_1)))
                 .andExpect(jsonPath("$.steps[1]", is(IMPORT_RECIPE_STEP_2)))
                 .andExpect(jsonPath("$.ingredients", hasSize(2)))
+                .andExpect(jsonPath("$.totalMacros", hasSize(AMOUNT_OF_MACROS)))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -206,17 +211,36 @@ class ImportRecipeTests extends BaseIntegrationTest {
 
     private String buildValidImportResponseContent() {
         return String.format(Locale.US,
-                "{"
-                        + "\"title\": \"%s\","
-                        + "\"description\": \"%s\","
-                        + "\"durationInMinutes\": %d,"
-                        + "\"servings\": %d,"
-                        + "\"steps\": [\"%s\", \"%s\"],"
-                        + "\"ingredients\": ["
-                        + "{\"name\": \"%s\", \"unit\": \"%s\", \"quantity\": %.1f, \"categories\": [\"%s\"]},"
-                        + "{\"name\": \"%s\", \"unit\": \"%s\", \"quantity\": %.1f, \"categories\": [\"%s\"]}"
-                        + "]"
-                        + "}",
+                """
+                {
+                    "title": "%s",
+                    "description": "%s",
+                    "durationInMinutes": %d,
+                    "servings": %d,
+                    "steps": ["%s", "%s"],
+                    "ingredients": [
+                        {
+                            "name": "%s",
+                            "unit": "%s",
+                            "quantity": %.1f,
+                            "categories": ["%s"],
+                            "macros": [
+                                {"type": "%s", "valuePerUnit": %.1f},
+                                {"type": "%s", "valuePerUnit": %.1f}
+                            ]
+                        },
+                        {
+                            "name": "%s",
+                            "unit": "%s",
+                            "quantity": %.1f,
+                            "categories": ["%s"],
+                            "macros": [
+                                {"type": "%s", "valuePerUnit": %.1f}
+                            ]
+                        }
+                    ]
+                }
+                """,
                 IMPORT_RECIPE_TITLE,
                 IMPORT_RECIPE_DESCRIPTION,
                 IMPORT_RECIPE_DURATION,
@@ -227,10 +251,13 @@ class ImportRecipeTests extends BaseIntegrationTest {
                 IMPORT_RECIPE_INGREDIENT_1_UNIT,
                 IMPORT_RECIPE_INGREDIENT_1_QUANTITY,
                 IMPORT_RECIPE_INGREDIENT_1_CATEGORY,
+                "PROTEIN", TOTAL_PROTEIN,
+                "CARBS", TOTAL_CALORIES,
                 IMPORT_RECIPE_INGREDIENT_2_NAME,
                 IMPORT_RECIPE_INGREDIENT_2_UNIT,
                 IMPORT_RECIPE_INGREDIENT_2_QUANTITY,
-                IMPORT_RECIPE_INGREDIENT_2_CATEGORY
+                IMPORT_RECIPE_INGREDIENT_2_CATEGORY,
+                "FAT", TOTAL_FAT
         );
     }
 }

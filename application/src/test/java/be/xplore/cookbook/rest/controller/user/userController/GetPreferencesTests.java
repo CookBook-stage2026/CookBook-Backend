@@ -2,6 +2,8 @@ package be.xplore.cookbook.rest.controller.user.userController;
 
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
+import be.xplore.cookbook.core.domain.ingredient.Macro;
+import be.xplore.cookbook.core.domain.ingredient.MacroType;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
@@ -18,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class GetPreferencesTests extends BaseIntegrationTest {
+    private static final double DEFAULT_CALORIES = 50;
 
     @Override
     protected String[] getTablesToClear() {
@@ -28,7 +31,12 @@ class GetPreferencesTests extends BaseIntegrationTest {
     void getPreferences_shouldReturnPreferences_whenPreferencesAreSet() throws Exception {
         User user = createUser();
 
-        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG, null);
+        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG, null,
+                List.of(
+                        new Macro(
+                                MacroType.CALORIES,
+                                DEFAULT_CALORIES
+                        )));
 
         getUserPreferenceRepository().save(new UserPreferences(
                 user,

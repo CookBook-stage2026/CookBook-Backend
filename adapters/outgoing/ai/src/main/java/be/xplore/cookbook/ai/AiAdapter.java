@@ -92,7 +92,7 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
 
             List<ImportedIngredient> ingredients = result.ingredients().stream()
                     .map(i -> new ImportedIngredient(i.name(), i.unit(), i.quantity(),
-                            i.categories()))
+                            i.categories(), i.macros()))
                     .toList();
 
             return new ImportedRecipe(

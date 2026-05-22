@@ -1,24 +1,29 @@
 package be.xplore.cookbook.rest.dto.recipe.response;
 
-import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.recipe.RecipeIngredient;
 
+import java.util.List;
 import java.util.UUID;
 
 public record RecipeIngredientDto(
         UUID ingredientId,
         String name,
-        double baseQuantity,
-        Unit unit
+        Unit unit,
+        double quantity,
+        List<MacroDto> macros
 ) {
-    public static RecipeIngredientDto fromDomain(RecipeIngredient ri) {
-        Ingredient ingredient = ri.ingredient();
+    public static RecipeIngredientDto fromDomain(RecipeIngredient recipeIngredient) {
+        List<MacroDto> scaledMacros = recipeIngredient.ingredient().macros().stream()
+                .map(m -> MacroDto.fromDomain(m, recipeIngredient.baseQuantity()))
+                .toList();
+
         return new RecipeIngredientDto(
-                ingredient.id().id(),
-                ingredient.name(),
-                ri.baseQuantity(),
-                ingredient.unit()
+                recipeIngredient.ingredient().id().id(),
+                recipeIngredient.ingredient().name(),
+                recipeIngredient.ingredient().unit(),
+                recipeIngredient.baseQuantity(),
+                scaledMacros
         );
     }
 }
