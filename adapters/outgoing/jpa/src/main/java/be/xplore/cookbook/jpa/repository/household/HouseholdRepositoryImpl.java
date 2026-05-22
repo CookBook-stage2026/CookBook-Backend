@@ -51,4 +51,12 @@ public class HouseholdRepositoryImpl implements HouseholdRepository {
     public void deleteById(HouseholdId id) {
         jpaHouseholdRepository.deleteById(id.id());
     }
+
+    @Override
+    public boolean isMemberOrCreator(HouseholdId householdId, UserId userId) {
+        return jpaHouseholdRepository.isMemberOrCreator(
+                householdId.id(),
+                userId.id()
+        );
+    }
 }

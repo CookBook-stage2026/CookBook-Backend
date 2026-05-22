@@ -77,10 +77,11 @@ public class AppConfig {
             UserRepository userRepository,
             RecipeRepository recipeRepository,
             UserPreferenceRepository userPreferenceRepository,
+            HouseholdRepository householdRepository,
             ScheduleSuggestionsPort scheduleSuggestionsPort
     ) {
         return new WeekScheduleService(weekScheduleRepository, userRepository, recipeRepository,
-                userPreferenceRepository, scheduleSuggestionsPort);
+                userPreferenceRepository, householdRepository, scheduleSuggestionsPort);
     }
 
     @Bean

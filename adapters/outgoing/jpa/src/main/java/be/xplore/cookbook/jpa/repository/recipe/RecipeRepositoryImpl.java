@@ -8,6 +8,7 @@ import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.user.User;
+import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.jpa.repository.recipe.entity.JpaRecipeEntity;
@@ -84,6 +85,18 @@ public class RecipeRepositoryImpl implements RecipeRepository {
                 page.getSize(),
                 page.getTotalElements()
         );
+    }
+
+    @Override
+    public List<RecipeSummary> findAllSummariesByUserIds(List<UserId> userIds) {
+        return jpaRecipeRepository.findByUser_IdIn(userIds.stream().map(UserId::id).toList()).stream()
+                .map(JpaRecipeEntity::toSummary)
+                .toList();
+    }
+
+    @Override
+    public List<RecipeSummary> findAllPersonalSummariesByUserAndPreferences(UserPreferences preferences, User user) {
+        return findAllSummariesWithFilter(List.of(), preferences, false, user, Paging.unpaged()).content();
     }
 
     @Override

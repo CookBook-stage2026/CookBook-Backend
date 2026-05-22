@@ -139,4 +139,6 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
             """)
     List<JpaRecipeEntity> searchByNamePrioritizingStartsWith(
             @Param("name") String name, @Param("user") JpaUserEntity user, Pageable pageable);
+
+    List<JpaRecipeEntity> findByUser_IdIn(List<UUID> userIds);
 }

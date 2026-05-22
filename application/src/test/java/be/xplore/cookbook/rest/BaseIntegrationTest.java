@@ -19,6 +19,7 @@ import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.domain.weekschedule.DaySchedule;
 import be.xplore.cookbook.core.domain.weekschedule.DayScheduleId;
+import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
 import be.xplore.cookbook.core.domain.weekschedule.WeekScheduleId;
 import be.xplore.cookbook.core.repository.HouseholdInviteRepository;
@@ -148,7 +149,18 @@ public abstract class BaseIntegrationTest {
         dailyRecipes.forEach((day, recipe) ->
                 daySchedules.add(new DaySchedule(DayScheduleId.create(), recipe, day))
         );
-        WeekSchedule weekSchedule = new WeekSchedule(WeekScheduleId.create(), user, weekStartDate, daySchedules);
+        WeekSchedule weekSchedule = new WeekSchedule(
+                WeekScheduleId.create(), ScheduleOwner.forUser(user.id()), weekStartDate, daySchedules);
+        getWeekScheduleRepository().save(weekSchedule);
+    }
+
+    protected void createWeekSchedule(ScheduleOwner owner, Map<DayOfWeek, Recipe> dailyRecipes, LocalDate weekStartDate) {
+        List<DaySchedule> daySchedules = new ArrayList<>();
+        dailyRecipes.forEach((day, recipe) ->
+                daySchedules.add(new DaySchedule(DayScheduleId.create(), recipe, day))
+        );
+        WeekSchedule weekSchedule = new WeekSchedule(
+                WeekScheduleId.create(), owner, weekStartDate, daySchedules);
         getWeekScheduleRepository().save(weekSchedule);
     }
 

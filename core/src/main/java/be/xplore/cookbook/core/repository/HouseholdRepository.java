@@ -9,8 +9,14 @@ import java.util.Optional;
 
 public interface HouseholdRepository {
     Household save(Household houseHold);
+
     Optional<Household> findById(HouseholdId id);
+
     List<Household> findAllByUserId(UserId userId);
+
     void removeMember(HouseholdId householdId, UserId userId);
+
     void deleteById(HouseholdId householdId);
+
+    boolean isMemberOrCreator(HouseholdId householdId, UserId userId);
 }

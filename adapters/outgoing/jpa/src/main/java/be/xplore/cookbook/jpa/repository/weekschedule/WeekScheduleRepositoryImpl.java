@@ -1,6 +1,6 @@
 package be.xplore.cookbook.jpa.repository.weekschedule;
 
-import be.xplore.cookbook.core.domain.user.UserId;
+import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
 import be.xplore.cookbook.core.domain.weekschedule.WeekScheduleId;
 import be.xplore.cookbook.core.repository.WeekScheduleRepository;
@@ -13,47 +13,54 @@ import java.util.Optional;
 
 @Repository
 public class WeekScheduleRepositoryImpl implements WeekScheduleRepository {
-    private final JpaWeekScheduleRepository weekScheduleRepository;
+    private final JpaWeekScheduleRepository scheduleRepository;
 
-    public WeekScheduleRepositoryImpl(JpaWeekScheduleRepository weekScheduleRepository) {
-        this.weekScheduleRepository = weekScheduleRepository;
+    public WeekScheduleRepositoryImpl(JpaWeekScheduleRepository scheduleRepository) {
+        this.scheduleRepository = scheduleRepository;
     }
 
     @Override
     public WeekSchedule save(WeekSchedule schedule) {
         JpaWeekScheduleEntity entity = JpaWeekScheduleEntity.fromDomain(schedule);
-        return weekScheduleRepository.save(entity).toDomain();
+        return scheduleRepository.save(entity).toDomain();
     }
 
     @Override
-    public List<WeekSchedule> findAllByUserId(UserId userId) {
-        return weekScheduleRepository.findByUserIdOrderByWeekStartDateDesc(userId.id()).stream()
+    public List<WeekSchedule> findAllByOwner(ScheduleOwner owner) {
+        return scheduleRepository.findByOwnerOwnerIdAndOwnerOwnerTypeOrderByWeekStartDateDesc(
+                        owner.ownerId(), owner.ownerType()
+                )
+                .stream()
                 .map(JpaWeekScheduleEntity::toDomain)
                 .toList();
     }
 
     @Override
-    public List<WeekSchedule> findAllByUserIdAndDateRange(UserId userId, LocalDate from, LocalDate to) {
-        return weekScheduleRepository.findByUserIdAndWeekStartDateBetweenOrderByWeekStartDateDesc(
-                        userId.id(), from, to).stream()
+    public List<WeekSchedule> findAllByOwnerAndDateRange(ScheduleOwner owner, LocalDate from, LocalDate to) {
+        return scheduleRepository.findByOwnerOwnerIdAndOwnerOwnerTypeAndWeekStartDateBetweenOrderByWeekStartDateDesc(
+                        owner.ownerId(), owner.ownerType(), from, to
+                )
+                .stream()
                 .map(JpaWeekScheduleEntity::toDomain)
                 .toList();
     }
 
     @Override
     public Optional<WeekSchedule> findById(WeekScheduleId id) {
-        return weekScheduleRepository.findById(id.id())
+        return scheduleRepository.findById(id.id())
                 .map(JpaWeekScheduleEntity::toDomain);
     }
 
     @Override
-    public Optional<WeekSchedule> findByUserIdAndWeekStartDate(UserId userId, LocalDate weekStartDate) {
-        return weekScheduleRepository.findByUserIdAndWeekStartDate(userId.id(), weekStartDate)
+    public Optional<WeekSchedule> findByOwnerAndWeekStartDate(ScheduleOwner owner, LocalDate weekStartDate) {
+        return scheduleRepository.findByOwnerOwnerIdAndOwnerOwnerTypeAndWeekStartDate(
+                        owner.ownerId(), owner.ownerType(), weekStartDate
+                )
                 .map(JpaWeekScheduleEntity::toDomain);
     }
 
     @Override
-    public void deleteById(WeekScheduleId id) {
-        weekScheduleRepository.deleteById(id.id());
+    public void delete(WeekSchedule schedule) {
+        scheduleRepository.delete(JpaWeekScheduleEntity.fromDomain(schedule));
     }
 }

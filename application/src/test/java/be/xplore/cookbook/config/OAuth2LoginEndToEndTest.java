@@ -5,7 +5,7 @@ import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.domain.user.command.FindUserBySocialConnectionQuery;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
 import be.xplore.cookbook.core.service.UserService;
-import be.xplore.cookbook.rest.dto.request.RecipeSearchRequest;
+import be.xplore.cookbook.rest.dto.recipe.request.RecipeSearchRequest;
 import be.xplore.cookbook.security.CookieAuthorizationRequestRepository;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
