@@ -154,8 +154,7 @@ public abstract class BaseIntegrationTest {
         getWeekScheduleRepository().save(weekSchedule);
     }
 
-    protected void createWeekSchedule(ScheduleOwner owner, Map<DayOfWeek, Recipe> dailyRecipes,
-                                      LocalDate weekStartDate) {
+    protected void createWeekSchedule(ScheduleOwner owner, Map<DayOfWeek, Recipe> dailyRecipes, LocalDate weekStartDate) {
         List<DaySchedule> daySchedules = new ArrayList<>();
         dailyRecipes.forEach((day, recipe) ->
                 daySchedules.add(new DaySchedule(DayScheduleId.create(), recipe, day))

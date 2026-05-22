@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:application/src/test/java/be/xplore/cookbook/rest/controller/recipe/recipeDiscoveryController/SearchPersonalRecipeSummariesTests.java
 package be.xplore.cookbook.rest.controller.recipe.recipeDiscoveryController;
+========
+package be.xplore.cookbook.rest.controller.recipe.recipeController;
+>>>>>>>> 1a52978 (Feat: #82 Split user and household schedules):application/src/test/java/be/xplore/cookbook/rest/controller/recipe/recipeController/SearchRecipeSummariesTests.java
 
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.rest.BaseIntegrationTest;

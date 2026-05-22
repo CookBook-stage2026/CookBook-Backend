@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:application/src/test/java/be/xplore/cookbook/rest/controller/householdInvite/householdInviteController/GetInviteByTokenTests.java
 package be.xplore.cookbook.rest.controller.householdInvite.householdInviteController;
+========
+package be.xplore.cookbook.rest.controller.household.householdInviteController;
+>>>>>>>> 1a52978 (Feat: #82 Split user and household schedules):application/src/test/java/be/xplore/cookbook/rest/controller/household/householdInviteController/GetInviteByTokenTests.java
 
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
 import be.xplore.cookbook.core.domain.household.Household;
