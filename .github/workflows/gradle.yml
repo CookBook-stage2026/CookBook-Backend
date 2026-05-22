@@ -44,6 +44,8 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: ./gradlew sonar --info --no-daemon
+        -Dsonar.projectKey=CookBook-stage2026_CookBook-Backend
+        -Dsonar.organization=cookbook-stage2026
 
 
   docker-github:
