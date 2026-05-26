@@ -36,6 +36,7 @@ import be.xplore.cookbook.core.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -224,21 +225,31 @@ public class RecipeService {
 
     private List<RecipeIngredient> mapToRecipeIngredients(List<IngredientWithQuantity> ingredientQuantities) {
         List<Ingredient> foundIngredients = ingredientRepository.findByIds(
-                ingredientQuantities.stream().map(IngredientWithQuantity::ingredientId).toList());
+                ingredientQuantities.stream().map(IngredientWithQuantity::ingredientId).toList()
+        );
 
-        if (foundIngredients.size() != ingredientQuantities.size()) {
-            throw new DataIntegrityException("One or more ingredients do not exist");
+        Map<IngredientId, Ingredient> ingredientMap = foundIngredients.stream()
+                .collect(Collectors.toMap(
+                        Ingredient::id,
+                        ingredient -> ingredient
+                ));
+
+        List<IngredientId> missingIds = ingredientQuantities.stream()
+                .map(IngredientWithQuantity::ingredientId)
+                .filter(id -> !ingredientMap.containsKey(id))
+                .toList();
+
+        if (!missingIds.isEmpty()) {
+            throw new DataIntegrityException(
+                    String.format("Ingredients not found with IDs: %s", missingIds)
+            );
         }
 
         return ingredientQuantities.stream()
-                .map(iwq -> {
-                    Ingredient ingredient = foundIngredients.stream()
-                            .filter(i -> i.id().equals(iwq.ingredientId()))
-                            .findFirst()
-                            .orElseThrow(() ->
-                                    new DataIntegrityException("Ingredient not found: " + iwq.ingredientId()));
-                    return new RecipeIngredient(ingredient, iwq.quantity());
-                })
+                .map(iwq -> new RecipeIngredient(
+                        ingredientMap.get(iwq.ingredientId()),
+                        iwq.quantity()
+                ))
                 .toList();
     }
 

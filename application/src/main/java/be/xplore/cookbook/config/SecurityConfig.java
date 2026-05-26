@@ -7,6 +7,7 @@ import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -64,7 +65,30 @@ public class SecurityConfig {
         return builder -> builder.additionalParameters(params -> params.put("prompt", "select_account"));
     }
 
+    /**
+     * Public filter chain - NO JWT validation for public endpoints
+     * Runs first
+     */
     @Bean
+    @Order(1)
+    public SecurityFilterChain publicFilterChain(HttpSecurity http) {
+        http
+                .securityMatcher("/api/household-invites/*")
+                .cors(Customizer.withDefaults())
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()
+                )
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        return http.build();
+    }
+
+    /**
+     * Main filter chain - requires authentication for all other endpoints
+     * Runs second
+     */
+    @Bean
+    @Order(2)
     public SecurityFilterChain filterChain(HttpSecurity http,
                                            ClientRegistrationRepository clientRegistrationRepository,
                                            Consumer<OAuth2AuthorizationRequest.Builder> promptCustomizer) {
@@ -77,7 +101,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/oauth2/authorization/**").permitAll()
                         .requestMatchers("/login/oauth2/code/**").permitAll()
-                        .requestMatchers("/api/household-invites/{token}").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -96,6 +119,7 @@ public class SecurityConfig {
                         .bearerTokenResolver(cookieTokenResolver())
                         .jwt(Customizer.withDefaults())
                 );
+
         return http.build();
     }
 

@@ -24,18 +24,25 @@ public class IngredientService {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(UserNotFoundException::new);
 
-        return ingredientRepository.findByNameIgnoreCaseAndUser(command.name(), user)
-                .orElseGet(() ->
-                        ingredientRepository.save(
-                                new Ingredient(
-                                        IngredientId.create(),
-                                        command.name(),
-                                        command.defaultUnit(),
-                                        command.categories(),
-                                        user
-                                )
-                        )
-                );
+        var oldIngredient = ingredientRepository.findByNameIgnoreCaseAndUser(command.name(), user);
+        if (oldIngredient.isEmpty()) {
+            return ingredientRepository.save(new Ingredient(
+                    IngredientId.create(),
+                    command.name(),
+                    command.defaultUnit(),
+                    command.categories(),
+                    user
+            ));
+        }
+        return ingredientRepository.save(
+                new Ingredient(
+                        oldIngredient.get().id(),
+                        command.name(),
+                        command.defaultUnit(),
+                        command.categories(),
+                        user
+                )
+        );
     }
 
     public List<Ingredient> searchByNameExcludingIds(SearchIngredientsQuery query) {
