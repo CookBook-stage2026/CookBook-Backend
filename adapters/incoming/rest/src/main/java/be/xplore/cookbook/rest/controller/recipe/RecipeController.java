@@ -1,6 +1,5 @@
 package be.xplore.cookbook.rest.controller.recipe;
 
-import be.xplore.cookbook.core.common.Paging;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
@@ -9,22 +8,17 @@ import be.xplore.cookbook.core.domain.recipe.command.ChangeVisibilityCommand;
 import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.DeleteRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.EnhanceRecipeQuery;
-import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FindRecipeByIdQuery;
 import be.xplore.cookbook.core.domain.recipe.command.ImportRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.IngredientWithQuantity;
-import be.xplore.cookbook.core.domain.recipe.command.SearchRecipesByNameQuery;
 import be.xplore.cookbook.core.domain.recipe.command.UpdateRecipeCommand;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.service.RecipeService;
 import be.xplore.cookbook.rest.dto.recipe.request.ChangeRecipeVisibilityRequest;
 import be.xplore.cookbook.rest.dto.recipe.request.CreateRecipeDto;
 import be.xplore.cookbook.rest.dto.recipe.request.ImportRecipeRequest;
-import be.xplore.cookbook.rest.dto.recipe.request.RecipeSearchRequest;
 import be.xplore.cookbook.rest.dto.recipe.request.UpdateRecipeDto;
-import be.xplore.cookbook.rest.dto.common.response.PaginatedResponse;
 import be.xplore.cookbook.rest.dto.recipe.response.RecipeDto;
-import be.xplore.cookbook.rest.dto.recipe.response.RecipeSummaryDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -37,7 +31,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -87,38 +80,6 @@ public class RecipeController {
         Recipe recipe = recipeService.findById(new FindRecipeByIdQuery(new RecipeId(id), userId));
 
         return RecipeDto.fromDomain(recipe, userId);
-    }
-
-    @PostMapping("/filter")
-    public PaginatedResponse<RecipeSummaryDto> filterRecipes(
-            @AuthenticationPrincipal Jwt jwt,
-            @Valid @RequestBody RecipeSearchRequest request
-    ) {
-        List<IngredientId> ingredients = request.ingredientIds().stream().map(IngredientId::new).toList();
-
-        var result = recipeService.findAllSummariesWithFilter(new FilterRecipesQuery(
-                ingredients, new Paging(request.page(), request.size()), request.shouldApplyPreferences(),
-                request.includeAccessibleRecipes(), getUserIdFromJwt(jwt)
-        ));
-
-        return new PaginatedResponse<>(
-                result.content().stream().map(RecipeSummaryDto::fromDomain).toList(),
-                new PaginatedResponse.PageMetadata(
-                        result.pageNumber(), result.pageSize(), result.totalElements(), result.totalPages()
-                )
-        );
-    }
-
-    @GetMapping("/search")
-    public List<RecipeSummaryDto> searchRecipeSummaries(
-            @AuthenticationPrincipal Jwt jwt,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam String query
-    ) {
-        return recipeService.searchSummariesByName(
-                new SearchRecipesByNameQuery(new Paging(page, size), getUserIdFromJwt(jwt), query)
-        ).stream().map(RecipeSummaryDto::fromDomain).toList();
     }
 
     @GetMapping("/{id}/enhance")

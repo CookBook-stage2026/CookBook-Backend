@@ -19,9 +19,9 @@ public record DaySuggestionInput(
                 .toList();
 
         List<WeekScheduleInput> schedules = List.of(
-                WeekScheduleInput.fromDomain(previousWeek),
+                WeekScheduleInput.fromDomain("reference", previousWeek),
                 WeekScheduleInput.fromDomain(currentWeek, dayToSuggestFor),
-                WeekScheduleInput.fromDomain(nextWeek)
+                WeekScheduleInput.fromDomain("reference", nextWeek)
         );
 
         return new DaySuggestionInput(dayToSuggestFor, schedules, recipes);

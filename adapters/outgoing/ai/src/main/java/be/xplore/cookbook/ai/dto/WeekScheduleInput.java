@@ -14,8 +14,8 @@ public record WeekScheduleInput(
         String weekRole,
         List<DayScheduleInput> schedule
 ) {
-    public static WeekScheduleInput fromDomain(WeekSchedule weekSchedule) {
-        return fromDomain("reference", weekSchedule, null);
+    public static WeekScheduleInput fromDomain(String weekRole, WeekSchedule weekSchedule) {
+        return fromDomain(weekRole, weekSchedule, null);
     }
 
     public static WeekScheduleInput fromDomain(WeekSchedule weekSchedule, DayOfWeek dayToSuggestFor) {

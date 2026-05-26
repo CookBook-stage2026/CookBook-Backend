@@ -16,14 +16,10 @@ import be.xplore.cookbook.rest.dto.schedule.response.WeekScheduleDto;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.http.Fault;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.time.DayOfWeek;
@@ -32,7 +28,6 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
@@ -44,32 +39,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public abstract class AbstractSuggestRecipeForDateTests extends BaseIntegrationTest {
 
-    private static WireMockServer wireMockServer;
-
     private static final LocalDate TARGET_DATE = LocalDate.now().plusDays(2);
     private static final LocalDate TARGET_MONDAY = TARGET_DATE.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
     private static final RecipeId RECIPE_ID = RecipeId.create();
 
-    @BeforeAll
-    static void startWireMock() {
-        wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
-        wireMockServer.start();
-        WireMock.configureFor(wireMockServer.port());
-    }
-
-    @AfterAll
-    static void stopWireMock() {
-        wireMockServer.stop();
-    }
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("ollama.base-url", wireMockServer::baseUrl);
-    }
-
     @BeforeEach
     void stubAi() {
-        WireMock.stubFor(WireMock.post(WireMock.urlPathEqualTo("/api/chat"))
+        getWireMockServer().stubFor(WireMock.post(WireMock.urlPathEqualTo("/api/chat"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withBody(buildOllamaResponseBodyWithContent(buildAiResponse()))));
@@ -77,7 +53,7 @@ public abstract class AbstractSuggestRecipeForDateTests extends BaseIntegrationT
 
     @AfterEach
     void resetWireMock() {
-        wireMockServer.resetAll();
+        getWireMockServer().resetAll();
     }
 
     @Override
@@ -87,6 +63,8 @@ public abstract class AbstractSuggestRecipeForDateTests extends BaseIntegrationT
                 "ingredient_categories", "week_schedules", "day_schedules", "users"
         };
     }
+
+    protected abstract WireMockServer getWireMockServer();
 
     protected abstract MockHttpServletRequestBuilder suggestRequest(LocalDate targetDate);
 

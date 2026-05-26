@@ -25,7 +25,9 @@ public interface RecipeRepository {
 
     List<RecipeSummary> findAllPersonalSummariesByUserAndPreferences(UserPreferences preferences, User user);
 
-    List<RecipeSummary> querySummaries(Paging pageable, User user, String query);
+    List<RecipeSummary> queryPersonalSummaries(Paging pageable, User user, String query);
+
+    List<RecipeSummary> querySummaries(Paging paging, List<UserId> userIds, String query);
 
     long count();
 

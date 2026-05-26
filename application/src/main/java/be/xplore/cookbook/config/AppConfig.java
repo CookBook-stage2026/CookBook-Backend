@@ -45,11 +45,12 @@ public class AppConfig {
             IngredientRepository ingredientRepository,
             UserRepository userRepository,
             UserPreferenceRepository userPreferenceRepository,
+            HouseholdRepository householdRepository,
             RecipeSuggestionsPort recipeSuggestionsPort,
             RecipeImportPort recipeImportPort
     ) {
         return new RecipeService(recipeRepository, ingredientRepository, userRepository,
-                userPreferenceRepository, recipeSuggestionsPort, recipeImportPort);
+                userPreferenceRepository, householdRepository, recipeSuggestionsPort, recipeImportPort);
     }
 
     @Bean

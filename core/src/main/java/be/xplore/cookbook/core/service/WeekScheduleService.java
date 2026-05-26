@@ -1,7 +1,9 @@
 package be.xplore.cookbook.core.service;
 
+import be.xplore.cookbook.core.domain.exception.ForbiddenException;
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
 import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
+import be.xplore.cookbook.core.domain.household.Household;
 import be.xplore.cookbook.core.domain.household.HouseholdId;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
@@ -32,6 +34,7 @@ import be.xplore.cookbook.core.repository.WeekScheduleRepository;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -219,12 +222,20 @@ public class WeekScheduleService {
             return recipeRepository.findAllPersonalSummariesByUserAndPreferences(preferences, user);
         }
 
-        List<UserId> memberIds = householdRepository.findById(new HouseholdId(owner.ownerId()))
-                .orElseThrow(() -> new NotFoundException("Household not found"))
-                .members()
+        Household household = householdRepository.findById(new HouseholdId(owner.ownerId()))
+                .orElseThrow(() -> new NotFoundException("Household not found"));
+
+        List<UserId> memberIds = new ArrayList<>(household.members()
                 .stream()
                 .map(User::id)
-                .toList();
+                .toList());
+
+        memberIds.add(household.creator().id());
+
+        if (!memberIds.contains(user.id())) {
+            throw new ForbiddenException("User is not part of this household");
+        }
+
         return recipeRepository.findAllSummariesByUserIds(memberIds);
     }
 }

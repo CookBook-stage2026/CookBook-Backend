@@ -8,28 +8,28 @@ import java.util.List;
 
 public record WeekSuggestionInput(
         LocalDate weekStartDate,
-        List<WeekScheduleInput.ShortRecipeInput> availableRecipes,
-        WeekScheduleInput.WeekScheduleContext previousWeek,
-        WeekScheduleInput.WeekScheduleContext currentWeek,
-        WeekScheduleInput.WeekScheduleContext nextWeek
+        List<ShortRecipeInput> availableRecipes,
+        WeekScheduleInput previousWeek,
+        WeekScheduleInput currentWeek,
+        WeekScheduleInput nextWeek
 ) {
-    public static WeekScheduleInput fromDomain(
+    public static WeekSuggestionInput fromDomain(
             LocalDate weekStartDate,
             List<RecipeSummary> availableRecipes,
             WeekSchedule previousWeek,
             WeekSchedule currentWeek,
             WeekSchedule nextWeek
     ) {
-        List<WeekScheduleInput.ShortRecipeInput> recipes = availableRecipes.stream()
-                .map(WeekScheduleInput.ShortRecipeInput::fromDomain)
+        List<ShortRecipeInput> recipes = availableRecipes.stream()
+                .map(ShortRecipeInput::fromDomain)
                 .toList();
 
-        return new WeekScheduleInput(
+        return new WeekSuggestionInput(
                 weekStartDate,
                 recipes,
-                WeekScheduleInput.WeekScheduleContext.fromDomain("previous week", previousWeek),
-                WeekScheduleInput.WeekScheduleContext.fromDomain("current week", currentWeek),
-                WeekScheduleInput.WeekScheduleContext.fromDomain("next week", nextWeek)
+                WeekScheduleInput.fromDomain("previous week", previousWeek),
+                WeekScheduleInput.fromDomain("current week", currentWeek),
+                WeekScheduleInput.fromDomain("next week", nextWeek)
         );
     }
 }

@@ -29,7 +29,6 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
                 WHERE r.id = :id
                 AND (
                     r.user = :user
-
                     OR (
                         r.isPublic = true
                         AND r.user IN (
@@ -42,7 +41,6 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
                             AND hm != :user
                         )
                     )
-
                     OR (
                         r.isPublic = true
                         AND r.user IN (
@@ -128,17 +126,33 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
                 LOWER(r.name) LIKE LOWER(CONCAT(:name, '%'))
                 OR LOWER(r.name) LIKE LOWER(CONCAT('%', :name, '%'))
             )
-            AND (r.user IN (
-                SELECT hm FROM JpaHouseholdEntity h
-                JOIN h.members hm
-                WHERE :user MEMBER OF h.members OR h.creator = :user
-            ) OR r.user = :user)
+            AND r.user = :user
+            ORDER BY
+                CASE WHEN LOWER(r.name) LIKE LOWER(CONCAT(:name, '%')) THEN 0 ELSE 1 END,
+                r.name
+            """)
+    List<JpaRecipeEntity> searchOwnByNamePrioritizingStartsWith(
+            @Param("name") String name,
+            @Param("user") JpaUserEntity user,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT r FROM JpaRecipeEntity r
+            WHERE (
+                LOWER(r.name) LIKE LOWER(CONCAT(:name, '%'))
+                OR LOWER(r.name) LIKE LOWER(CONCAT('%', :name, '%'))
+            )
+            AND r.user.id IN :userIds
+            AND r.isPublic = true
             ORDER BY
                 CASE WHEN LOWER(r.name) LIKE LOWER(CONCAT(:name, '%')) THEN 0 ELSE 1 END,
                 r.name
             """)
     List<JpaRecipeEntity> searchByNamePrioritizingStartsWith(
-            @Param("name") String name, @Param("user") JpaUserEntity user, Pageable pageable);
+            @Param("name") String name,
+            @Param("userIds") List<UUID> userIds,
+            Pageable pageable);
 
-    List<JpaRecipeEntity> findByUser_IdIn(List<UUID> userIds);
+    List<JpaRecipeEntity> findByUser_IdInAndIsPublicTrue(List<UUID> userIds);
 }
