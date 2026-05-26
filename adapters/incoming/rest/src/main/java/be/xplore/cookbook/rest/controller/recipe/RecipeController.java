@@ -141,6 +141,7 @@ public class RecipeController {
     }
 
     @PutMapping("/{id}/visibility")
+    @Transactional
     public void changeVisibility(
             @PathVariable UUID id,
             @RequestBody ChangeRecipeVisibilityRequest request,
