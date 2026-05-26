@@ -17,9 +17,8 @@ public interface JpaWeekScheduleRepository extends CrudRepository<JpaWeekSchedul
     );
 
     List<JpaWeekScheduleEntity>
-    findByOwnerOwnerIdAndOwnerOwnerTypeAndWeekStartDateBetweenOrderByWeekStartDateDesc(
+    findByOwnerOwnerIdAndWeekStartDateBetweenOrderByWeekStartDateDesc(
             UUID ownerId,
-            ScheduleOwnerType ownerType,
             LocalDate startFrom,
             LocalDate startTo
     );

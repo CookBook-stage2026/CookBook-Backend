@@ -1,5 +1,6 @@
 package be.xplore.cookbook.core.service;
 
+import be.xplore.cookbook.core.common.Paging;
 import be.xplore.cookbook.core.domain.exception.ForbiddenException;
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
 import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
@@ -16,12 +17,16 @@ import be.xplore.cookbook.core.domain.weekschedule.DayScheduleId;
 import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
 import be.xplore.cookbook.core.domain.weekschedule.WeekScheduleId;
-import be.xplore.cookbook.core.domain.weekschedule.command.CreateWeekScheduleCommand;
+import be.xplore.cookbook.core.domain.weekschedule.command.CreateHouseholdWeekScheduleCommand;
+import be.xplore.cookbook.core.domain.weekschedule.command.CreatePersonalWeekScheduleCommand;
 import be.xplore.cookbook.core.domain.weekschedule.command.DayEntry;
 import be.xplore.cookbook.core.domain.weekschedule.command.DeleteWeekScheduleCommand;
-import be.xplore.cookbook.core.domain.weekschedule.command.FindWeekSchedulesByOwnerQuery;
-import be.xplore.cookbook.core.domain.weekschedule.command.SuggestRecipeForDayQuery;
-import be.xplore.cookbook.core.domain.weekschedule.command.SuggestWeekScheduleQuery;
+import be.xplore.cookbook.core.domain.weekschedule.command.FindHouseholdWeekSchedulesQuery;
+import be.xplore.cookbook.core.domain.weekschedule.command.FindPersonalWeekSchedulesQuery;
+import be.xplore.cookbook.core.domain.weekschedule.command.SuggestHouseholdRecipeForDayQuery;
+import be.xplore.cookbook.core.domain.weekschedule.command.SuggestHouseholdWeekScheduleQuery;
+import be.xplore.cookbook.core.domain.weekschedule.command.SuggestPersonalRecipeForDayQuery;
+import be.xplore.cookbook.core.domain.weekschedule.command.SuggestPersonalWeekScheduleQuery;
 import be.xplore.cookbook.core.domain.weekschedule.command.UpdateWeekScheduleCommand;
 import be.xplore.cookbook.core.port.weekschedule.ScheduleSuggestionsPort;
 import be.xplore.cookbook.core.port.weekschedule.SuggestedDayRecipe;
@@ -66,26 +71,28 @@ public class WeekScheduleService {
         this.aiPort = aiPort;
     }
 
-    public WeekSchedule saveWeekSchedule(CreateWeekScheduleCommand command) {
-        User user = userRepository.findById(command.userId())
-                .orElseThrow(UserNotFoundException::new);
+    public WeekSchedule savePersonalWeekSchedule(CreatePersonalWeekScheduleCommand command) {
+        ScheduleOwner owner = ScheduleOwner.forUser(command.userId());
 
-        List<DaySchedule> daySchedules = extractDaySchedulesFromDayEntries(command.days(), user);
-
-        weekScheduleRepository.findByOwnerAndWeekStartDate(command.owner(), command.weekStartDate())
-                .ifPresent(weekScheduleRepository::delete);
-
-        return weekScheduleRepository.save(
-                new WeekSchedule(WeekScheduleId.create(), command.owner(), command.weekStartDate(), daySchedules)
-        );
+        return saveWeekSchedule(command.weekStartDate(), command.days(), owner, command.userId());
     }
 
-    public List<WeekSchedule> findSchedulesForOwner(FindWeekSchedulesByOwnerQuery query) {
-        if (query.hasDateRange()) {
-            return weekScheduleRepository.findAllByOwnerAndDateRange(
-                    query.owner(), query.from(), query.to());
-        }
-        return weekScheduleRepository.findAllByOwner(query.owner());
+    public WeekSchedule saveHouseholdWeekSchedule(CreateHouseholdWeekScheduleCommand command) {
+        ScheduleOwner owner = ScheduleOwner.forHousehold(command.householdId());
+
+        return saveWeekSchedule(command.weekStartDate(), command.days(), owner, command.userId());
+    }
+
+    public List<WeekSchedule> findPersonalSchedules(FindPersonalWeekSchedulesQuery query) {
+        ScheduleOwner owner = ScheduleOwner.forUser(query.userId());
+
+        return findSchedulesByOwner(owner, query.from(), query.to(), query.userId());
+    }
+
+    public List<WeekSchedule> findHouseholdSchedules(FindHouseholdWeekSchedulesQuery query) {
+        ScheduleOwner owner = ScheduleOwner.forHousehold(query.householdId());
+
+        return findSchedulesByOwner(owner, query.from(), query.to(), query.userId());
     }
 
     public void updateWeekSchedule(UpdateWeekScheduleCommand command) {
@@ -116,17 +123,66 @@ public class WeekScheduleService {
         weekScheduleRepository.delete(existing);
     }
 
-    public WeekSchedule suggestRecipeForDay(SuggestRecipeForDayQuery query) {
-        LocalDate dayToSuggestFor = query.dayToSuggestFor();
-        User user = userRepository.findById(query.userId())
+    public WeekSchedule suggestPersonalRecipeForDay(SuggestPersonalRecipeForDayQuery query) {
+        ScheduleOwner owner = ScheduleOwner.forUser(query.userId());
+
+        return suggestRecipeForDay(owner, query.dayToSuggestFor(), query.userId());
+    }
+
+    public WeekSchedule suggestHouseholdRecipeForDay(SuggestHouseholdRecipeForDayQuery query) {
+        ScheduleOwner owner = ScheduleOwner.forHousehold(query.householdId());
+
+        return suggestRecipeForDay(owner, query.dayToSuggestFor(), query.userId());
+    }
+
+    public WeekSchedule suggestPersonalWeekSchedule(SuggestPersonalWeekScheduleQuery query) {
+        ScheduleOwner owner = ScheduleOwner.forUser(query.userId());
+
+        return suggestWeekSchedule(owner, query.weekStartDate(), query.userId());
+    }
+
+    public WeekSchedule suggestHouseholdWeekSchedule(SuggestHouseholdWeekScheduleQuery query) {
+        ScheduleOwner owner = ScheduleOwner.forHousehold(query.householdId());
+
+        return suggestWeekSchedule(owner, query.weekStartDate(), query.userId());
+    }
+
+    private WeekSchedule saveWeekSchedule(LocalDate weekStartDate, List<DayEntry> days, ScheduleOwner owner,
+                                          UserId userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
-        List<WeekSchedule> schedules = resolveThreeWeekSchedules(query.owner(), dayToSuggestFor);
+        List<DaySchedule> daySchedules = extractDaySchedulesFromDayEntries(days, user);
+
+        weekScheduleRepository.findByOwnerAndWeekStartDate(owner, weekStartDate)
+                .ifPresent(weekScheduleRepository::delete);
+
+        return weekScheduleRepository.save(
+                new WeekSchedule(WeekScheduleId.create(), owner, weekStartDate, daySchedules)
+        );
+    }
+
+    private List<WeekSchedule> findSchedulesByOwner(ScheduleOwner owner, LocalDate from, LocalDate to, UserId userId) {
+        userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        if (from != null && to != null) {
+            return weekScheduleRepository.findAllByOwnerAndDateRange(owner, from, to);
+        }
+
+        return weekScheduleRepository.findAllByOwner(owner);
+    }
+
+    private WeekSchedule suggestRecipeForDay(ScheduleOwner owner, LocalDate dayToSuggestFor, UserId userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        List<WeekSchedule> schedules = resolveThreeWeekSchedules(owner, dayToSuggestFor);
         WeekSchedule targetWeek = schedules.get(1);
 
-        assertUserCanModifySchedule(targetWeek, query.userId());
+        assertUserCanModifySchedule(targetWeek, userId);
 
-        List<RecipeSummary> availableRecipes = loadAvailableRecipes(query.owner(), user);
+        List<RecipeSummary> availableRecipes = loadAvailableRecipes(owner, user);
 
         RecipeId recipeId = aiPort.suggestRecipeForDay(dayToSuggestFor.getDayOfWeek(), schedules, availableRecipes);
         Recipe recipe = recipeRepository.findById(recipeId, user)
@@ -135,23 +191,23 @@ public class WeekScheduleService {
         return targetWeek.assignRecipe(dayToSuggestFor.getDayOfWeek(), recipe);
     }
 
-    public WeekSchedule suggestWeekSchedule(SuggestWeekScheduleQuery query) {
-        if (query.weekStartDate().getDayOfWeek() != FIRST_DAY_OF_WEEK) {
+    private WeekSchedule suggestWeekSchedule(ScheduleOwner owner, LocalDate weekStartDate, UserId userId) {
+        if (weekStartDate.getDayOfWeek() != FIRST_DAY_OF_WEEK) {
             throw new IllegalArgumentException("Week start date must be a Monday");
         }
 
-        User user = userRepository.findById(query.userId())
+        User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
-        List<WeekSchedule> schedules = resolveThreeWeekSchedules(query.owner(), query.weekStartDate());
+        List<WeekSchedule> schedules = resolveThreeWeekSchedules(owner, weekStartDate);
         WeekSchedule targetWeek = schedules.get(1);
 
-        assertUserCanModifySchedule(targetWeek, query.userId());
+        assertUserCanModifySchedule(targetWeek, userId);
 
-        List<RecipeSummary> availableRecipes = loadAvailableRecipes(query.owner(), user);
+        List<RecipeSummary> availableRecipes = loadAvailableRecipes(owner, user);
 
         List<SuggestedDayRecipe> suggestions = aiPort.suggestWeekSchedule(
-                query.weekStartDate(), schedules, availableRecipes);
+                weekStartDate, schedules, availableRecipes);
 
         for (SuggestedDayRecipe suggestion : suggestions) {
             Recipe recipe = recipeRepository.findById(suggestion.recipeId(), user)
@@ -219,7 +275,9 @@ public class WeekScheduleService {
             UserPreferences preferences = preferenceRepository.findPreferences(user)
                     .orElseThrow(UserNotFoundException::new);
 
-            return recipeRepository.findAllPersonalSummariesByUserAndPreferences(preferences, user);
+            return recipeRepository
+                    .findAllSummariesWithFilter(List.of(), preferences, false, user, Paging.unpaged())
+                    .content();
         }
 
         Household household = householdRepository.findById(new HouseholdId(owner.ownerId()))

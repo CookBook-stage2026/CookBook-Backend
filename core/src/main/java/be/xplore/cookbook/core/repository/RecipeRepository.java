@@ -23,8 +23,6 @@ public interface RecipeRepository {
 
     List<RecipeSummary> findAllSummariesByUserIds(List<UserId> userIds);
 
-    List<RecipeSummary> findAllPersonalSummariesByUserAndPreferences(UserPreferences preferences, User user);
-
     List<RecipeSummary> queryPersonalSummaries(Paging pageable, User user, String query);
 
     List<RecipeSummary> querySummaries(Paging paging, List<UserId> userIds, String query);

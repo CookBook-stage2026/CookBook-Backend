@@ -37,7 +37,7 @@ class SearchHouseholdRecipeSummariesTests extends BaseIntegrationTest {
     }
 
     @Test
-    void searchHouseholdRecipeSummaries_shouldReturnPublicRecipesOfMembers_whenQueryMatches() throws Exception {
+    void searchHouseholdRecipeSummaries_shouldReturnPublicRecipesOfMembers_whenQueryMatchesAsMember() throws Exception {
         User creator = createUser();
         User member1 = createUserWithId(UserId.create());
         User member2 = createUserWithId(UserId.create());
@@ -56,7 +56,8 @@ class SearchHouseholdRecipeSummariesTests extends BaseIntegrationTest {
     }
 
     @Test
-    void searchHouseholdRecipeSummaries_shouldOnlyReturnAccessibleRecipesOfMembers_whenQuerying() throws Exception {
+    void searchHouseholdRecipeSummaries_shouldOnlyReturnAccessibleRecipesOfMembers_whenQueryingAsMember()
+            throws Exception {
         User creator = createUser();
         User member1 = createUserWithId(UserId.create());
         User member2 = createUserWithId(UserId.create());
@@ -78,7 +79,7 @@ class SearchHouseholdRecipeSummariesTests extends BaseIntegrationTest {
     }
 
     @Test
-    void searchHouseholdRecipeSummaries_shouldReturnEmptyList_whenNoRecipesMatchQuery() throws Exception {
+    void searchHouseholdRecipeSummaries_shouldReturnEmptyList_whenNoRecipesMatchQueryAsCreator() throws Exception {
         var creator = createUser();
         var member = createUserWithId(UserId.create());
         var household = createHouseholdWithMembers(List.of(member), creator);
@@ -92,7 +93,7 @@ class SearchHouseholdRecipeSummariesTests extends BaseIntegrationTest {
     }
 
     @Test
-    void searchHouseholdRecipeSummaries_shouldBeCaseInsensitive_whenSearching() throws Exception {
+    void searchHouseholdRecipeSummaries_shouldBeCaseInsensitive_whenSearchingAsCreator() throws Exception {
         var creator = createUser();
         var household = createHouseholdWithMembers(List.of(), creator);
 
@@ -105,7 +106,7 @@ class SearchHouseholdRecipeSummariesTests extends BaseIntegrationTest {
     }
 
     @Test
-    void searchHouseholdRecipeSummaries_shouldReturnAllPublicRecipes_whenQueryIsEmpty() throws Exception {
+    void searchHouseholdRecipeSummaries_shouldReturnAllPublicRecipes_whenQueryIsEmptyAsCreator() throws Exception {
         var creator = createUser();
         var member = createUserWithId(UserId.create());
         var household = createHouseholdWithMembers(List.of(member), creator);
@@ -120,7 +121,7 @@ class SearchHouseholdRecipeSummariesTests extends BaseIntegrationTest {
     }
 
     @Test
-    void searchHouseholdRecipeSummaries_shouldHandlePagination_whenMultiplePages() throws Exception {
+    void searchHouseholdRecipeSummaries_shouldHandlePagination_whenMultiplePagesAsCreator() throws Exception {
         var creator = createUser();
         var household = createHouseholdWithMembers(List.of(), creator);
 
@@ -138,7 +139,7 @@ class SearchHouseholdRecipeSummariesTests extends BaseIntegrationTest {
     }
 
     @Test
-    void searchHouseholdRecipeSummaries_shouldNotReturnRecipesFromNonMembers_whenQuerying() throws Exception {
+    void searchHouseholdRecipeSummaries_shouldNotReturnRecipesFromNonMembers_whenQueryingAsCreator() throws Exception {
         var creator = createUser();
         var nonMember = createUserWithId(UserId.create());
         var household = createHouseholdWithMembers(List.of(), creator);

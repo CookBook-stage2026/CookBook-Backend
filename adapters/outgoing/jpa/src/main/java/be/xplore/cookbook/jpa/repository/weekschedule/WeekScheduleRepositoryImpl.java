@@ -37,8 +37,8 @@ public class WeekScheduleRepositoryImpl implements WeekScheduleRepository {
 
     @Override
     public List<WeekSchedule> findAllByOwnerAndDateRange(ScheduleOwner owner, LocalDate from, LocalDate to) {
-        return scheduleRepository.findByOwnerOwnerIdAndOwnerOwnerTypeAndWeekStartDateBetweenOrderByWeekStartDateDesc(
-                        owner.ownerId(), owner.ownerType(), from, to
+        return scheduleRepository.findByOwnerOwnerIdAndWeekStartDateBetweenOrderByWeekStartDateDesc(
+                        owner.ownerId(), from, to
                 )
                 .stream()
                 .map(JpaWeekScheduleEntity::toDomain)

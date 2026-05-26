@@ -95,11 +95,6 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public List<RecipeSummary> findAllPersonalSummariesByUserAndPreferences(UserPreferences preferences, User user) {
-        return findAllSummariesWithFilter(List.of(), preferences, false, user, Paging.unpaged()).content();
-    }
-
-    @Override
     public List<RecipeSummary> queryPersonalSummaries(Paging paging, User user, String query) {
         Pageable pageable = PageRequest.of(paging.page(), paging.size());
 

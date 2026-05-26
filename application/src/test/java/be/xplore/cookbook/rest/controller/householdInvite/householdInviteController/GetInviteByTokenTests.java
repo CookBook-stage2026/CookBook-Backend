@@ -1,4 +1,4 @@
-package be.xplore.cookbook.rest.controller.household.householdInviteController;
+package be.xplore.cookbook.rest.controller.householdInvite.householdInviteController;
 
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
 import be.xplore.cookbook.core.domain.household.Household;

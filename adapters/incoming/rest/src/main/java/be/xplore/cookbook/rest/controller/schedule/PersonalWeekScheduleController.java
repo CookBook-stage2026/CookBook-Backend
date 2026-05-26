@@ -2,13 +2,12 @@ package be.xplore.cookbook.rest.controller.schedule;
 
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.user.UserId;
-import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
-import be.xplore.cookbook.core.domain.weekschedule.command.CreateWeekScheduleCommand;
+import be.xplore.cookbook.core.domain.weekschedule.command.CreatePersonalWeekScheduleCommand;
 import be.xplore.cookbook.core.domain.weekschedule.command.DayEntry;
-import be.xplore.cookbook.core.domain.weekschedule.command.FindWeekSchedulesByOwnerQuery;
-import be.xplore.cookbook.core.domain.weekschedule.command.SuggestRecipeForDayQuery;
-import be.xplore.cookbook.core.domain.weekschedule.command.SuggestWeekScheduleQuery;
+import be.xplore.cookbook.core.domain.weekschedule.command.FindPersonalWeekSchedulesQuery;
+import be.xplore.cookbook.core.domain.weekschedule.command.SuggestPersonalRecipeForDayQuery;
+import be.xplore.cookbook.core.domain.weekschedule.command.SuggestPersonalWeekScheduleQuery;
 import be.xplore.cookbook.core.service.WeekScheduleService;
 import be.xplore.cookbook.rest.dto.schedule.request.CreateDayScheduleDto;
 import be.xplore.cookbook.rest.dto.schedule.request.CreateWeekScheduleDto;
@@ -49,9 +48,8 @@ public class PersonalWeekScheduleController {
             @Valid @RequestBody CreateWeekScheduleDto dto
     ) {
         UserId userId = getUserIdFromJwt(jwt);
-        ScheduleOwner owner = ScheduleOwner.forUser(userId);
-        return WeekScheduleDto.fromDomain(scheduleService.saveWeekSchedule(
-                new CreateWeekScheduleCommand(dto.weekStartDate(), toDayEntries(dto.days()), owner, userId)
+        return WeekScheduleDto.fromDomain(scheduleService.savePersonalWeekSchedule(
+                new CreatePersonalWeekScheduleCommand(dto.weekStartDate(), toDayEntries(dto.days()), userId)
         ));
     }
 
@@ -62,8 +60,7 @@ public class PersonalWeekScheduleController {
             @RequestParam(required = false) LocalDate to
     ) {
         UserId userId = getUserIdFromJwt(jwt);
-        ScheduleOwner owner = ScheduleOwner.forUser(userId);
-        return scheduleService.findSchedulesForOwner(new FindWeekSchedulesByOwnerQuery(owner, from, to, userId))
+        return scheduleService.findPersonalSchedules(new FindPersonalWeekSchedulesQuery(from, to, userId))
                 .stream()
                 .map(WeekScheduleDto::fromDomain)
                 .toList();
@@ -75,9 +72,8 @@ public class PersonalWeekScheduleController {
             @PathVariable LocalDate date
     ) {
         UserId userId = getUserIdFromJwt(jwt);
-        ScheduleOwner owner = ScheduleOwner.forUser(userId);
-        WeekSchedule schedule = scheduleService.suggestRecipeForDay(
-                new SuggestRecipeForDayQuery(owner, date, userId));
+        WeekSchedule schedule = scheduleService.suggestPersonalRecipeForDay(
+                new SuggestPersonalRecipeForDayQuery(date, userId));
         return WeekScheduleDto.fromDomain(schedule);
     }
 
@@ -87,9 +83,8 @@ public class PersonalWeekScheduleController {
             @PathVariable LocalDate weekStartDate
     ) {
         UserId userId = getUserIdFromJwt(jwt);
-        ScheduleOwner owner = ScheduleOwner.forUser(userId);
-        WeekSchedule schedule = scheduleService.suggestWeekSchedule(
-                new SuggestWeekScheduleQuery(owner, weekStartDate, userId));
+        WeekSchedule schedule = scheduleService.suggestPersonalWeekSchedule(
+                new SuggestPersonalWeekScheduleQuery(weekStartDate, userId));
         return WeekScheduleDto.fromDomain(schedule);
     }
 

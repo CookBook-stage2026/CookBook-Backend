@@ -3,13 +3,12 @@ package be.xplore.cookbook.rest.controller.schedule;
 import be.xplore.cookbook.core.domain.household.HouseholdId;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.user.UserId;
-import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
-import be.xplore.cookbook.core.domain.weekschedule.command.CreateWeekScheduleCommand;
+import be.xplore.cookbook.core.domain.weekschedule.command.CreateHouseholdWeekScheduleCommand;
 import be.xplore.cookbook.core.domain.weekschedule.command.DayEntry;
-import be.xplore.cookbook.core.domain.weekschedule.command.FindWeekSchedulesByOwnerQuery;
-import be.xplore.cookbook.core.domain.weekschedule.command.SuggestRecipeForDayQuery;
-import be.xplore.cookbook.core.domain.weekschedule.command.SuggestWeekScheduleQuery;
+import be.xplore.cookbook.core.domain.weekschedule.command.FindHouseholdWeekSchedulesQuery;
+import be.xplore.cookbook.core.domain.weekschedule.command.SuggestHouseholdRecipeForDayQuery;
+import be.xplore.cookbook.core.domain.weekschedule.command.SuggestHouseholdWeekScheduleQuery;
 import be.xplore.cookbook.core.service.WeekScheduleService;
 import be.xplore.cookbook.rest.dto.schedule.request.CreateDayScheduleDto;
 import be.xplore.cookbook.rest.dto.schedule.request.CreateWeekScheduleDto;
@@ -51,9 +50,9 @@ public class HouseholdWeekScheduleController {
             @Valid @RequestBody CreateWeekScheduleDto dto
     ) {
         UserId userId = getUserIdFromJwt(jwt);
-        ScheduleOwner owner = ScheduleOwner.forHousehold(new HouseholdId(householdId));
-        return WeekScheduleDto.fromDomain(scheduleService.saveWeekSchedule(
-                new CreateWeekScheduleCommand(dto.weekStartDate(), toDayEntries(dto.days()), owner, userId)
+        return WeekScheduleDto.fromDomain(scheduleService.saveHouseholdWeekSchedule(
+                new CreateHouseholdWeekScheduleCommand(dto.weekStartDate(), toDayEntries(dto.days()),
+                        new HouseholdId(householdId), userId)
         ));
     }
 
@@ -65,9 +64,9 @@ public class HouseholdWeekScheduleController {
             @RequestParam(required = false) LocalDate to
     ) {
         UserId userId = getUserIdFromJwt(jwt);
-        ScheduleOwner owner = ScheduleOwner.forHousehold(new HouseholdId(householdId));
-        return scheduleService.findSchedulesForOwner(new FindWeekSchedulesByOwnerQuery(owner, from, to, userId))
-                .stream()
+        return scheduleService.findHouseholdSchedules(
+                        new FindHouseholdWeekSchedulesQuery(new HouseholdId(householdId), from, to, userId)
+                ).stream()
                 .map(WeekScheduleDto::fromDomain)
                 .toList();
     }
@@ -79,9 +78,8 @@ public class HouseholdWeekScheduleController {
             @PathVariable LocalDate date
     ) {
         UserId userId = getUserIdFromJwt(jwt);
-        ScheduleOwner owner = ScheduleOwner.forHousehold(new HouseholdId(householdId));
-        WeekSchedule schedule = scheduleService.suggestRecipeForDay(
-                new SuggestRecipeForDayQuery(owner, date, userId));
+        WeekSchedule schedule = scheduleService.suggestHouseholdRecipeForDay(
+                new SuggestHouseholdRecipeForDayQuery(new HouseholdId(householdId), date, userId));
         return WeekScheduleDto.fromDomain(schedule);
     }
 
@@ -92,9 +90,8 @@ public class HouseholdWeekScheduleController {
             @PathVariable LocalDate weekStartDate
     ) {
         UserId userId = getUserIdFromJwt(jwt);
-        ScheduleOwner owner = ScheduleOwner.forHousehold(new HouseholdId(householdId));
-        WeekSchedule schedule = scheduleService.suggestWeekSchedule(
-                new SuggestWeekScheduleQuery(owner, weekStartDate, userId));
+        WeekSchedule schedule = scheduleService.suggestHouseholdWeekSchedule(
+                new SuggestHouseholdWeekScheduleQuery(new HouseholdId(householdId), weekStartDate, userId));
         return WeekScheduleDto.fromDomain(schedule);
     }
 
