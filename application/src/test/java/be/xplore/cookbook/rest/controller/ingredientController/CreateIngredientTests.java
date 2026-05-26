@@ -219,7 +219,7 @@ class CreateIngredientTests extends BaseIntegrationTest {
                 .orElseThrow(() -> new Exception("Ingredient not found"));
 
         assertThat(ingredient.name()).isEqualTo("Flour");
-        assertThat(ingredient.unit()).isEqualTo(Unit.GRAM);
+        assertThat(ingredient.unit()).isEqualTo(Unit.TEASPOON);
     }
 
     private ResultActions performCreateIngredientWithValidJwt(CreateIngredientDto dto) throws Exception {
