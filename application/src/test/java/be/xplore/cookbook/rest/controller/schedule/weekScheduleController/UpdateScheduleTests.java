@@ -60,9 +60,8 @@ class UpdateScheduleTests extends BaseIntegrationTest {
                 .orElseThrow();
 
         assertThat(updatedSchedule.dailyRecipes())
-                .allMatch(day ->
-                        day.recipe().getId().equals(updatedRecipe.getId())
-                );
+                .isNotEmpty()
+                .allMatch(day -> day.recipe().getId().equals(updatedRecipe.getId()));
     }
 
     @Test
@@ -97,9 +96,8 @@ class UpdateScheduleTests extends BaseIntegrationTest {
                 .orElseThrow();
 
         assertThat(updatedSchedule.dailyRecipes())
-                .allMatch(day ->
-                        day.recipe().getId().equals(updatedRecipe.getId())
-                );
+                .isNotEmpty()
+                .allMatch(day -> day.recipe().getId().equals(updatedRecipe.getId()));
     }
 
     @Test

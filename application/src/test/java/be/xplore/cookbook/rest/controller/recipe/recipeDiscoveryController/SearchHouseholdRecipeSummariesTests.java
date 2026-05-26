@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-public class SearchHouseholdRecipeSummariesTests extends BaseIntegrationTest {
+class SearchHouseholdRecipeSummariesTests extends BaseIntegrationTest {
 
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_PAGE_SIZE = 10;
