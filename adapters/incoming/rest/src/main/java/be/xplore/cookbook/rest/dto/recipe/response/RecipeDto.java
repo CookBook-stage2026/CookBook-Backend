@@ -1,11 +1,9 @@
 package be.xplore.cookbook.rest.dto.recipe.response;
 
-import be.xplore.cookbook.core.domain.ingredient.MacroType;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.user.UserId;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public record RecipeDto(
@@ -21,10 +19,8 @@ public record RecipeDto(
         List<MacroDto> totalMacros
 ) {
     public static RecipeDto fromDomain(Recipe recipe, UserId requestingUserId) {
-        Map<MacroType, Double> macros = recipe.calculateMacros();
-
-        List<MacroDto> totalMacros = macros.entrySet().stream()
-                .map(e -> MacroDto.of(e.getKey(), e.getValue()))
+        List<MacroDto> totalMacros = recipe.getMacros().stream()
+                .map(m -> MacroDto.of(m.type(), m.valuePerUnit()))
                 .toList();
 
         List<RecipeIngredientDto> ingredientDtos = recipe.getIngredients().stream()

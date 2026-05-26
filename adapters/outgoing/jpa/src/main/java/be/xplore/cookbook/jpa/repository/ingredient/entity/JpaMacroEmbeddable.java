@@ -1,7 +1,7 @@
 package be.xplore.cookbook.jpa.repository.ingredient.entity;
 
-import be.xplore.cookbook.core.domain.ingredient.Macro;
 import be.xplore.cookbook.core.domain.ingredient.MacroType;
+import be.xplore.cookbook.core.domain.recipe.Macro;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;

@@ -3,8 +3,6 @@ package be.xplore.cookbook.rest.controller.ingredient.ingredientController;
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
-import be.xplore.cookbook.core.domain.ingredient.Macro;
-import be.xplore.cookbook.core.domain.ingredient.MacroType;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
@@ -26,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class CreateIngredientTests extends BaseIntegrationTest {
-    private static final double DEFAULT_CALORIES = 50;
 
     @Override
     protected String[] getTablesToClear() {
@@ -42,12 +39,6 @@ class CreateIngredientTests extends BaseIntegrationTest {
                 List.of(
                         Category.GRAIN,
                         Category.ADDITIVE
-                ),
-                List.of(
-                        new CreateIngredientDto.MacroRequest(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )
                 )
         );
 
@@ -86,13 +77,7 @@ class CreateIngredientTests extends BaseIntegrationTest {
         CreateIngredientDto dto = new CreateIngredientDto(
                 "Flour",
                 null,
-                List.of(Category.GRAIN),
-                List.of(
-                        new CreateIngredientDto.MacroRequest(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )
-                )
+                List.of(Category.GRAIN)
         );
 
         createUser();
@@ -108,13 +93,7 @@ class CreateIngredientTests extends BaseIntegrationTest {
         CreateIngredientDto dto = new CreateIngredientDto(
                 "",
                 Unit.GRAM,
-                List.of(Category.GRAIN),
-                List.of(
-                        new CreateIngredientDto.MacroRequest(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )
-                )
+                List.of(Category.GRAIN)
         );
 
         createUser();
@@ -130,13 +109,7 @@ class CreateIngredientTests extends BaseIntegrationTest {
         CreateIngredientDto dto = new CreateIngredientDto(
                 "Flour",
                 Unit.GRAM,
-                List.of(),
-                List.of(
-                        new CreateIngredientDto.MacroRequest(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )
-                )
+                List.of()
         );
 
         createUser();
@@ -152,13 +125,7 @@ class CreateIngredientTests extends BaseIntegrationTest {
         CreateIngredientDto dto = new CreateIngredientDto(
                 "Flour",
                 Unit.GRAM,
-                List.of(Category.GRAIN),
-                List.of(
-                        new CreateIngredientDto.MacroRequest(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )
-                )
+                List.of(Category.GRAIN)
         );
 
         // Act & Assert
@@ -172,25 +139,13 @@ class CreateIngredientTests extends BaseIntegrationTest {
     @Test
     void createIngredient_shouldReturnCustomIngredient_whenOverwritingGlobalIngredient() throws Exception {
         // Arrange
-        createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null,
-                List.of(
-                        new Macro(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )
-                ));
+        createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null);
         CreateIngredientDto dto = new CreateIngredientDto(
                 "Flour",
                 Unit.KILOGRAM,
                 List.of(
                         Category.GRAIN,
                         Category.ADDITIVE
-                ),
-                List.of(
-                        new CreateIngredientDto.MacroRequest(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )
                 )
         );
 
@@ -224,25 +179,13 @@ class CreateIngredientTests extends BaseIntegrationTest {
         CreateIngredientDto dto1 = new CreateIngredientDto(
                 "Flour",
                 Unit.GRAM,
-                List.of(Category.GRAIN),
-                List.of(
-                        new CreateIngredientDto.MacroRequest(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )
-                )
+                List.of(Category.GRAIN)
         );
 
         CreateIngredientDto dto2 = new CreateIngredientDto(
                 "Flour",
                 Unit.TEASPOON,
-                List.of(Category.EGG),
-                List.of(
-                        new CreateIngredientDto.MacroRequest(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )
-                )
+                List.of(Category.EGG)
         );
 
         UserId userId = UserId.create();

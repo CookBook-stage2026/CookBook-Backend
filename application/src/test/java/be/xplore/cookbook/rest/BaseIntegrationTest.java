@@ -9,9 +9,8 @@ import be.xplore.cookbook.core.domain.householdinvite.InviteTokenGenerator;
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
-import be.xplore.cookbook.core.domain.ingredient.Macro;
-import be.xplore.cookbook.core.domain.ingredient.MacroType;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
+import be.xplore.cookbook.core.domain.recipe.Macro;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
@@ -68,7 +67,6 @@ public abstract class BaseIntegrationTest {
     private static final List<String> DEFAULT_STEPS = List.of("This is step 1", "This is step 2");
     private static final boolean DEFAULT_IS_PUBLIC = true;
     private static final double DEFAULT_QUANTITY = 1.0;
-    private static final double DEFAULT_CALORIES = 50;
 
     @Autowired
     private MockMvc mockMvc;
@@ -157,7 +155,8 @@ public abstract class BaseIntegrationTest {
         getWeekScheduleRepository().save(weekSchedule);
     }
 
-    protected void createWeekSchedule(ScheduleOwner owner, Map<DayOfWeek, Recipe> dailyRecipes, LocalDate weekStartDate) {
+    protected void createWeekSchedule(ScheduleOwner owner, Map<DayOfWeek, Recipe> dailyRecipes,
+                                      LocalDate weekStartDate) {
         List<DaySchedule> daySchedules = new ArrayList<>();
         dailyRecipes.forEach((day, recipe) ->
                 daySchedules.add(new DaySchedule(DayScheduleId.create(), recipe, day))
@@ -220,23 +219,15 @@ public abstract class BaseIntegrationTest {
     }
 
     protected Ingredient createAndSaveIngredient(String name) {
-        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE, null, List.of(new Macro(MacroType.CALORIES,
-                DEFAULT_CALORIES)));
+        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE, null);
     }
 
     protected Ingredient createAndSaveIngredient(String name, User user) {
-        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE, user,
-                List.of(new Macro(MacroType.CALORIES,
-                        DEFAULT_CALORIES)));
+        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE, user);
     }
 
-    protected Ingredient createAndSaveIngredientWithMacros(String name, List<Macro> macros) {
-        return createAndSaveIngredient(name, Unit.GRAM, Category.GRAIN, null, macros);
-    }
-
-    protected Ingredient createAndSaveIngredient(String name, Unit unit, Category category, User user,
-                                                 List<Macro> macros) {
-        Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit, List.of(category), user, macros);
+    protected Ingredient createAndSaveIngredient(String name, Unit unit, Category category, User user) {
+        Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit, List.of(category), user);
         return ingredientRepository.save(ingredient);
     }
 
@@ -284,7 +275,25 @@ public abstract class BaseIntegrationTest {
                 details,
                 recipeIngredients,
                 isPublic,
-                user
+                user,
+                List.of()
+        );
+        return recipeRepository.save(recipe);
+    }
+
+    protected Recipe createAndSaveRecipe(RecipeId recipeId, RecipeDetails details, List<Ingredient> ingredients,
+                                         boolean isPublic, User user, List<Macro> macros) {
+        List<RecipeIngredient> recipeIngredients = ingredients.stream()
+                .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY))
+                .toList();
+
+        Recipe recipe = new Recipe(
+                recipeId,
+                details,
+                recipeIngredients,
+                isPublic,
+                user,
+                macros == null ? List.of() : macros
         );
         return recipeRepository.save(recipe);
     }

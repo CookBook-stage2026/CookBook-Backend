@@ -1,7 +1,7 @@
-package be.xplore.cookbook.rest.dto.response;
+package be.xplore.cookbook.rest.dto.recipe.response;
 
-import be.xplore.cookbook.core.domain.ingredient.Macro;
 import be.xplore.cookbook.core.domain.ingredient.MacroType;
+import be.xplore.cookbook.core.domain.recipe.Macro;
 
 public record MacroDto(
         MacroType type,

@@ -1,13 +1,7 @@
-<<<<<<<< HEAD:application/src/test/java/be/xplore/cookbook/rest/controller/recipe/recipeDiscoveryController/FilterRecipesTests.java
 package be.xplore.cookbook.rest.controller.recipe.recipeDiscoveryController;
-========
-package be.xplore.cookbook.rest.controller.recipe.recipeController;
->>>>>>>> 1a52978 (Feat: #82 Split user and household schedules):application/src/test/java/be/xplore/cookbook/rest/controller/recipe/recipeController/FilterRecipesTests.java
 
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
-import be.xplore.cookbook.core.domain.ingredient.Macro;
-import be.xplore.cookbook.core.domain.ingredient.MacroType;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.user.User;
@@ -37,7 +31,6 @@ class FilterRecipesTests extends BaseIntegrationTest {
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_PAGE_SIZE = 10;
     private static final int NUMBER_OF_RECIPES = 3;
-    private static final double DEFAULT_CALORIES = 50;
 
     @Override
     protected String[] getTablesToClear() {
@@ -148,24 +141,9 @@ class FilterRecipesTests extends BaseIntegrationTest {
     @Test
     void filterRecipes_shouldFilterByIngredients_whenIngredientIdsProvided() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null,
-                List.of(
-                        new Macro(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )));
-        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN, null,
-                List.of(
-                        new Macro(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )));
-        Ingredient salt = createAndSaveIngredient("Salt", Unit.GRAM, Category.GRAIN, null,
-                List.of(
-                        new Macro(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )));
+        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null);
+        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN, null);
+        Ingredient salt = createAndSaveIngredient("Salt", Unit.GRAM, Category.GRAIN, null);
 
         User user = createUser();
 
@@ -191,12 +169,7 @@ class FilterRecipesTests extends BaseIntegrationTest {
     @Test
     void filterRecipes_shouldReturnEmptyResults_whenNoRecipesMatchIngredientFilter() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null,
-                List.of(
-                        new Macro(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )));
+        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null);
         User user = createUser();
         createAndSaveRecipeWithIngredients(List.of(flour), user);
 
@@ -210,24 +183,9 @@ class FilterRecipesTests extends BaseIntegrationTest {
     @Test
     void filterRecipes_shouldExcludeRecipesConflictingWithPreferences_whenPreferencesAreSet() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null,
-                List.of(
-                        new Macro(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )));
-        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN, null,
-                List.of(
-                        new Macro(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )));
-        Ingredient milk = createAndSaveIngredient("Milk", Unit.LITER, Category.DAIRY, null,
-                List.of(
-                        new Macro(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )));
+        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null);
+        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN, null);
+        Ingredient milk = createAndSaveIngredient("Milk", Unit.LITER, Category.DAIRY, null);
 
         User user = createUser();
 
@@ -395,18 +353,8 @@ class FilterRecipesTests extends BaseIntegrationTest {
     @Test
     void filterRecipes_shouldApplyIngredientFilterAcrossHouseholdMembers() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null,
-                List.of(
-                        new Macro(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )));
-        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN, null,
-                List.of(
-                        new Macro(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )));
+        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null);
+        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN, null);
 
         User user1 = createUser();
         User user2 = createUserWithId(UserId.create());
@@ -436,18 +384,8 @@ class FilterRecipesTests extends BaseIntegrationTest {
     @Test
     void filterRecipes_shouldApplyExclusionPreferencesAcrossHouseholdMembers() throws Exception {
         // Arrange
-        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null,
-                List.of(
-                        new Macro(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )));
-        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN, null,
-                List.of(
-                        new Macro(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )));
+        Ingredient flour = createAndSaveIngredient("Flour", Unit.GRAM, Category.GRAIN, null);
+        Ingredient sugar = createAndSaveIngredient("Sugar", Unit.GRAM, Category.GRAIN, null);
 
         User user1 = createUser();
         User user2 = createUserWithId(UserId.create());

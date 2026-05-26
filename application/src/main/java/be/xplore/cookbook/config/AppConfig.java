@@ -46,10 +46,11 @@ public class AppConfig {
             IngredientRepository ingredientRepository,
             UserRepository userRepository,
             WeekScheduleRepository weekScheduleRepository,
-            RecipeImportPort recipeImportPort
+            RecipeImportPort recipeImportPort,
+            RecipeSuggestionsPort recipeSuggestionsPort
     ) {
         return new RecipeCommandService(recipeRepository, ingredientRepository, userRepository,
-                weekScheduleRepository, recipeImportPort);
+                weekScheduleRepository, recipeImportPort, recipeSuggestionsPort);
     }
 
     @Bean

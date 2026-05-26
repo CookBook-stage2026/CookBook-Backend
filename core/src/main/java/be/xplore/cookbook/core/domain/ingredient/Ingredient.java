@@ -9,8 +9,7 @@ public record Ingredient(
         String name,
         Unit unit,
         List<Category> categories,
-        User user,
-        List<Macro> macros
+        User user
 ) {
     public Ingredient {
         if (id == null) {
@@ -25,12 +24,8 @@ public record Ingredient(
         if (categories == null) {
             throw new IllegalArgumentException("Ingredient categories cannot be null!");
         }
-        if (macros == null) {
-            throw new IllegalArgumentException("Ingredient macros cannot be null!");
-        }
 
         name = Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
         categories = List.copyOf(categories);
-        macros = List.copyOf(macros);
     }
 }

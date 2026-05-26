@@ -1,4 +1,6 @@
-package be.xplore.cookbook.core.domain.ingredient;
+package be.xplore.cookbook.core.domain.recipe;
+
+import be.xplore.cookbook.core.domain.ingredient.MacroType;
 
 public record Macro(
         MacroType type,

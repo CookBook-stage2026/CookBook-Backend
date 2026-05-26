@@ -6,6 +6,7 @@ import be.xplore.cookbook.ai.dto.SuggestedWeekScheduleIds;
 import be.xplore.cookbook.ai.dto.WeekSuggestionInput;
 import be.xplore.cookbook.ai.exception.AiConnectionException;
 import be.xplore.cookbook.ai.exception.AiInvalidResponseException;
+import be.xplore.cookbook.core.domain.recipe.Macro;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
@@ -58,6 +59,16 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
     }
 
     @Override
+    public List<Macro> generateMacros(Recipe recipe) {
+        String recipeJson = serialize(RecipeInput.fromDomain(recipe));
+        try {
+            return recipeAiService.generateMacros(recipeJson).macros();
+        } catch (RuntimeException e) {
+            throw handleException(e);
+        }
+    }
+
+    @Override
     public RecipeId suggestRecipeForDay(DayOfWeek dayToSuggestFor, List<WeekSchedule> weekSchedules,
                                         List<RecipeSummary> availableRecipes) {
         DaySuggestionInput input = buildDaySuggestionInput(dayToSuggestFor, weekSchedules, availableRecipes);
@@ -91,8 +102,7 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
             var result = recipeAiService.importFromUrl(url);
 
             List<ImportedIngredient> ingredients = result.ingredients().stream()
-                    .map(i -> new ImportedIngredient(i.name(), i.unit(), i.quantity(),
-                            i.categories(), i.macros()))
+                    .map(i -> new ImportedIngredient(i.name(), i.unit(), i.quantity(), i.categories()))
                     .toList();
 
             return new ImportedRecipe(
@@ -101,7 +111,8 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
                     result.durationInMinutes(),
                     result.servings(),
                     result.steps(),
-                    ingredients
+                    ingredients,
+                    result.macros()
             );
         } catch (RuntimeException e) {
             Throwable cause = e.getCause();

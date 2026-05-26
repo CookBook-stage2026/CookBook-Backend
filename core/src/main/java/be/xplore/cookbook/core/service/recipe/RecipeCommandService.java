@@ -5,6 +5,7 @@ import be.xplore.cookbook.core.domain.exception.NotFoundException;
 import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
+import be.xplore.cookbook.core.domain.recipe.Macro;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
@@ -20,6 +21,7 @@ import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwnerType;
 import be.xplore.cookbook.core.port.recipe.ImportedIngredient;
 import be.xplore.cookbook.core.port.recipe.ImportedRecipe;
 import be.xplore.cookbook.core.port.recipe.RecipeImportPort;
+import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
 import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
@@ -37,16 +39,18 @@ public class RecipeCommandService {
     private final UserRepository userRepository;
     private final WeekScheduleRepository scheduleRepository;
     private final RecipeImportPort recipeImportPort;
+    private final RecipeSuggestionsPort aiPort;
 
     public RecipeCommandService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository,
                                 UserRepository userRepository, WeekScheduleRepository scheduleRepository,
-                                RecipeImportPort recipeImportPort
+                                RecipeImportPort recipeImportPort, RecipeSuggestionsPort aiPort
     ) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
         this.userRepository = userRepository;
         this.scheduleRepository = scheduleRepository;
         this.recipeImportPort = recipeImportPort;
+        this.aiPort = aiPort;
     }
 
     public Recipe createRecipe(CreateRecipeCommand command) {
@@ -56,13 +60,19 @@ public class RecipeCommandService {
         List<RecipeIngredient> raw = mapToRecipeIngredients(command.ingredientQuantities());
         List<RecipeIngredient> unique = deduplicateIngredients(raw);
 
-        return recipeRepository.save(new Recipe(
+        Recipe recipe = new Recipe(
                 RecipeId.create(),
                 command.details(),
                 unique,
                 command.isPublic(),
-                user
-        ));
+                user,
+                List.of()
+        );
+
+        List<Macro> macros = aiPort.generateMacros(recipe);
+        recipe.updateMacros(macros);
+
+        return recipeRepository.save(recipe);
     }
 
     public void updateRecipe(UpdateRecipeCommand command) {
@@ -82,6 +92,9 @@ public class RecipeCommandService {
 
         recipe.changeVisibility(command.isPublic());
 
+        List<Macro> macros = aiPort.generateMacros(recipe);
+        recipe.updateMacros(macros);
+
         recipeRepository.save(recipe);
     }
 
@@ -97,7 +110,7 @@ public class RecipeCommandService {
 
         List<RecipeIngredient> unique = deduplicateIngredients(raw);
 
-        return recipeRepository.save(new Recipe(
+        Recipe recipe = new Recipe(
                 RecipeId.create(),
                 new RecipeDetails(
                         scraped.title(),
@@ -108,8 +121,13 @@ public class RecipeCommandService {
                 ),
                 unique,
                 false,
-                user
-        ));
+                user,
+                List.of()
+        );
+
+        recipe.updateMacros(scraped.macros());
+
+        return recipeRepository.save(recipe);
     }
 
     public void changeVisibility(ChangeVisibilityCommand command) {
@@ -148,8 +166,7 @@ public class RecipeCommandService {
                         scraped.name(),
                         scraped.unit(),
                         scraped.categories(),
-                        user,
-                        scraped.macros()
+                        user
                 )));
         return new RecipeIngredient(ingredient, scraped.quantity());
     }

@@ -2,8 +2,6 @@ package be.xplore.cookbook.rest.controller.user.userController;
 
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
-import be.xplore.cookbook.core.domain.ingredient.Macro;
-import be.xplore.cookbook.core.domain.ingredient.MacroType;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
@@ -23,8 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class UpdatePreferencesTests extends BaseIntegrationTest {
-    private static final double DEFAULT_CALORIES = 50;
-
     @Override
     protected String[] getTablesToClear() {
         return new String[]{"user_excluded_categories", "user_excluded_ingredients", "users", "ingredients"};
@@ -35,12 +31,7 @@ class UpdatePreferencesTests extends BaseIntegrationTest {
         // Arrange
         User user = createUser();
 
-        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG, null,
-                List.of(
-                        new Macro(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )));
+        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG, null);
 
         UpdateUserPreferencesRequest request = new UpdateUserPreferencesRequest(
                 List.of(Category.DAIRY),
@@ -70,12 +61,7 @@ class UpdatePreferencesTests extends BaseIntegrationTest {
         // Arrange
         User user = createUser();
 
-        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG, null,
-                List.of(
-                        new Macro(
-                                MacroType.CALORIES,
-                                DEFAULT_CALORIES
-                        )));
+        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG, null);
 
         getUserPreferenceRepository().save(new UserPreferences(
                 user,

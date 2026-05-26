@@ -1,7 +1,6 @@
 package be.xplore.cookbook.core.domain.ingredient.command;
 
 import be.xplore.cookbook.core.domain.ingredient.Category;
-import be.xplore.cookbook.core.domain.ingredient.Macro;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.user.UserId;
 
@@ -11,7 +10,6 @@ public record CreateIngredientCommand(
         String name,
         Unit defaultUnit,
         List<Category> categories,
-        List<Macro> macros,
         UserId userId
 ) {
 }

@@ -1,7 +1,6 @@
 package be.xplore.cookbook.rest.controller.recipe.recipeController;
 
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
-import be.xplore.cookbook.core.domain.ingredient.Macro;
 import be.xplore.cookbook.core.domain.ingredient.MacroType;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.user.User;
@@ -9,14 +8,24 @@ import be.xplore.cookbook.rest.BaseIntegrationTest;
 import be.xplore.cookbook.rest.dto.recipe.request.CreateRecipeDto;
 import be.xplore.cookbook.rest.dto.recipe.request.NewRecipeIngredientDto;
 import be.xplore.cookbook.rest.dto.recipe.response.RecipeDto;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
@@ -43,20 +52,61 @@ class CreateRecipeTests extends BaseIntegrationTest {
     private static final double INGREDIENT_EGGS_QUANTITY = 2.0;
     private static final double INGREDIENT_FLOUR_QUANTITY = 200.0;
 
-    private static final double MACRO_CALORIES_PER_UNIT = 3.6;
-    private static final double MACRO_FAT_PER_UNIT = 0.01;
-    private static final double MACRO_EXPECTED_TOTAL_CALORIES = 720.0;
-    private static final double MACRO_EXPECTED_TOTAL_FAT = 2.0;
+    private static final double TOTAL_CALORIES = 720.0;
+    private static final double TOTAL_FAT = 2.0;
 
     private static final int EXPECTED_MACRO_COUNT_TWO = 2;
     private static final int EXPECTED_INGREDIENT_COUNT_TWO = 2;
-    private static final int EXPECTED_MACRO_COUNT = 1;
     private static final int EXPECTED_RECIPE_COUNT_ONE = 1;
+
+    private static WireMockServer wireMockServer;
+    private static String mockAiBaseUrl;
+
+    @BeforeAll
+    static void startWireMock() {
+        wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
+        wireMockServer.start();
+
+        WireMock.configureFor("localhost", wireMockServer.port());
+
+        mockAiBaseUrl = "http://localhost:" + wireMockServer.port();
+    }
+
+    @AfterAll
+    static void stopWireMock() {
+        wireMockServer.stop();
+    }
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("ollama.base-url", () -> mockAiBaseUrl);
+    }
+
+    @BeforeEach
+    void stubOllamaChat() {
+        String responseBody = buildOllamaResponseBodyWithContent(buildMacrosResponseContent());
+
+        WireMock.stubFor(WireMock.post(WireMock.urlPathMatching("/api/chat"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(responseBody)));
+    }
+
+    @AfterEach
+    void resetWireMock() {
+        WireMock.reset();
+    }
 
     @Override
     protected String[] getTablesToClear() {
-        return new String[]{"recipe_ingredients", "recipe_steps", "recipes", "ingredient_macros",
-                "ingredients", "users"};
+        return new String[]{
+                "recipe_ingredients",
+                "recipe_steps",
+                "recipes",
+                "recipe_macros",
+                "ingredients",
+                "users"
+        };
     }
 
     @Test
@@ -89,15 +139,19 @@ class CreateRecipeTests extends BaseIntegrationTest {
                         eggs.id().id().toString()
                 )))
                 .andExpect(jsonPath("$.ingredients[*].quantity", hasItems(
-                        INGREDIENT_DEFAULT_QUANTITY, INGREDIENT_EGGS_QUANTITY)))
-                .andExpect(jsonPath("$.ingredients[0].macros", hasSize(EXPECTED_MACRO_COUNT)))
-                .andExpect(jsonPath("$.ingredients[1].macros", hasSize(EXPECTED_MACRO_COUNT)))
-                .andExpect(jsonPath("$.totalMacros", hasSize(EXPECTED_MACRO_COUNT)))
+                        INGREDIENT_DEFAULT_QUANTITY,
+                        INGREDIENT_EGGS_QUANTITY
+                )))
+                .andExpect(jsonPath("$.totalMacros", hasSize(EXPECTED_MACRO_COUNT_TWO)))
                 .andReturn();
 
-        RecipeDto response = getMapper().readValue(result.getResponse().getContentAsString(), RecipeDto.class);
+        RecipeDto response = getMapper().readValue(
+                result.getResponse().getContentAsString(),
+                RecipeDto.class
+        );
 
         RecipeId recipeId = new RecipeId(response.id());
+
         getRecipeRepository().findById(recipeId, user)
                 .orElseThrow(() -> new Exception("Recipe with id " + recipeId + " not found!"));
 
@@ -107,11 +161,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
     @Test
     void createRecipe_shouldReturnTotalMacros_whenIngredientsHaveMacros() throws Exception {
         // Arrange
-        List<Macro> macros = List.of(
-                new Macro(MacroType.CALORIES, MACRO_CALORIES_PER_UNIT),
-                new Macro(MacroType.FAT, MACRO_FAT_PER_UNIT)
-        );
-        Ingredient flour = createAndSaveIngredientWithMacros(INGREDIENT_FLOUR_NAME, macros);
+        Ingredient flour = createAndSaveIngredient(INGREDIENT_FLOUR_NAME);
 
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
                 new NewRecipeIngredientDto(flour.id().id(), INGREDIENT_FLOUR_QUANTITY)
@@ -122,12 +172,11 @@ class CreateRecipeTests extends BaseIntegrationTest {
         // Act & Assert
         performCreateRecipeWithValidJwt(dto)
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.ingredients[0].macros", hasSize(EXPECTED_MACRO_COUNT_TWO)))
                 .andExpect(jsonPath("$.totalMacros", hasSize(EXPECTED_MACRO_COUNT_TWO)))
-                .andExpect(jsonPath("$.totalMacros[?(@.type == 'CALORIES')].value")
-                        .value(MACRO_EXPECTED_TOTAL_CALORIES))
-                .andExpect(jsonPath("$.totalMacros[?(@.type == 'FAT')].value")
-                        .value(MACRO_EXPECTED_TOTAL_FAT));
+                .andExpect(jsonPath("$.totalMacros[0].type").value("CALORIES"))
+                .andExpect(jsonPath("$.totalMacros[0].value").value(TOTAL_CALORIES))
+                .andExpect(jsonPath("$.totalMacros[1].type").value("FAT"))
+                .andExpect(jsonPath("$.totalMacros[1].value").value(TOTAL_FAT));
     }
 
     @Test
@@ -223,5 +272,43 @@ class CreateRecipeTests extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(getMapper().writeValueAsString(dto)))
                 .andDo(print());
+    }
+
+    private String buildOllamaResponseBodyWithContent(String content) {
+        record Message(String role, String content) {
+        }
+
+        record OllamaResponse(Message message, boolean done) {
+        }
+
+        return getMapper().writeValueAsString(
+                new OllamaResponse(
+                        new Message("assistant", content),
+                        true
+                )
+        );
+    }
+
+    private String buildMacrosResponseContent() {
+        return String.format(Locale.US,
+                """
+                {
+                    "macros": [
+                        {
+                            "type": "%s",
+                            "valuePerUnit": %.1f
+                        },
+                        {
+                            "type": "%s",
+                            "valuePerUnit": %.1f
+                        }
+                    ]
+                }
+                """,
+                MacroType.CALORIES,
+                TOTAL_CALORIES,
+                MacroType.FAT,
+                TOTAL_FAT
+        );
     }
 }
