@@ -1,14 +1,22 @@
 package be.xplore.cookbook.rest.controller.recipe.recipeController;
 
+import be.xplore.cookbook.core.domain.household.Household;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
+import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
 import be.xplore.cookbook.rest.dto.recipe.request.ChangeRecipeVisibilityRequest;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,6 +25,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ChangeVisibilityTests extends BaseIntegrationTest {
+
+    private static final LocalDate MONDAY = LocalDate.of(2026, 5, 4);
 
     @Override
     protected String[] getTablesToClear() {
@@ -83,6 +93,47 @@ class ChangeVisibilityTests extends BaseIntegrationTest {
         // Act & Assert
         performChangeVisibilityAsUser(otherUser, recipe.getId().id(), dto)
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void changeVisibility_shouldUpdateHouseholdWeekSchedule_whenRequestIsValid() throws Exception {
+        // Arrange
+        User creator = createUserWithId(UserId.create());
+        User member = createUserWithId(UserId.create());
+        Household household = createHouseholdWithMembers(List.of(member), creator);
+
+        Recipe recipe = createAndSaveRecipe("Recipe", true, member);
+
+        Map<DayOfWeek, Recipe> householdSchedule = new EnumMap<>(DayOfWeek.class);
+        householdSchedule.put(DayOfWeek.MONDAY, recipe);
+        createWeekSchedule(ScheduleOwner.forHousehold(household.id()), householdSchedule, MONDAY);
+
+        Map<DayOfWeek, Recipe> personalSchedule = new EnumMap<>(DayOfWeek.class);
+        personalSchedule.put(DayOfWeek.MONDAY, recipe);
+        createWeekSchedule(ScheduleOwner.forUser(member.id()), personalSchedule, MONDAY);
+
+        ChangeRecipeVisibilityRequest dto = new ChangeRecipeVisibilityRequest(false);
+
+        // Act & Assert
+        performChangeVisibilityAsUser(member, recipe.getId().id(), dto)
+                .andExpect(status().isOk());
+
+        var savedSchedule = getWeekScheduleRepository().findAllByOwner(ScheduleOwner.forHousehold(household.id()))
+                .getFirst();
+
+        boolean hasRecipeHousehold = savedSchedule.dailyRecipes().stream()
+                .anyMatch(ds -> ds.recipe().getId().equals(recipe.getId()));
+
+        AssertionsForClassTypes.assertThat(hasRecipeHousehold).isFalse();
+
+
+        var savedPersonalSchedule = getWeekScheduleRepository().findAllByOwner(ScheduleOwner.forUser(member.id()))
+                .getFirst();
+
+        boolean hasRecipe = savedPersonalSchedule.dailyRecipes().stream()
+                .anyMatch(ds -> ds.recipe().getId().equals(recipe.getId()));
+
+        AssertionsForClassTypes.assertThat(hasRecipe).isTrue();
     }
 
     private ResultActions performChangeVisibility(UUID recipeId,

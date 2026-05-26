@@ -1,11 +1,15 @@
 package be.xplore.cookbook.jpa.repository.weekschedule;
 
+import be.xplore.cookbook.core.domain.recipe.RecipeId;
+import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
+import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwnerType;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
 import be.xplore.cookbook.core.domain.weekschedule.WeekScheduleId;
 import be.xplore.cookbook.core.repository.WeekScheduleRepository;
 import be.xplore.cookbook.jpa.repository.weekschedule.entity.JpaWeekScheduleEntity;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -62,5 +66,17 @@ public class WeekScheduleRepositoryImpl implements WeekScheduleRepository {
     @Override
     public void delete(WeekSchedule schedule) {
         scheduleRepository.delete(JpaWeekScheduleEntity.fromDomain(schedule));
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllScheduledRecipesFromUser(ScheduleOwner owner, UserId userId) {
+        scheduleRepository.deleteAllByOwnerAndRecipeUser(owner.ownerId(), userId.id());
+    }
+
+    @Override
+    @Transactional
+    public void deleteByRecipeIdAndOwnerType(RecipeId recipeId, ScheduleOwnerType ownerType) {
+        scheduleRepository.deleteByRecipeIdAndOwnerType(recipeId.id(), ownerType);
     }
 }

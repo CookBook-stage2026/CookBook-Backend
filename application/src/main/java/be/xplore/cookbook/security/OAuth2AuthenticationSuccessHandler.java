@@ -4,7 +4,7 @@ import be.xplore.cookbook.core.domain.auth.OAuth2UserInfo;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.command.AutoSaveAfterLoginCommand;
 import be.xplore.cookbook.core.domain.user.command.FindUserBySocialConnectionQuery;
-import be.xplore.cookbook.core.service.UserService;
+import be.xplore.cookbook.core.service.user.UserService;
 import be.xplore.cookbook.security.exception.OAuth2Exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

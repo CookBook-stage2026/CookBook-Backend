@@ -7,7 +7,7 @@ import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
 import be.xplore.cookbook.core.domain.recipe.command.SearchHouseholdRecipesByNameQuery;
 import be.xplore.cookbook.core.domain.recipe.command.SearchPersonalRecipesByNameQuery;
 import be.xplore.cookbook.core.domain.user.UserId;
-import be.xplore.cookbook.core.service.RecipeService;
+import be.xplore.cookbook.core.service.recipe.RecipeQueryService;
 import be.xplore.cookbook.rest.dto.common.response.PaginatedResponse;
 import be.xplore.cookbook.rest.dto.recipe.request.RecipeSearchRequest;
 import be.xplore.cookbook.rest.dto.recipe.response.RecipeSummaryDto;
@@ -29,10 +29,10 @@ import java.util.UUID;
 @RequestMapping("/api/recipes")
 public class RecipeDiscoveryController {
 
-    private final RecipeService recipeService;
+    private final RecipeQueryService recipeQueryService;
 
-    public RecipeDiscoveryController(RecipeService recipeService) {
-        this.recipeService = recipeService;
+    public RecipeDiscoveryController(RecipeQueryService recipeQueryService) {
+        this.recipeQueryService = recipeQueryService;
     }
 
     @PostMapping("/filter")
@@ -42,7 +42,7 @@ public class RecipeDiscoveryController {
     ) {
         List<IngredientId> ingredients = request.ingredientIds().stream().map(IngredientId::new).toList();
 
-        var result = recipeService.findAllSummariesWithFilter(new FilterRecipesQuery(
+        var result = recipeQueryService.findAllSummariesWithFilter(new FilterRecipesQuery(
                 ingredients, new Paging(request.page(), request.size()), request.shouldApplyPreferences(),
                 request.includeAccessibleRecipes(), getUserIdFromJwt(jwt)
         ));
@@ -62,7 +62,7 @@ public class RecipeDiscoveryController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam String query
     ) {
-        return recipeService.searchPersonalSummariesByName(
+        return recipeQueryService.searchPersonalSummariesByName(
                         new SearchPersonalRecipesByNameQuery(new Paging(page, size), getUserIdFromJwt(jwt), query)
                 ).stream()
                 .map(RecipeSummaryDto::fromDomain)
@@ -77,7 +77,7 @@ public class RecipeDiscoveryController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam String query
     ) {
-        return recipeService.searchHouseholdSummariesByName(
+        return recipeQueryService.searchHouseholdSummariesByName(
                         new SearchHouseholdRecipesByNameQuery(new Paging(page, size),
                                 new HouseholdId(householdId), getUserIdFromJwt(jwt), query)
                 ).stream()

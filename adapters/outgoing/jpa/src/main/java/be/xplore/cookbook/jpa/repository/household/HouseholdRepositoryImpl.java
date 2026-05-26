@@ -36,15 +36,17 @@ public class HouseholdRepositoryImpl implements HouseholdRepository {
     }
 
     @Override
-    public void removeMember(HouseholdId householdId, UserId userId) {
+    public boolean removeMember(HouseholdId householdId, UserId userId) {
         JpaHouseholdEntity household = jpaHouseholdRepository.findById(householdId.id())
                 .orElseThrow(() -> new HouseholdNotFoundException(householdId));
 
-        household.getMembers().removeIf(member ->
+        boolean isRemoved = household.getMembers().removeIf(member ->
                 member.getId().equals(userId.id())
         );
 
         jpaHouseholdRepository.save(household);
+
+        return isRemoved;
     }
 
     @Override

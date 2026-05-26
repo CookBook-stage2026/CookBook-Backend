@@ -1,14 +1,21 @@
 package be.xplore.cookbook.rest.controller.recipe.recipeController;
 
+import be.xplore.cookbook.core.domain.household.Household;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
+import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -17,6 +24,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class DeleteRecipeTests extends BaseIntegrationTest {
+
+    private static final LocalDate MONDAY = LocalDate.of(2026, 5, 4);
 
     @Override
     protected String[] getTablesToClear() {
@@ -81,6 +90,45 @@ class DeleteRecipeTests extends BaseIntegrationTest {
         getMockMvc().perform(delete("/api/recipes/{id}", recipe.getId().id())
                         .with(csrf()))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void deleteRecipe_shouldReturn204AndUpdateWeekSchedules_whenRecipeExistsAndBelongsToUser() throws Exception {
+        // Arrange
+        User creator = createUserWithId(UserId.create());
+        User member = createUserWithId(UserId.create());
+        Household household = createHouseholdWithMembers(List.of(member), creator);
+
+        Recipe recipe = createAndSaveRecipe("Recipe", true, member);
+
+        Map<DayOfWeek, Recipe> householdSchedule = new EnumMap<>(DayOfWeek.class);
+        householdSchedule.put(DayOfWeek.MONDAY, recipe);
+        createWeekSchedule(ScheduleOwner.forHousehold(household.id()), householdSchedule, MONDAY);
+
+        Map<DayOfWeek, Recipe> personalSchedule = new EnumMap<>(DayOfWeek.class);
+        personalSchedule.put(DayOfWeek.MONDAY, recipe);
+        createWeekSchedule(ScheduleOwner.forUser(member.id()), personalSchedule, MONDAY);
+
+        // Act & Assert
+        performDeleteRecipe(recipe.getId().id(), member.id())
+                .andExpect(status().isNoContent());
+
+        var savedSchedule = getWeekScheduleRepository().findAllByOwner(ScheduleOwner.forHousehold(household.id()))
+                .getFirst();
+
+        boolean hasRecipeHousehold = savedSchedule.dailyRecipes().stream()
+                .anyMatch(ds -> ds.recipe().getId().equals(recipe.getId()));
+
+        AssertionsForClassTypes.assertThat(hasRecipeHousehold).isFalse();
+
+
+        var savedPersonalSchedule = getWeekScheduleRepository().findAllByOwner(ScheduleOwner.forUser(member.id()))
+                .getFirst();
+
+        boolean hasRecipe = savedPersonalSchedule.dailyRecipes().stream()
+                .anyMatch(ds -> ds.recipe().getId().equals(recipe.getId()));
+
+        AssertionsForClassTypes.assertThat(hasRecipe).isFalse();
     }
 
     private ResultActions performDeleteRecipe(UUID recipeId, UserId userId) throws Exception {

@@ -14,7 +14,7 @@ public interface HouseholdRepository {
 
     List<Household> findAllByUserId(UserId userId);
 
-    void removeMember(HouseholdId householdId, UserId userId);
+    boolean removeMember(HouseholdId householdId, UserId userId);
 
     void deleteById(HouseholdId householdId);
 
