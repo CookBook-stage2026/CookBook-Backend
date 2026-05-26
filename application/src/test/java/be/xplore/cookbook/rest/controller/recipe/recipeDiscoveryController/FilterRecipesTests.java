@@ -1,4 +1,4 @@
-package be.xplore.cookbook.rest.controller.recipe.recipeController;
+package be.xplore.cookbook.rest.controller.recipe.recipeDiscoveryController;
 
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;

@@ -154,7 +154,8 @@ public abstract class BaseIntegrationTest {
         getWeekScheduleRepository().save(weekSchedule);
     }
 
-    protected void createWeekSchedule(ScheduleOwner owner, Map<DayOfWeek, Recipe> dailyRecipes, LocalDate weekStartDate) {
+    protected void createWeekSchedule(ScheduleOwner owner, Map<DayOfWeek, Recipe> dailyRecipes,
+                                      LocalDate weekStartDate) {
         List<DaySchedule> daySchedules = new ArrayList<>();
         dailyRecipes.forEach((day, recipe) ->
                 daySchedules.add(new DaySchedule(DayScheduleId.create(), recipe, day))
@@ -194,6 +195,13 @@ public abstract class BaseIntegrationTest {
         return createAndSaveRecipe(new RecipeDetails(name, DEFAULT_RECIPE_DESCRIPTION,
                         DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS),
                 List.of(ingredient), DEFAULT_IS_PUBLIC, user);
+    }
+
+    protected Recipe createAndSaveRecipe(String name, boolean isPublic, User user) {
+        Ingredient ingredient = createAndSaveIngredient("Ingredient");
+        return createAndSaveRecipe(new RecipeDetails(name, DEFAULT_RECIPE_DESCRIPTION,
+                        DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS),
+                List.of(ingredient), isPublic, user);
     }
 
     protected Recipe createAndSaveRecipe(boolean isPublic, User user) {

@@ -1,13 +1,11 @@
-package be.xplore.cookbook.rest.controller.recipe.recipeController;
+package be.xplore.cookbook.rest.controller.recipe.recipeDiscoveryController;
 
-import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -18,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class SearchRecipeSummariesTests extends BaseIntegrationTest {
+class SearchPersonalRecipeSummariesTests extends BaseIntegrationTest {
 
     private static final int DEFAULT_SIZE = 3;
     private static final int AMOUNT_OF_RECIPES = 15;
@@ -28,7 +26,8 @@ class SearchRecipeSummariesTests extends BaseIntegrationTest {
 
     @Override
     protected String[] getTablesToClear() {
-        return new String[]{"recipe_ingredients", "recipe_steps", "recipes", "ingredients", "users"};
+        return new String[]{"recipe_ingredients", "recipe_steps", "recipes", "ingredients", "users", "households",
+                "households_members"};
     }
 
     @Test
@@ -68,24 +67,6 @@ class SearchRecipeSummariesTests extends BaseIntegrationTest {
     }
 
     @Test
-    void searchRecipeSummaries_shouldReturnMultipleRecipes_whenQueryMatchesSeveral() throws Exception {
-        // Arrange
-        var user = createUser();
-        createAndSaveRecipe(user);
-        createAndSaveRecipe(user);
-
-        String query = "Test";
-
-        // Act & Assert
-        performSearch(query, 0, DEFAULT_PAGE_SIZE)
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].name").value("Test Name"))
-                .andExpect(jsonPath("$[1].name").value("Test Name"));
-    }
-
-    @Test
     void searchRecipeSummaries_shouldBeCaseInsensitive_whenSearching() throws Exception {
         // Arrange
         var user = createUser();
@@ -119,19 +100,6 @@ class SearchRecipeSummariesTests extends BaseIntegrationTest {
     }
 
     @Test
-    void searchRecipeSummaries_shouldReturnEmptyList_whenNoRecipesExist() throws Exception {
-        // Arrange
-        String query = "pizza";
-        createUser();
-
-        // Act & Assert
-        performSearch(query, 0, DEFAULT_PAGE_SIZE)
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(0)));
-    }
-
-    @Test
     void searchRecipeSummaries_shouldHandlePagination_whenMultiplePages() throws Exception {
         // Arrange
         var user = createUser();
@@ -153,108 +121,28 @@ class SearchRecipeSummariesTests extends BaseIntegrationTest {
     }
 
     @Test
-    void searchRecipeSummaries_shouldReturnEmptyPage_whenPageNumberExceedsTotalPages() throws Exception {
-        // Arrange
-        var user = createUser();
-        createAndSaveRecipe(user);
-
-        String query = "Test";
-
-        // Act & Assert
-        performSearch(query, SECONDARY_PAGE_SIZE, DEFAULT_PAGE_SIZE)
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(0)));
-    }
-
-    @Test
-    void searchRecipeSummaries_shouldMatchExactName_whenQueryMatchesExactly() throws Exception {
-        // Arrange
-        var user = createUser();
-        createAndSaveRecipe(user);
-        createAndSaveRecipe(user);
-
-        String query = "Test Name";
-
-        // Act & Assert
-        performSearch(query, 0, DEFAULT_PAGE_SIZE)
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(2)));
-    }
-
-    @Test
-    void searchRecipeSummaries_shouldReturnRecipesFromHouseholdMembers_whenUserIsInHousehold() throws Exception {
+    void searchRecipeSummaries_shouldNotReturnRecipesFromHouseholdMembers_whenUserIsInHousehold() throws Exception {
         // Arrange
         var user1 = createUser();
         var user2 = createUserWithId(UserId.create());
         var user3 = createUserWithId(UserId.create());
-        List<User> householdMembers = new ArrayList<>();
-        householdMembers.add(user2);
-        householdMembers.add(user3);
 
-        createHouseholdWithMembers(householdMembers, user1);
+        createHouseholdWithMembers(List.of(user2, user3), user1);
 
-        createAndSaveRecipe(user1);
-        createAndSaveRecipe(user2);
-        createAndSaveRecipe(user3);
+        String recipeName = "Test Recipe";
 
-        String query = "Test";
+        createAndSaveRecipe(recipeName, user1);
+        createAndSaveRecipe(recipeName, true, user2);
+        createAndSaveRecipe(recipeName, true, user3);
 
         // Act & Assert
-        performSearchAsUser(query, 0, DEFAULT_PAGE_SIZE, user1.id())
+        performSearchAsUser(recipeName, 0, DEFAULT_PAGE_SIZE, user1.id())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(DEFAULT_SIZE)));
-    }
-
-    @Test
-    void searchRecipeSummaries_shouldNotReturnRecipesFromNonHouseholdMembers_whenUserIsInHousehold() throws Exception {
-        // Arrange
-        var user1 = createUser();
-        var user2 = createUserWithId(UserId.create());
-        var userOutsideHousehold = createUserWithId(UserId.create());
-
-        List<User> householdMembers = new ArrayList<>();
-        householdMembers.add(user2);
-
-        createHouseholdWithMembers(householdMembers, user1);
-
-        createAndSaveRecipe(user1);
-        createAndSaveRecipe(userOutsideHousehold);
-
-        String query = "Test";
-
-        // Act & Assert
-        performSearchAsUser(query, 0, DEFAULT_PAGE_SIZE, user1.id())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name").value("Test Name"));
-    }
-
-    @Test
-    void searchRecipeSummaries_shouldBeCaseInsensitiveForHouseholdRecipes_whenSearching() throws Exception {
-        // Arrange
-        var user1 = createUser();
-        var user2 = createUserWithId(UserId.create());
-
-        List<User> householdMembers = new ArrayList<>();
-        householdMembers.add(user2);
-
-        createHouseholdWithMembers(householdMembers, user1);
-
-        createAndSaveRecipe(user1);
-        createAndSaveRecipe(user2);
-
-        String query = "test";
-
-        // Act & Assert
-        performSearchAsUser(query, 0, DEFAULT_PAGE_SIZE, user1.id())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(jsonPath("$", hasSize(1)));
     }
 
     private ResultActions performSearchAsUser(String query, int page, int size, UserId userId) throws Exception {
-        return getMockMvc().perform(get("/api/recipes/search")
+        return getMockMvc().perform(get("/api/recipes/search/personal")
                         .with(validJwtFromUserId(userId))
                         .with(csrf())
                         .param("page", String.valueOf(page))
@@ -264,7 +152,7 @@ class SearchRecipeSummariesTests extends BaseIntegrationTest {
     }
 
     private ResultActions performSearch(String query, int page, int size) throws Exception {
-        return getMockMvc().perform(get("/api/recipes/search")
+        return getMockMvc().perform(get("/api/recipes/search/personal")
                         .with(validJwt())
                         .with(csrf())
                         .param("page", String.valueOf(page))
