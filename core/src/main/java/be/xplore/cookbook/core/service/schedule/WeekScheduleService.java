@@ -1,4 +1,4 @@
-package be.xplore.cookbook.core.service;
+package be.xplore.cookbook.core.service.schedule;
 
 import be.xplore.cookbook.core.common.Paging;
 import be.xplore.cookbook.core.domain.exception.ForbiddenException;
