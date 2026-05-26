@@ -45,11 +45,12 @@ public class AppConfig {
             IngredientRepository ingredientRepository,
             UserRepository userRepository,
             UserPreferenceRepository userPreferenceRepository,
+            HouseholdRepository householdRepository,
             RecipeSuggestionsPort recipeSuggestionsPort,
             RecipeImportPort recipeImportPort
     ) {
         return new RecipeService(recipeRepository, ingredientRepository, userRepository,
-                userPreferenceRepository, recipeSuggestionsPort, recipeImportPort);
+                userPreferenceRepository, householdRepository, recipeSuggestionsPort, recipeImportPort);
     }
 
     @Bean
@@ -77,10 +78,11 @@ public class AppConfig {
             UserRepository userRepository,
             RecipeRepository recipeRepository,
             UserPreferenceRepository userPreferenceRepository,
+            HouseholdRepository householdRepository,
             ScheduleSuggestionsPort scheduleSuggestionsPort
     ) {
         return new WeekScheduleService(weekScheduleRepository, userRepository, recipeRepository,
-                userPreferenceRepository, scheduleSuggestionsPort);
+                userPreferenceRepository, householdRepository, scheduleSuggestionsPort);
     }
 
     @Bean

@@ -11,6 +11,7 @@ import java.util.List;
 public interface ScheduleSuggestionsPort {
     RecipeId suggestRecipeForDay(DayOfWeek dayToSuggestFor, List<WeekSchedule> weekSchedules,
                                  List<RecipeSummary> availableRecipes);
+
     List<SuggestedDayRecipe> suggestWeekSchedule(LocalDate weekStartDate, List<WeekSchedule> weekSchedules,
                                                  List<RecipeSummary> availableRecipes);
 }

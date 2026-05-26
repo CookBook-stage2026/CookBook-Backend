@@ -8,6 +8,7 @@ import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.user.User;
+import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.jpa.repository.recipe.entity.JpaRecipeEntity;
@@ -87,11 +88,34 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public List<RecipeSummary> querySummaries(Paging paging, User user, String query) {
+    public List<RecipeSummary> findAllSummariesByUserIds(List<UserId> userIds) {
+        return jpaRecipeRepository.findByUser_IdInAndIsPublicTrue(userIds.stream().map(UserId::id).toList()).stream()
+                .map(JpaRecipeEntity::toSummary)
+                .toList();
+    }
+
+    @Override
+    public List<RecipeSummary> queryPersonalSummaries(Paging paging, User user, String query) {
         Pageable pageable = PageRequest.of(paging.page(), paging.size());
 
-        return jpaRecipeRepository.searchByNamePrioritizingStartsWith(query, JpaUserEntity.fromDomain(user), pageable)
-                .stream().map(JpaRecipeEntity::toSummary).toList();
+        return jpaRecipeRepository
+                .searchOwnByNamePrioritizingStartsWith(query, JpaUserEntity.fromDomain(user), pageable)
+                .stream()
+                .map(JpaRecipeEntity::toSummary)
+                .toList();
+    }
+
+    @Override
+    public List<RecipeSummary> querySummaries(Paging paging, List<UserId> userIds, String query) {
+        Pageable pageable = PageRequest.of(paging.page(), paging.size());
+        List<UUID> userUuids = userIds.stream()
+                .map(UserId::id)
+                .toList();
+
+        return jpaRecipeRepository.searchByNamePrioritizingStartsWith(query, userUuids, pageable)
+                .stream()
+                .map(JpaRecipeEntity::toSummary)
+                .toList();
     }
 
     @Override

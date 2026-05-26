@@ -7,6 +7,7 @@ import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.user.User;
+import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 
 import java.util.List;
@@ -20,7 +21,11 @@ public interface RecipeRepository {
     PagedResult<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, UserPreferences preferences,
                                                           boolean includeAccessibleRecipes, User user, Paging pageable);
 
-    List<RecipeSummary> querySummaries(Paging pageable, User user, String query);
+    List<RecipeSummary> findAllSummariesByUserIds(List<UserId> userIds);
+
+    List<RecipeSummary> queryPersonalSummaries(Paging pageable, User user, String query);
+
+    List<RecipeSummary> querySummaries(Paging paging, List<UserId> userIds, String query);
 
     long count();
 

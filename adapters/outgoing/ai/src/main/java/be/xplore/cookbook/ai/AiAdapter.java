@@ -3,7 +3,7 @@ package be.xplore.cookbook.ai;
 import be.xplore.cookbook.ai.dto.DaySuggestionInput;
 import be.xplore.cookbook.ai.dto.RecipeInput;
 import be.xplore.cookbook.ai.dto.SuggestedWeekScheduleIds;
-import be.xplore.cookbook.ai.dto.WeekScheduleInput;
+import be.xplore.cookbook.ai.dto.WeekSuggestionInput;
 import be.xplore.cookbook.ai.exception.AiConnectionException;
 import be.xplore.cookbook.ai.exception.AiInvalidResponseException;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
@@ -73,7 +73,7 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
     @Override
     public List<SuggestedDayRecipe> suggestWeekSchedule(LocalDate weekStartDate, List<WeekSchedule> weekSchedules,
                                                         List<RecipeSummary> availableRecipes) {
-        WeekScheduleInput input = buildWeekScheduleInput(weekStartDate, weekSchedules, availableRecipes);
+        WeekSuggestionInput input = buildWeekSuggestionInput(weekStartDate, weekSchedules, availableRecipes);
         String json = serialize(input);
         try {
             SuggestedWeekScheduleIds result = scheduleAiService.suggestWeekSchedule(json);
@@ -129,9 +129,9 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
         return new AiInvalidResponseException("AI returned an unexpected response", e);
     }
 
-    private WeekScheduleInput buildWeekScheduleInput(LocalDate weekStartDate, List<WeekSchedule> weekSchedules,
+    private WeekSuggestionInput buildWeekSuggestionInput(LocalDate weekStartDate, List<WeekSchedule> weekSchedules,
                                                      List<RecipeSummary> availableRecipes) {
-        return WeekScheduleInput.fromDomain(
+        return WeekSuggestionInput.fromDomain(
                 weekStartDate,
                 availableRecipes,
                 weekSchedules.get(PREVIOUS_WEEK_INDEX),
