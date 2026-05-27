@@ -6,7 +6,7 @@ import be.xplore.cookbook.core.domain.weekschedule.WeekScheduleId;
 import be.xplore.cookbook.core.domain.weekschedule.command.DayEntry;
 import be.xplore.cookbook.core.domain.weekschedule.command.DeleteWeekScheduleCommand;
 import be.xplore.cookbook.core.domain.weekschedule.command.UpdateWeekScheduleCommand;
-import be.xplore.cookbook.core.service.WeekScheduleService;
+import be.xplore.cookbook.core.service.schedule.WeekScheduleService;
 import be.xplore.cookbook.rest.dto.schedule.request.UpdateWeekScheduleDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -54,6 +54,7 @@ public class WeekScheduleController {
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteSchedule(
             @AuthenticationPrincipal Jwt jwt,

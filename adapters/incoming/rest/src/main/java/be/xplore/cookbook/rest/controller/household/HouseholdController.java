@@ -8,7 +8,7 @@ import be.xplore.cookbook.core.domain.household.command.FindAllHouseholdsForUser
 import be.xplore.cookbook.core.domain.household.command.FindHouseholdByIdQuery;
 import be.xplore.cookbook.core.domain.household.command.RemoveMemberFromHouseholdCommand;
 import be.xplore.cookbook.core.domain.user.UserId;
-import be.xplore.cookbook.core.service.HouseholdService;
+import be.xplore.cookbook.core.service.household.HouseholdService;
 import be.xplore.cookbook.rest.dto.household.request.CreateHouseholdDto;
 import be.xplore.cookbook.rest.dto.household.response.HouseholdDto;
 import jakarta.validation.Valid;
@@ -84,6 +84,7 @@ public class HouseholdController {
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(
             @AuthenticationPrincipal Jwt jwt,

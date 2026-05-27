@@ -1,4 +1,4 @@
-package be.xplore.cookbook.core.service;
+package be.xplore.cookbook.core.service.ingredient;
 
 import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;

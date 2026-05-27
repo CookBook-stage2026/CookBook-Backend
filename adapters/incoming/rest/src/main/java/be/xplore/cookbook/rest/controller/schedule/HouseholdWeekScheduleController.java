@@ -9,7 +9,7 @@ import be.xplore.cookbook.core.domain.weekschedule.command.DayEntry;
 import be.xplore.cookbook.core.domain.weekschedule.command.FindHouseholdWeekSchedulesQuery;
 import be.xplore.cookbook.core.domain.weekschedule.command.SuggestHouseholdRecipeForDayQuery;
 import be.xplore.cookbook.core.domain.weekschedule.command.SuggestHouseholdWeekScheduleQuery;
-import be.xplore.cookbook.core.service.WeekScheduleService;
+import be.xplore.cookbook.core.service.schedule.WeekScheduleService;
 import be.xplore.cookbook.rest.dto.schedule.request.CreateDayScheduleDto;
 import be.xplore.cookbook.rest.dto.schedule.request.CreateWeekScheduleDto;
 import be.xplore.cookbook.rest.dto.schedule.response.WeekScheduleDto;

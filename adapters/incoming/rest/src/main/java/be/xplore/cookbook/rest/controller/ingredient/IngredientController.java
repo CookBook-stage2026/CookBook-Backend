@@ -8,7 +8,7 @@ import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.ingredient.command.CreateIngredientCommand;
 import be.xplore.cookbook.core.domain.ingredient.command.SearchIngredientsQuery;
 import be.xplore.cookbook.core.domain.user.UserId;
-import be.xplore.cookbook.core.service.IngredientService;
+import be.xplore.cookbook.core.service.ingredient.IngredientService;
 import be.xplore.cookbook.rest.dto.ingredient.request.CreateIngredientDto;
 import be.xplore.cookbook.rest.dto.ingredient.request.IngredientSearchRequest;
 import be.xplore.cookbook.rest.dto.ingredient.response.IngredientDto;

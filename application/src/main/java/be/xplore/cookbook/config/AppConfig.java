@@ -11,13 +11,14 @@ import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
 import be.xplore.cookbook.core.repository.WeekScheduleRepository;
-import be.xplore.cookbook.core.service.HouseholdInviteService;
-import be.xplore.cookbook.core.service.HouseholdService;
-import be.xplore.cookbook.core.service.IngredientService;
-import be.xplore.cookbook.core.service.RecipeService;
-import be.xplore.cookbook.core.service.UserPreferenceService;
-import be.xplore.cookbook.core.service.UserService;
-import be.xplore.cookbook.core.service.WeekScheduleService;
+import be.xplore.cookbook.core.service.household.HouseholdInviteService;
+import be.xplore.cookbook.core.service.household.HouseholdService;
+import be.xplore.cookbook.core.service.ingredient.IngredientService;
+import be.xplore.cookbook.core.service.recipe.RecipeCommandService;
+import be.xplore.cookbook.core.service.recipe.RecipeQueryService;
+import be.xplore.cookbook.core.service.schedule.WeekScheduleService;
+import be.xplore.cookbook.core.service.user.UserPreferenceService;
+import be.xplore.cookbook.core.service.user.UserService;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,17 +41,29 @@ public class AppConfig {
 
     @Bean
     @Transactional(readOnly = true)
-    public RecipeService recipeService(
+    public RecipeCommandService recipeCommandService(
+            RecipeRepository recipeRepository,
+            IngredientRepository ingredientRepository,
+            UserRepository userRepository,
+            WeekScheduleRepository weekScheduleRepository,
+            RecipeImportPort recipeImportPort
+    ) {
+        return new RecipeCommandService(recipeRepository, ingredientRepository, userRepository,
+                weekScheduleRepository, recipeImportPort);
+    }
+
+    @Bean
+    @Transactional(readOnly = true)
+    public RecipeQueryService recipeQueryService(
             RecipeRepository recipeRepository,
             IngredientRepository ingredientRepository,
             UserRepository userRepository,
             UserPreferenceRepository userPreferenceRepository,
             HouseholdRepository householdRepository,
-            RecipeSuggestionsPort recipeSuggestionsPort,
-            RecipeImportPort recipeImportPort
+            RecipeSuggestionsPort recipeSuggestionsPort
     ) {
-        return new RecipeService(recipeRepository, ingredientRepository, userRepository,
-                userPreferenceRepository, householdRepository, recipeSuggestionsPort, recipeImportPort);
+        return new RecipeQueryService(recipeRepository, ingredientRepository, userRepository, userPreferenceRepository,
+                householdRepository, recipeSuggestionsPort);
     }
 
     @Bean
@@ -89,9 +102,10 @@ public class AppConfig {
     @Transactional(readOnly = true)
     public HouseholdService householdService(
             HouseholdRepository houseHoldRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            WeekScheduleRepository weekScheduleRepository
     ) {
-        return new HouseholdService(houseHoldRepository, userRepository);
+        return new HouseholdService(houseHoldRepository, userRepository, weekScheduleRepository);
     }
 
     @Bean

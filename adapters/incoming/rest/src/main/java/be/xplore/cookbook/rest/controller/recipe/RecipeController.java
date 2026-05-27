@@ -13,7 +13,8 @@ import be.xplore.cookbook.core.domain.recipe.command.ImportRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.IngredientWithQuantity;
 import be.xplore.cookbook.core.domain.recipe.command.UpdateRecipeCommand;
 import be.xplore.cookbook.core.domain.user.UserId;
-import be.xplore.cookbook.core.service.RecipeService;
+import be.xplore.cookbook.core.service.recipe.RecipeCommandService;
+import be.xplore.cookbook.core.service.recipe.RecipeQueryService;
 import be.xplore.cookbook.rest.dto.recipe.request.ChangeRecipeVisibilityRequest;
 import be.xplore.cookbook.rest.dto.recipe.request.CreateRecipeDto;
 import be.xplore.cookbook.rest.dto.recipe.request.ImportRecipeRequest;
@@ -40,10 +41,12 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/recipes")
 public class RecipeController {
-    private final RecipeService recipeService;
+    private final RecipeCommandService recipeCommandService;
+    private final RecipeQueryService recipeQueryService;
 
-    public RecipeController(RecipeService recipeService) {
-        this.recipeService = recipeService;
+    public RecipeController(RecipeCommandService recipeCommandService, RecipeQueryService recipeQueryService) {
+        this.recipeCommandService = recipeCommandService;
+        this.recipeQueryService = recipeQueryService;
     }
 
     @PostMapping
@@ -60,7 +63,7 @@ public class RecipeController {
                         new IngredientId(i.ingredientId()), i.baseQuantity()))
                 .toList();
 
-        Recipe recipe = recipeService.createRecipe(new CreateRecipeCommand(
+        Recipe recipe = recipeCommandService.createRecipe(new CreateRecipeCommand(
                 new RecipeDetails(dto.name(), dto.description(), dto.durationInMinutes(), dto.servings(), dto.steps()),
                 ingredientQuantities,
                 dto.isPublic(),
@@ -77,7 +80,7 @@ public class RecipeController {
     ) {
         UserId userId = getUserIdFromJwt(jwt);
 
-        Recipe recipe = recipeService.findById(new FindRecipeByIdQuery(new RecipeId(id), userId));
+        Recipe recipe = recipeQueryService.findById(new FindRecipeByIdQuery(new RecipeId(id), userId));
 
         return RecipeDto.fromDomain(recipe, userId);
     }
@@ -89,12 +92,13 @@ public class RecipeController {
     ) {
         UserId userId = getUserIdFromJwt(jwt);
 
-        Recipe recipe = recipeService.enhanceRecipe(new EnhanceRecipeQuery(new RecipeId(id), userId));
+        Recipe recipe = recipeQueryService.enhanceRecipe(new EnhanceRecipeQuery(new RecipeId(id), userId));
 
         return RecipeDto.fromDomain(recipe, userId);
     }
 
     @PutMapping("/{id}")
+    @Transactional
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateRecipe(
             @AuthenticationPrincipal Jwt jwt,
@@ -106,7 +110,7 @@ public class RecipeController {
                         new IngredientId(i.ingredientId()), i.baseQuantity()))
                 .toList();
 
-        recipeService.updateRecipe(new UpdateRecipeCommand(
+        recipeCommandService.updateRecipe(new UpdateRecipeCommand(
                 new RecipeId(id),
                 new RecipeDetails(dto.name(), dto.description(), dto.durationInMinutes(), dto.servings(), dto.steps()),
                 ingredientQuantities,
@@ -123,7 +127,7 @@ public class RecipeController {
     ) {
         UserId userId = getUserIdFromJwt(jwt);
 
-        Recipe recipe = recipeService.importRecipe((new ImportRecipeCommand(request.url(), userId)));
+        Recipe recipe = recipeCommandService.importRecipe((new ImportRecipeCommand(request.url(), userId)));
 
         return RecipeDto.fromDomain(recipe, userId);
     }
@@ -134,18 +138,19 @@ public class RecipeController {
             @RequestBody ChangeRecipeVisibilityRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        recipeService.changeVisibility(new ChangeVisibilityCommand(
+        recipeCommandService.changeVisibility(new ChangeVisibilityCommand(
                 new RecipeId(id), getUserIdFromJwt(jwt), request.isPublic()));
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteRecipe(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID id
     ) {
         UserId userId = getUserIdFromJwt(jwt);
-        recipeService.deleteRecipe(new DeleteRecipeCommand(new RecipeId(id), userId));
+        recipeCommandService.deleteRecipe(new DeleteRecipeCommand(new RecipeId(id), userId));
     }
 
     private UserId getUserIdFromJwt(Jwt jwt) {

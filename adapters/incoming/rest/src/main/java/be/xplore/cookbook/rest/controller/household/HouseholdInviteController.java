@@ -7,7 +7,7 @@ import be.xplore.cookbook.core.domain.householdinvite.command.CreateInviteComman
 import be.xplore.cookbook.core.domain.householdinvite.command.FindHouseholdInvitationByTokenQuery;
 import be.xplore.cookbook.core.domain.householdinvite.command.RevokeInviteCommand;
 import be.xplore.cookbook.core.domain.user.UserId;
-import be.xplore.cookbook.core.service.HouseholdInviteService;
+import be.xplore.cookbook.core.service.household.HouseholdInviteService;
 import be.xplore.cookbook.rest.dto.household.request.CreateInviteRequestDto;
 import be.xplore.cookbook.rest.dto.household.response.HouseholdInviteDto;
 import be.xplore.cookbook.rest.dto.household.response.HouseholdInviteResponseDto;
