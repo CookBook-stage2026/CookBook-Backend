@@ -69,7 +69,7 @@ public enum Unit {
     }
 
     private static double round(double value, int scale) {
-        return new BigDecimal(value).setScale(scale, RoundingMode.HALF_UP).doubleValue();
+        return BigDecimal.valueOf(value).setScale(scale, RoundingMode.HALF_UP).doubleValue();
     }
 
     private static String categoryOf(Unit unit) {

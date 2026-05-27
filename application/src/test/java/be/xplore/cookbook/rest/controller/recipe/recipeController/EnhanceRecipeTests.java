@@ -154,7 +154,7 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
 
         List<Ingredient> ingredients = getIngredientRepository()
                 .searchByNameExcludingIds("", List.of(), FIND_ALL_INGREDIENTS_PAGING, user);
-        assertThat(ingredients.size()).isEqualTo(ingredientCountBefore);
+        assertThat(ingredients).hasSize(ingredientCountBefore);
     }
 
     @Test

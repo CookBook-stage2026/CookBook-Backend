@@ -20,22 +20,19 @@ public record RecipeIngredient(Ingredient ingredient, double baseQuantity, Unit 
             return List.of(a, b);
         }
 
-        if (a.unit() == b.unit()) {
-            Unit.NormalisedQuantity normalised =
-                    Unit.normalise(a.baseQuantity() + b.baseQuantity(), a.unit().baseUnit());
-            return List.of(new RecipeIngredient(a.ingredient(), normalised.quantity(), normalised.unit()));
+        Ingredient personalIngredient = a.ingredient.user() != null
+                ? a.ingredient
+                : b.ingredient;
+
+        if (!a.unit().isCompatibleWith(b.unit())) {
+            return List.of(
+                    new RecipeIngredient(personalIngredient, a.baseQuantity(), a.unit()),
+                    new RecipeIngredient(personalIngredient, b.baseQuantity(), b.unit())
+            );
         }
 
-        if (a.unit().isCompatibleWith(b.unit())) {
-            double mergedBase = a.unit().toBaseUnit(a.baseQuantity()) + b.unit().toBaseUnit(b.baseQuantity());
-            Unit.NormalisedQuantity normalised = Unit.normalise(mergedBase, a.unit().baseUnit());
-            return List.of(new RecipeIngredient(a.ingredient(), normalised.quantity(), normalised.unit()));
-        }
-
-        if (a.ingredient.user() != null) {
-            return List.of(a, new RecipeIngredient(a.ingredient(), b.baseQuantity(), b.unit()));
-        }
-
-        return List.of(new RecipeIngredient(b.ingredient(), a.baseQuantity(), a.unit()), b);
+        double mergedBase = a.unit().toBaseUnit(a.baseQuantity()) + b.unit().toBaseUnit(b.baseQuantity());
+        Unit.NormalisedQuantity normalised = Unit.normalise(mergedBase, a.unit().baseUnit());
+        return List.of(new RecipeIngredient(personalIngredient, normalised.quantity(), normalised.unit()));
     }
 }
