@@ -51,7 +51,7 @@ class CreateIngredientTests extends BaseIntegrationTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name").value("Flour"))
-                .andExpect(jsonPath("$.unit").value("GRAM"))
+                .andExpect(jsonPath("$.defaultUnit").value("GRAM"))
                 .andExpect(jsonPath("$.categories", hasItems(
                         "GRAIN",
                         "ADDITIVE"
@@ -68,7 +68,7 @@ class CreateIngredientTests extends BaseIntegrationTest {
                 .orElseThrow(() -> new Exception("Ingredient not found"));
 
         assertThat(ingredient.name()).isEqualTo("Flour");
-        assertThat(ingredient.unit()).isEqualTo(Unit.GRAM);
+        assertThat(ingredient.defaultUnit()).isEqualTo(Unit.GRAM);
     }
 
     @Test
@@ -157,7 +157,7 @@ class CreateIngredientTests extends BaseIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.unit").value("KILOGRAM"))
+                .andExpect(jsonPath("$.defaultUnit").value("KILOGRAM"))
                 .andReturn();
 
         IngredientDto response = getMapper().readValue(
@@ -170,7 +170,7 @@ class CreateIngredientTests extends BaseIntegrationTest {
                 .orElseThrow(() -> new Exception("Ingredient not found"));
 
         assertThat(ingredient.name()).isEqualTo("Flour");
-        assertThat(ingredient.unit()).isEqualTo(Unit.KILOGRAM);
+        assertThat(ingredient.defaultUnit()).isEqualTo(Unit.KILOGRAM);
     }
 
     @Test
@@ -219,7 +219,7 @@ class CreateIngredientTests extends BaseIntegrationTest {
                 .orElseThrow(() -> new Exception("Ingredient not found"));
 
         assertThat(ingredient.name()).isEqualTo("Flour");
-        assertThat(ingredient.unit()).isEqualTo(Unit.TEASPOON);
+        assertThat(ingredient.defaultUnit()).isEqualTo(Unit.TEASPOON);
     }
 
     private ResultActions performCreateIngredientWithValidJwt(CreateIngredientDto dto) throws Exception {

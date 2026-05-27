@@ -62,7 +62,7 @@ public class RecipeController {
 
         List<IngredientWithQuantity> ingredientQuantities = dto.ingredients().stream()
                 .map(i -> new IngredientWithQuantity(
-                        new IngredientId(i.ingredientId()), i.baseQuantity()))
+                        new IngredientId(i.ingredientId()), i.baseQuantity(), i.unit()))
                 .toList();
 
         Recipe recipe = recipeCommandService.createRecipe(new CreateRecipeCommand(
@@ -109,7 +109,7 @@ public class RecipeController {
     ) {
         List<IngredientWithQuantity> ingredientQuantities = dto.ingredients().stream()
                 .map(i -> new IngredientWithQuantity(
-                        new IngredientId(i.ingredientId()), i.baseQuantity()))
+                        new IngredientId(i.ingredientId()), i.baseQuantity(), i.unit()))
                 .toList();
 
         recipeCommandService.updateRecipe(new UpdateRecipeCommand(

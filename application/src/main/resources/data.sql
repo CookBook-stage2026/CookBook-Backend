@@ -1,7 +1,7 @@
 -- ---------------------------------------------------------
 -- INGREDIENTS
 -- ---------------------------------------------------------
-INSERT INTO ingredients (ingredient_id, name, unit)
+INSERT INTO ingredients (ingredient_id, name, default_unit)
 VALUES ('91b60a9d-be30-46e1-8499-ee668a4c2d7d', 'Spaghetti', 'GRAM'),
        ('df2e8703-4a38-45a7-a747-bb3f28afbf82', 'Pancetta', 'GRAM'),
        ('1f821767-f0a9-4e03-ad70-c288f73efd9a', 'Eggs', 'PIECE'),

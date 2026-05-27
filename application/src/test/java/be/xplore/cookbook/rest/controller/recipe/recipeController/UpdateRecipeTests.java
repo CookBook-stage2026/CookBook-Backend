@@ -1,6 +1,7 @@
 package be.xplore.cookbook.rest.controller.recipe.recipeController;
 
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
+import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
@@ -99,7 +100,7 @@ class UpdateRecipeTests extends BaseIntegrationTest {
         Recipe recipe = createAndSaveRecipe(user);
 
         UpdateRecipeDto dto = buildUpdateRecipeDto(List.of(
-                new NewRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY)
+                new NewRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY, flour.defaultUnit())
         ));
 
         performUpdateRecipe(recipe.getId().id().toString(), dto)
@@ -123,7 +124,7 @@ class UpdateRecipeTests extends BaseIntegrationTest {
         Recipe recipe = createAndSaveRecipe(user);
 
         UpdateRecipeDto dto = buildUpdateRecipeDto(List.of(
-                new NewRecipeIngredientDto(UUID.randomUUID(), DEFAULT_QUANTITY)
+                new NewRecipeIngredientDto(UUID.randomUUID(), DEFAULT_QUANTITY, Unit.GRAM)
         ));
 
         performUpdateRecipe(recipe.getId().id().toString(), dto)
@@ -136,7 +137,7 @@ class UpdateRecipeTests extends BaseIntegrationTest {
         Ingredient ingredient = createAndSaveIngredient("Flour");
 
         UpdateRecipeDto dto = buildUpdateRecipeDto(List.of(
-                new NewRecipeIngredientDto(ingredient.id().id(), DEFAULT_QUANTITY)
+                new NewRecipeIngredientDto(ingredient.id().id(), DEFAULT_QUANTITY, ingredient.defaultUnit())
         ));
 
         performUpdateRecipe(UUID.randomUUID().toString(), dto)
@@ -152,7 +153,7 @@ class UpdateRecipeTests extends BaseIntegrationTest {
         createUser();
 
         UpdateRecipeDto dto = buildUpdateRecipeDto(List.of(
-                new NewRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY)
+                new NewRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY, flour.defaultUnit())
         ));
 
         performUpdateRecipe(recipe.getId().id().toString(), dto)
@@ -164,7 +165,7 @@ class UpdateRecipeTests extends BaseIntegrationTest {
         Ingredient flour = createAndSaveIngredient("Flour");
 
         UpdateRecipeDto dto = buildUpdateRecipeDto(List.of(
-                new NewRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY)
+                new NewRecipeIngredientDto(flour.id().id(), DEFAULT_QUANTITY, flour.defaultUnit())
         ));
 
         getMockMvc().perform(put("/api/recipes/{id}", UUID.randomUUID())
