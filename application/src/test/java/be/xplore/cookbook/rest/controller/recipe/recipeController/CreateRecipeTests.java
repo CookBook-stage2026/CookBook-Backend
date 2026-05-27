@@ -10,6 +10,7 @@ import be.xplore.cookbook.rest.dto.recipe.request.NewRecipeIngredientDto;
 import be.xplore.cookbook.rest.dto.recipe.response.RecipeDto;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.http.Fault;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -251,6 +252,24 @@ class CreateRecipeTests extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(getMapper().writeValueAsString(dto)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void createRecipe_shouldReturn503_whenAiUnavailableForMacros() throws Exception {
+        // Arrange
+        WireMock.stubFor(WireMock.post(WireMock.urlPathMatching("/api/chat"))
+                .willReturn(WireMock.aResponse()
+                        .withFault(Fault.CONNECTION_RESET_BY_PEER)));
+
+        Ingredient flour = createAndSaveIngredient(INGREDIENT_FLOUR_NAME);
+        CreateRecipeDto dto = buildCreateRecipeDto(List.of(
+                new NewRecipeIngredientDto(flour.id().id(), INGREDIENT_DEFAULT_QUANTITY)
+        ));
+        createUser();
+
+        // Act & Assert
+        performCreateRecipeWithValidJwt(dto)
+                .andExpect(status().isServiceUnavailable());
     }
 
     private CreateRecipeDto buildCreateRecipeDto(List<NewRecipeIngredientDto> ingredients) {

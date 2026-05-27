@@ -20,7 +20,7 @@ public record RecipeDto(
 ) {
     public static RecipeDto fromDomain(Recipe recipe, UserId requestingUserId) {
         List<MacroDto> totalMacros = recipe.getMacros().stream()
-                .map(m -> MacroDto.of(m.type(), m.valuePerUnit()))
+                .map(MacroDto::fromDomain)
                 .toList();
 
         List<RecipeIngredientDto> ingredientDtos = recipe.getIngredients().stream()

@@ -7,11 +7,7 @@ public record MacroDto(
         MacroType type,
         double value
 ) {
-    public static MacroDto fromDomain(Macro macro, double quantity) {
-        return new MacroDto(macro.type(), macro.valuePerUnit() * quantity);
-    }
-
-    public static MacroDto of(MacroType type, double value) {
-        return new MacroDto(type, value);
+    public static MacroDto fromDomain(Macro macro) {
+        return new MacroDto(macro.type(), macro.valuePerUnit());
     }
 }

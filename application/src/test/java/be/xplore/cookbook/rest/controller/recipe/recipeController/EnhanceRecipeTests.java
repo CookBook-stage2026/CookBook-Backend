@@ -47,6 +47,9 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
     private static final String ENHANCED_STEP_1 = "Wash and dry the thyme.";
     private static final String ENHANCED_STEP_2 = "Add thyme while cooking.";
 
+    private static final String MACRO_TYPE = "CALORIES";
+    private static final double MACRO_VALUE_PER_UNIT = 10.0;
+
     private static final int PAGING_PAGE = 0;
     private static final int PAGING_SIZE = 10;
 
@@ -113,7 +116,10 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.steps", hasItem(ENHANCED_STEP_1)))
                 .andExpect(jsonPath("$.steps", hasItem(ENHANCED_STEP_2)))
                 .andExpect(jsonPath("$.ingredients", not(empty())))
-                .andExpect(jsonPath("$.ingredients", hasSize(greaterThanOrEqualTo(1))));
+                .andExpect(jsonPath("$.ingredients", hasSize(greaterThanOrEqualTo(1))))
+                .andExpect(jsonPath("$.totalMacros", not(empty())))
+                .andExpect(jsonPath("$.totalMacros[0].type").value(MACRO_TYPE))
+                .andExpect(jsonPath("$.totalMacros[0].value").value(MACRO_VALUE_PER_UNIT));
 
         String body = result.andReturn().getResponse().getContentAsString();
         RecipeDto dto = getMapper().readValue(body, RecipeDto.class);
@@ -122,6 +128,8 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
 
         assertThat(saved.getId()).isEqualTo(recipe.getId());
         assertThat(dto.id()).isEqualTo(recipe.getId().id());
+
+        assertThat(dto.totalMacros()).isNotEmpty();
     }
 
     @Test
@@ -214,9 +222,8 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
                         + "},"
                         + "\"updatedSteps\": [\"%s\", \"%s\"],"
                         + "\"macros\": ["
-                        + "{ \"type\": \"CALORIES\", \"valuePerUnit\": 10.0 }"
+                        + "{ \"type\": \"%s\", \"valuePerUnit\": %.1f }"
                         + "]"
-                        + "}"
                         + "}",
                 ENHANCED_DURATION_MINUTES,
                 ENHANCED_INGREDIENT_NAME,
@@ -224,7 +231,9 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
                 ENHANCED_INGREDIENT_UNIT,
                 ENHANCED_INGREDIENT_CATEGORY,
                 ENHANCED_STEP_1,
-                ENHANCED_STEP_2
+                ENHANCED_STEP_2,
+                MACRO_TYPE,
+                MACRO_VALUE_PER_UNIT
         );
     }
 }
