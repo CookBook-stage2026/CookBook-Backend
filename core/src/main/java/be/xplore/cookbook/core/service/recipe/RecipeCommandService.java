@@ -27,10 +27,10 @@ import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
 import be.xplore.cookbook.core.repository.WeekScheduleRepository;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class RecipeCommandService {
@@ -168,7 +168,7 @@ public class RecipeCommandService {
                         scraped.categories(),
                         user
                 )));
-        return new RecipeIngredient(ingredient, scraped.quantity());
+        return new RecipeIngredient(ingredient, scraped.quantity(), scraped.unit());
     }
 
     private List<RecipeIngredient> mapToRecipeIngredients(List<IngredientWithQuantity> ingredientQuantities) {
@@ -196,20 +196,39 @@ public class RecipeCommandService {
         return ingredientQuantities.stream()
                 .map(iwq -> new RecipeIngredient(
                         ingredientMap.get(iwq.ingredientId()),
-                        iwq.quantity()
+                        iwq.quantity(),
+                        iwq.unit()
                 ))
                 .toList();
     }
 
-    private static List<RecipeIngredient> deduplicateIngredients(List<RecipeIngredient> ingredients) {
+    private List<RecipeIngredient> deduplicateIngredients(List<RecipeIngredient> ingredients) {
         return ingredients.stream()
-                .collect(Collectors.toMap(
-                        RecipeIngredient::ingredient,
-                        Function.identity(),
-                        RecipeIngredient::merge,
-                        LinkedHashMap::new
-                ))
+                .collect(Collectors.groupingBy(ri -> ri.ingredient().name(), LinkedHashMap::new, Collectors.toList()))
                 .values().stream()
+                .flatMap(group -> mergeGroup(group).stream())
                 .toList();
+    }
+
+    private List<RecipeIngredient> mergeGroup(List<RecipeIngredient> group) {
+        List<RecipeIngredient> result = new ArrayList<>();
+        for (RecipeIngredient candidate : group) {
+            List<RecipeIngredient> unmerged = new ArrayList<>();
+            boolean merged = false;
+            for (RecipeIngredient existing : result) {
+                List<RecipeIngredient> mergeResult = RecipeIngredient.merge(existing, candidate);
+                if (mergeResult.size() == 1) {
+                    unmerged.add(mergeResult.getFirst());
+                    merged = true;
+                } else {
+                    unmerged.add(existing);
+                }
+            }
+            if (!merged) {
+                unmerged.add(candidate);
+            }
+            result = unmerged;
+        }
+        return result;
     }
 }

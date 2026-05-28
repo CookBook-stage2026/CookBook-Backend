@@ -166,7 +166,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
         Ingredient flour = createAndSaveIngredient(INGREDIENT_FLOUR_NAME);
 
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
-                new NewRecipeIngredientDto(flour.id().id(), INGREDIENT_FLOUR_QUANTITY)
+                new NewRecipeIngredientDto(flour.id().id(), INGREDIENT_FLOUR_QUANTITY, flour.defaultUnit())
         ));
 
         createUser();
@@ -264,7 +264,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
 
         Ingredient flour = createAndSaveIngredient(INGREDIENT_FLOUR_NAME);
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
-                new NewRecipeIngredientDto(flour.id().id(), INGREDIENT_DEFAULT_QUANTITY)
+                new NewRecipeIngredientDto(flour.id().id(), INGREDIENT_DEFAULT_QUANTITY, flour.defaultUnit())
         ));
         createUser();
 

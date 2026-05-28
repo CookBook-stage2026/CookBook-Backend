@@ -141,6 +141,6 @@ public class RecipeQueryService {
                         newIngredient.categories(),
                         user
                 )));
-        return new RecipeIngredient(ingredient, newIngredient.quantity());
+        return new RecipeIngredient(ingredient, newIngredient.quantity(), newIngredient.unit());
     }
 }
