@@ -15,7 +15,7 @@ public record RecipeIngredientDto(
         return new RecipeIngredientDto(
                 recipeIngredient.ingredient().id().id(),
                 recipeIngredient.ingredient().name(),
-                recipeIngredient.ingredient().unit(),
+                recipeIngredient.unit(),
                 recipeIngredient.baseQuantity()
         );
     }

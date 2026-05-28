@@ -2,6 +2,7 @@ package be.xplore.cookbook.rest.controller.recipe.recipeController;
 
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.MacroType;
+import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
@@ -117,8 +118,8 @@ class CreateRecipeTests extends BaseIntegrationTest {
         Ingredient eggs = createAndSaveIngredient(INGREDIENT_EGGS_NAME);
 
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
-                new NewRecipeIngredientDto(flour.id().id(), INGREDIENT_DEFAULT_QUANTITY),
-                new NewRecipeIngredientDto(eggs.id().id(), INGREDIENT_EGGS_QUANTITY)
+                new NewRecipeIngredientDto(flour.id().id(), INGREDIENT_DEFAULT_QUANTITY, flour.defaultUnit()),
+                new NewRecipeIngredientDto(eggs.id().id(), INGREDIENT_EGGS_QUANTITY, eggs.defaultUnit())
         ));
 
         User user = createUser();
@@ -165,7 +166,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
         Ingredient flour = createAndSaveIngredient(INGREDIENT_FLOUR_NAME);
 
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
-                new NewRecipeIngredientDto(flour.id().id(), INGREDIENT_FLOUR_QUANTITY)
+                new NewRecipeIngredientDto(flour.id().id(), INGREDIENT_FLOUR_QUANTITY, flour.defaultUnit())
         ));
 
         createUser();
@@ -211,7 +212,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
                 TEST_RECIPE_DESCRIPTION,
                 TEST_RECIPE_DURATION_MINUTES,
                 List.of(TEST_RECIPE_STEP_1, TEST_RECIPE_STEP_2),
-                List.of(new NewRecipeIngredientDto(flour.id().id(), negativeQuantity)),
+                List.of(new NewRecipeIngredientDto(flour.id().id(), negativeQuantity, flour.defaultUnit())),
                 TEST_RECIPE_IS_PUBLIC,
                 TEST_RECIPE_SERVINGS
         );
@@ -227,7 +228,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
     void createRecipe_shouldReturn400_whenIngredientDoesNotExist() throws Exception {
         // Arrange
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
-                new NewRecipeIngredientDto(UUID.randomUUID(), INGREDIENT_DEFAULT_QUANTITY)
+                new NewRecipeIngredientDto(UUID.randomUUID(), INGREDIENT_DEFAULT_QUANTITY, Unit.GRAM)
         ));
 
         createUser();
@@ -243,7 +244,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
         Ingredient flour = createAndSaveIngredient(INGREDIENT_FLOUR_NAME);
 
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
-                new NewRecipeIngredientDto(flour.id().id(), INGREDIENT_DEFAULT_QUANTITY)
+                new NewRecipeIngredientDto(flour.id().id(), INGREDIENT_DEFAULT_QUANTITY, flour.defaultUnit())
         ));
 
         // Act & Assert
@@ -263,7 +264,7 @@ class CreateRecipeTests extends BaseIntegrationTest {
 
         Ingredient flour = createAndSaveIngredient(INGREDIENT_FLOUR_NAME);
         CreateRecipeDto dto = buildCreateRecipeDto(List.of(
-                new NewRecipeIngredientDto(flour.id().id(), INGREDIENT_DEFAULT_QUANTITY)
+                new NewRecipeIngredientDto(flour.id().id(), INGREDIENT_DEFAULT_QUANTITY, flour.defaultUnit())
         ));
         createUser();
 

@@ -10,14 +10,14 @@ import java.util.UUID;
 public record IngredientDto(
         UUID id,
         String name,
-        Unit unit,
+        Unit defaultUnit,
         List<Category> categories
 ) {
     public static IngredientDto fromDomain(Ingredient ingredient) {
         return new IngredientDto(
                 ingredient.id().id(),
                 ingredient.name(),
-                ingredient.unit(),
+                ingredient.defaultUnit(),
                 ingredient.categories()
         );
     }

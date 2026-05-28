@@ -7,7 +7,7 @@ import java.util.List;
 public record Ingredient(
         IngredientId id,
         String name,
-        Unit unit,
+        Unit defaultUnit,
         List<Category> categories,
         User user
 ) {
@@ -18,7 +18,7 @@ public record Ingredient(
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Ingredient name cannot be null or blank!");
         }
-        if (unit == null) {
+        if (defaultUnit == null) {
             throw new IllegalArgumentException("Ingredient default unit cannot be null!");
         }
         if (categories == null) {

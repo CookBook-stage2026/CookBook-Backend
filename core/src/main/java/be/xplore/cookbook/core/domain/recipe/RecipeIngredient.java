@@ -1,21 +1,38 @@
 package be.xplore.cookbook.core.domain.recipe;
 
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
+import be.xplore.cookbook.core.domain.ingredient.Unit;
 
+import java.util.List;
 import java.util.Objects;
 
-public record RecipeIngredient(Ingredient ingredient, double baseQuantity) {
+public record RecipeIngredient(Ingredient ingredient, double baseQuantity, Unit unit) {
     public RecipeIngredient {
         Objects.requireNonNull(ingredient, "Ingredient cannot be null!");
         if (baseQuantity <= 0) {
             throw new IllegalArgumentException("Base quantity must be greater than 0!");
         }
+        Objects.requireNonNull(unit, "Unit cannot be null!");
     }
 
-    public static RecipeIngredient merge(RecipeIngredient a, RecipeIngredient b) {
-        if (!a.ingredient.equals(b.ingredient)) {
-            throw new IllegalArgumentException("Cannot merge ingredients with different IDs");
+    public static List<RecipeIngredient> merge(RecipeIngredient a, RecipeIngredient b) {
+        if (!a.ingredient().name().equals(b.ingredient().name())) {
+            return List.of(a, b);
         }
-        return new RecipeIngredient(a.ingredient, a.baseQuantity + b.baseQuantity);
+
+        Ingredient personalIngredient = a.ingredient.user() != null
+                ? a.ingredient
+                : b.ingredient;
+
+        if (!a.unit().isCompatibleWith(b.unit())) {
+            return List.of(
+                    new RecipeIngredient(personalIngredient, a.baseQuantity(), a.unit()),
+                    new RecipeIngredient(personalIngredient, b.baseQuantity(), b.unit())
+            );
+        }
+
+        double mergedBase = a.unit().toBaseUnit(a.baseQuantity()) + b.unit().toBaseUnit(b.baseQuantity());
+        Unit.NormalisedQuantity normalised = Unit.normalise(mergedBase, a.unit().baseUnit());
+        return List.of(new RecipeIngredient(personalIngredient, normalised.quantity(), normalised.unit()));
     }
 }

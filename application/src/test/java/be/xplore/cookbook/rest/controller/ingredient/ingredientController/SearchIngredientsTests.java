@@ -263,7 +263,7 @@ class SearchIngredientsTests extends BaseIntegrationTest {
         performSearchWithUserId(dto, user.id())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].unit").value("GRAM"));
+                .andExpect(jsonPath("$[0].defaultUnit").value("GRAM"));
     }
 
     private ResultActions performSearch(IngredientSearchRequest request) throws Exception {

@@ -33,7 +33,7 @@ public class JpaIngredientEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Unit unit;
+    private Unit defaultUnit;
 
     @ElementCollection(targetClass = Category.class)
     @CollectionTable(
@@ -48,10 +48,10 @@ public class JpaIngredientEntity {
     @JoinColumn(name = "user_id")
     private JpaUserEntity user;
 
-    public JpaIngredientEntity(UUID id, String name, Unit unit, List<Category> categories, JpaUserEntity user) {
+    public JpaIngredientEntity(UUID id, String name, Unit defaultUnit, List<Category> categories, JpaUserEntity user) {
         this.id = id;
         this.name = name;
-        this.unit = unit;
+        this.defaultUnit = defaultUnit;
         this.categories = categories;
         this.user = user;
     }
@@ -63,7 +63,7 @@ public class JpaIngredientEntity {
         return new JpaIngredientEntity(
                 ingredient.id().id(),
                 ingredient.name(),
-                ingredient.unit(),
+                ingredient.defaultUnit(),
                 ingredient.categories(),
                 ingredient.user() != null ? JpaUserEntity.fromDomain(ingredient.user()) : null
         );
@@ -73,7 +73,7 @@ public class JpaIngredientEntity {
         return new Ingredient(
                 new IngredientId(id),
                 name,
-                unit,
+                defaultUnit,
                 categories,
                 user != null ? user.toDomain() : null
         );
@@ -83,7 +83,7 @@ public class JpaIngredientEntity {
         return new Ingredient(
                 new IngredientId(id),
                 name,
-                unit,
+                defaultUnit,
                 List.of(),
                 null
         );

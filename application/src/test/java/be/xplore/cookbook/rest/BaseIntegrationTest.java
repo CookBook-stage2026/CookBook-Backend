@@ -191,6 +191,12 @@ public abstract class BaseIntegrationTest {
                 List.of(ingredient), DEFAULT_IS_PUBLIC, user);
     }
 
+    protected Recipe createAndSaveRecipe(User user, Ingredient ingredient) {
+        return createAndSaveRecipe(new RecipeDetails(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
+                        DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS),
+                List.of(ingredient), DEFAULT_IS_PUBLIC, user);
+    }
+
     protected Recipe createAndSaveRecipe(String name, User user) {
         Ingredient ingredient = createAndSaveIngredient("Ingredient");
         return createAndSaveRecipe(new RecipeDetails(name, DEFAULT_RECIPE_DESCRIPTION,
@@ -267,7 +273,7 @@ public abstract class BaseIntegrationTest {
     private Recipe createAndSaveRecipe(RecipeDetails details, List<Ingredient> ingredients,
                                        boolean isPublic, User user) {
         List<RecipeIngredient> recipeIngredients = ingredients.stream()
-                .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY))
+                .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY, ing.defaultUnit()))
                 .toList();
 
         Recipe recipe = new Recipe(
@@ -284,7 +290,7 @@ public abstract class BaseIntegrationTest {
     protected Recipe createAndSaveRecipe(RecipeId recipeId, RecipeDetails details, List<Ingredient> ingredients,
                                          boolean isPublic, User user, List<Macro> macros) {
         List<RecipeIngredient> recipeIngredients = ingredients.stream()
-                .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY))
+                .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY, ing.defaultUnit()))
                 .toList();
 
         Recipe recipe = new Recipe(

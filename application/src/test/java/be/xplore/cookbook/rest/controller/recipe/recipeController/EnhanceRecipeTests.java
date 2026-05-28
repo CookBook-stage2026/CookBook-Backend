@@ -1,6 +1,9 @@
 package be.xplore.cookbook.rest.controller.recipe.recipeController;
 
 import be.xplore.cookbook.core.common.Paging;
+import be.xplore.cookbook.core.domain.ingredient.Category;
+import be.xplore.cookbook.core.domain.ingredient.Ingredient;
+import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
@@ -28,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -133,25 +137,24 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
     }
 
     @Test
-    void enhanceRecipe_shouldNotCreateDuplicate_whenIngredientAlreadyExists() throws Exception {
+    void enhanceRecipe_shouldNotCreateDuplicateAndSetUnitCorrectly_whenNewIngredientAlreadyExists() throws Exception {
         User user = createUser();
+        createAndSaveIngredient(ENHANCED_INGREDIENT_NAME, Unit.PINCH, Category.BEVERAGE, user);
+        Ingredient ing = createAndSaveIngredient("Ingredient 1", Unit.CUP, Category.DAIRY, user);
+        Recipe recipe = createAndSaveRecipe(user, ing);
 
-        createAndSaveIngredient(ENHANCED_INGREDIENT_NAME);
-        Recipe recipe = createAndSaveRecipe(user);
-
-        int before = getIngredientRepository()
+        int ingredientCountBefore = getIngredientRepository()
                 .searchByNameExcludingIds("", List.of(), PAGING, user)
                 .size();
 
         performEnhanceRecipe(recipe.getId().id().toString())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ingredients", not(empty())));
+                .andExpect(jsonPath("$.ingredients", hasSize(recipe.getIngredients().size() + 1)))
+                .andExpect(jsonPath("$.ingredients[*].unit", containsInAnyOrder("CUP", "GRAM")));
 
-        int after = getIngredientRepository()
-                .searchByNameExcludingIds("", List.of(), PAGING, user)
-                .size();
-
-        assertThat(after).isEqualTo(before);
+        List<Ingredient> ingredients = getIngredientRepository()
+                .searchByNameExcludingIds("", List.of(), PAGING, user);
+        assertThat(ingredients).hasSize(ingredientCountBefore);
     }
 
     @Test
