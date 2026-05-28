@@ -35,6 +35,9 @@ public class JpaHouseholdInviteEntity {
     @Column(nullable = false)
     private UUID createdBy;
 
+    @Column(nullable = false)
+    private Instant createdOn;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private JpaHouseholdEntity household;
@@ -42,7 +45,7 @@ public class JpaHouseholdInviteEntity {
     protected JpaHouseholdInviteEntity() {
     }
 
-    public JpaHouseholdInviteEntity(UUID id, String tokenHash, Instant expiresAt,
+    public JpaHouseholdInviteEntity(UUID id, String tokenHash, Instant expiresAt, Instant createdOn,
                                     boolean revoked, UUID createdBy, JpaHouseholdEntity household) {
         this.id = id;
         this.tokenHash = tokenHash;
@@ -50,6 +53,7 @@ public class JpaHouseholdInviteEntity {
         this.revoked = revoked;
         this.createdBy = createdBy;
         this.household = household;
+        this.createdOn = createdOn;
     }
 
     public HouseholdInvite toDomain() {
@@ -58,6 +62,7 @@ public class JpaHouseholdInviteEntity {
                 new HouseholdId(household.getId()),
                 tokenHash,
                 expiresAt,
+                createdOn,
                 revoked,
                 new UserId(createdBy)
         );
@@ -68,6 +73,7 @@ public class JpaHouseholdInviteEntity {
                 invite.id().id(),
                 invite.tokenHash(),
                 invite.expiresAt(),
+                invite.createdOn(),
                 invite.revoked(),
                 invite.createdBy().id(),
                 householdRef

@@ -251,7 +251,7 @@ public abstract class BaseIntegrationTest {
         String tokenHash = InviteTokenGenerator.hash(plainToken);
         HouseholdInvite expired = new HouseholdInvite(
                 HouseholdInviteId.create(), householdId, tokenHash,
-                Instant.now().minus(Duration.ofMinutes(1)), false, createdBy
+                Instant.now().minus(Duration.ofMinutes(1)), Instant.now(), false, createdBy
         );
         return new HouseholdInviteToken(householdInviteRepository.save(expired), plainToken);
     }

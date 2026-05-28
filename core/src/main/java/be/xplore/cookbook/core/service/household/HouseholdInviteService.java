@@ -11,6 +11,7 @@ import be.xplore.cookbook.core.domain.householdinvite.InviteTokenGenerator;
 import be.xplore.cookbook.core.domain.householdinvite.command.AcceptInviteCommand;
 import be.xplore.cookbook.core.domain.householdinvite.command.CreateInviteCommand;
 import be.xplore.cookbook.core.domain.householdinvite.command.FindHouseholdInvitationByTokenQuery;
+import be.xplore.cookbook.core.domain.householdinvite.command.FindHouseholdInviteByHouseholdIdQuery;
 import be.xplore.cookbook.core.domain.householdinvite.command.RevokeInviteCommand;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.repository.HouseholdInviteRepository;
@@ -18,6 +19,7 @@ import be.xplore.cookbook.core.repository.HouseholdRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
 
 import java.time.Duration;
+import java.util.List;
 
 public class HouseholdInviteService {
     private final UserRepository userRepository;
@@ -58,7 +60,7 @@ public class HouseholdInviteService {
         return new HouseholdInviteToken(householdInviteRepository.save(invite), plainToken);
     }
 
-    public Household acceptInvite(AcceptInviteCommand command) {
+    public void acceptInvite(AcceptInviteCommand command) {
         String tokenHash = InviteTokenGenerator.hash(command.token());
         HouseholdInvite invite = householdInviteRepository.findByTokenHash(tokenHash)
                 .orElseThrow(() -> new NotFoundException("Invite not found for token: " + command.token()));
@@ -68,7 +70,7 @@ public class HouseholdInviteService {
         User user = userRepository.findById(command.userId()).orElseThrow(UserNotFoundException::new);
         Household household = householdRepository.findById(invite.householdId())
                 .orElseThrow(() -> new HouseholdNotFoundException(invite.householdId()));
-        return householdRepository.save(household.addMember(user));
+        householdRepository.save(household.addMember(user));
     }
 
     public void revokeInvite(RevokeInviteCommand command) {
@@ -83,6 +85,17 @@ public class HouseholdInviteService {
             throw new ForbiddenException("Only the household creator can revoke this invite!");
         }
         householdInviteRepository.save(invite.revoke());
+    }
+
+    public List<HouseholdInvite> getInvitesForHousehold(FindHouseholdInviteByHouseholdIdQuery query) {
+        Household household = householdRepository.findById(query.householdId())
+                .orElseThrow(() -> new HouseholdNotFoundException(query.householdId()));
+
+        if (!household.creator().id().equals(query.loggedInUserId())) {
+            throw new ForbiddenException("You are not allowed to view all invites for this household.");
+        }
+
+        return householdInviteRepository.findAllByHouseholdId(query.householdId());
     }
 
     private Duration resolveDuration(Duration requested) {

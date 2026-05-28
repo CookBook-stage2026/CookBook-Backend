@@ -8,6 +8,7 @@ import be.xplore.cookbook.core.domain.household.command.DeleteByIdCommand;
 import be.xplore.cookbook.core.domain.household.command.FindAllHouseholdsForUserCommand;
 import be.xplore.cookbook.core.domain.household.command.FindHouseholdByIdQuery;
 import be.xplore.cookbook.core.domain.household.command.RemoveMemberFromHouseholdCommand;
+import be.xplore.cookbook.core.domain.household.command.UpdateHouseholdByIdCommand;
 import be.xplore.cookbook.core.domain.household.exception.HouseholdNotFoundException;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
@@ -79,5 +80,22 @@ public class HouseholdService {
         }
 
         householdRepository.deleteById(command.householdId());
+    }
+
+    public void updateById(UpdateHouseholdByIdCommand command) {
+        Household household = householdRepository.findById(command.householdId())
+                .orElseThrow(() -> new HouseholdNotFoundException(command.householdId()));
+
+        if (!household.creator().id().equals(command.loggedInUserId())) {
+            throw new ForbiddenException("You are not allowed to edit this household.");
+        }
+
+        householdRepository.save(new Household(
+                household.id(),
+                household.creator(),
+                household.members(),
+                command.name(),
+                command.description()
+        ));
     }
 }
