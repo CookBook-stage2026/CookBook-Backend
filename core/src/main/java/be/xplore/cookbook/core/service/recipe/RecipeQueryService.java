@@ -126,7 +126,8 @@ public class RecipeQueryService {
                 ),
                 updatedIngredients,
                 recipe.isPublic(),
-                recipe.getUser()
+                recipe.getUser(),
+                suggestion.macros()
         );
     }
 

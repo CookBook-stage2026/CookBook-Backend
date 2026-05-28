@@ -10,7 +10,7 @@ import java.util.List;
 
 public record CreateIngredientDto(
         @NotBlank String name,
-        @NotNull Unit unit,
+        @NotNull Unit defaultUnit,
         @NotEmpty List<Category> categories
 ) {
 }

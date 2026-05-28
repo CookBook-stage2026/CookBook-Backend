@@ -1,13 +1,11 @@
 package be.xplore.cookbook.rest.controller.recipe.recipeController;
 
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
-import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.List;
@@ -22,12 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class GetRecipeByIdTests extends BaseIntegrationTest {
-
-    private static final String DEFAULT_INGREDIENT_NAME = "Flour";
-    private static final String DEFAULT_INGREDIENT_NAME_2 = "Butter";
-    private static final Unit DEFAULT_UNIT = Unit.GRAM;
-    private static final int MINUTES_IN_HOUR = 60;
-
+    private static final int DURATION_IN_MINUTES = 60;
     @Override
     protected String[] getTablesToClear() {
         return new String[]{"recipe_ingredients", "recipe_steps", "recipes", "ingredients", "users"};
@@ -36,9 +29,8 @@ class GetRecipeByIdTests extends BaseIntegrationTest {
     @Test
     void getRecipeById_shouldReturnRecipe_whenRecipeExists() throws Exception {
         // Arrange
-        Ingredient ingredient1 = createAndSaveIngredient(DEFAULT_INGREDIENT_NAME);
-        Ingredient ingredient2 = createAndSaveIngredient(DEFAULT_INGREDIENT_NAME_2);
-
+        Ingredient ingredient1 = createAndSaveIngredient("Flour");
+        Ingredient ingredient2 = createAndSaveIngredient("Butter");
         User user = createUser();
 
         Recipe recipe = createAndSaveRecipeWithIngredients(List.of(ingredient1, ingredient2), user);
@@ -46,11 +38,11 @@ class GetRecipeByIdTests extends BaseIntegrationTest {
         // Act & Assert
         performGetRecipeById(recipe.getId().id())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.id").value(recipe.getId().id().toString()))
                 .andExpect(jsonPath("$.name").value("Test Name"))
                 .andExpect(jsonPath("$.description").value("Test Description"))
-                .andExpect(jsonPath("$.durationInMinutes").value(MINUTES_IN_HOUR))
+                .andExpect(jsonPath("$.durationInMinutes").value(DURATION_IN_MINUTES))
                 .andExpect(jsonPath("$.servings").value(2))
                 .andExpect(jsonPath("$.steps[0]").value("This is step 1"))
                 .andExpect(jsonPath("$.steps[1]").value("This is step 2"))
@@ -58,11 +50,10 @@ class GetRecipeByIdTests extends BaseIntegrationTest {
                         ingredient1.id().id().toString(),
                         ingredient2.id().id().toString()
                 )))
-                .andExpect(jsonPath("$.ingredients[*].name", hasItems(
-                        DEFAULT_INGREDIENT_NAME, DEFAULT_INGREDIENT_NAME_2)))
-                .andExpect(jsonPath("$.ingredients[*].baseQuantity", hasItem(1.0)))
-                .andExpect(jsonPath("$.ingredients[*].unit", hasItem(DEFAULT_UNIT.toString())))
-                .andExpect(jsonPath("$.isCreator").value(true));
+                .andExpect(jsonPath("$.ingredients[*].name", hasItems("Flour", "Butter")))
+                .andExpect(jsonPath("$.ingredients[*].quantity", hasItem(1.0)))
+                .andExpect(jsonPath("$.ingredients[*].unit", hasItem("GRAM")))
+                .andExpect(jsonPath("$.isOwner").value(true));
     }
 
     @Test
@@ -72,15 +63,14 @@ class GetRecipeByIdTests extends BaseIntegrationTest {
         User user2 = createUserWithId(UserId.create());
 
         createHouseholdWithMembers(List.of(user2), user1);
-
-        Recipe recipeByOtherUser = createAndSaveRecipe(true, user2);
+        Recipe recipeByOtherUser = createAndSaveRecipe(true, user2); // true = public
 
         // Act & Assert
         performGetRecipeByIdWithPredefinedUserId(recipeByOtherUser.getId().id(), user1.id())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.id").value(recipeByOtherUser.getId().id().toString()))
-                .andExpect(jsonPath("$.isCreator").value(false));
+                .andExpect(jsonPath("$.isOwner").value(false));
     }
 
     @Test
@@ -90,8 +80,7 @@ class GetRecipeByIdTests extends BaseIntegrationTest {
         User user2 = createUserWithId(UserId.create());
 
         createHouseholdWithMembers(List.of(user2), user1);
-
-        Recipe recipeByOtherUser = createAndSaveRecipe(false, user2);
+        Recipe recipeByOtherUser = createAndSaveRecipe(false, user2); // false = private
 
         // Act & Assert
         performGetRecipeByIdWithPredefinedUserId(recipeByOtherUser.getId().id(), user1.id())
@@ -102,9 +91,10 @@ class GetRecipeByIdTests extends BaseIntegrationTest {
     void getRecipeById_shouldReturn404_whenRecipeDoesNotExist() throws Exception {
         // Arrange
         createUser();
+        UUID nonExistentRecipeId = UUID.randomUUID();
 
         // Act & Assert
-        performGetRecipeById(UUID.randomUUID())
+        performGetRecipeById(nonExistentRecipeId)
                 .andExpect(status().isNotFound());
     }
 
@@ -112,10 +102,10 @@ class GetRecipeByIdTests extends BaseIntegrationTest {
     void getRecipeById_shouldReturn404_whenUserNotAllowedToAccess() throws Exception {
         // Arrange
         createUser();
-        var otherUser = createUserWithId(UserId.create());
+        User otherUser = createUserWithId(UserId.create());
 
-        Ingredient ingredient1 = createAndSaveIngredient(DEFAULT_INGREDIENT_NAME);
-        Ingredient ingredient2 = createAndSaveIngredient(DEFAULT_INGREDIENT_NAME_2);
+        Ingredient ingredient1 = createAndSaveIngredient("Flour");
+        Ingredient ingredient2 = createAndSaveIngredient("Butter");
 
         Recipe recipe = createAndSaveRecipeWithIngredients(List.of(ingredient1, ingredient2), otherUser);
 
@@ -128,9 +118,8 @@ class GetRecipeByIdTests extends BaseIntegrationTest {
     void getRecipeById_shouldReturn401_whenNotLoggedIn() throws Exception {
         // Arrange
         User user = createUser();
-
-        Ingredient ingredient1 = createAndSaveIngredient(DEFAULT_INGREDIENT_NAME);
-        Ingredient ingredient2 = createAndSaveIngredient(DEFAULT_INGREDIENT_NAME_2);
+        Ingredient ingredient1 = createAndSaveIngredient("Flour");
+        Ingredient ingredient2 = createAndSaveIngredient("Butter");
         Recipe recipe = createAndSaveRecipeWithIngredients(List.of(ingredient1, ingredient2), user);
 
         // Act & Assert
@@ -140,8 +129,8 @@ class GetRecipeByIdTests extends BaseIntegrationTest {
 
     private ResultActions performGetRecipeById(UUID id) throws Exception {
         return getMockMvc().perform(get("/api/recipes/{id}", id)
-                        .with(validJwt())
-                        .with(csrf()));
+                .with(validJwt())
+                .with(csrf()));
     }
 
     private ResultActions performGetRecipeByIdWithPredefinedUserId(UUID id, UserId userId) throws Exception {

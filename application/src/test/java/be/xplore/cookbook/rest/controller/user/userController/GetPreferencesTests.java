@@ -18,7 +18,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class GetPreferencesTests extends BaseIntegrationTest {
-
     @Override
     protected String[] getTablesToClear() {
         return new String[]{"user_excluded_categories", "user_excluded_ingredients", "users", "ingredients"};

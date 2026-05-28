@@ -2,7 +2,6 @@ package be.xplore.cookbook.rest.controller.ingredient;
 
 import be.xplore.cookbook.core.common.Paging;
 import be.xplore.cookbook.core.domain.ingredient.Category;
-import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.ingredient.command.CreateIngredientCommand;
@@ -44,8 +43,11 @@ public class IngredientController {
             @Valid @RequestBody CreateIngredientDto dto,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        Ingredient ingredient = ingredientService.createIngredient(new CreateIngredientCommand(
-                dto.name(), dto.unit(), dto.categories(), getUserIdFromJwt(jwt)
+        var ingredient = ingredientService.createIngredient(new CreateIngredientCommand(
+                dto.name(),
+                dto.defaultUnit(),
+                dto.categories(),
+                getUserIdFromJwt(jwt)
         ));
 
         return IngredientDto.fromDomain(ingredient);
@@ -62,7 +64,8 @@ public class IngredientController {
                 .toList();
 
         return ingredientService.searchByNameExcludingIds(new SearchIngredientsQuery(
-                request.query(), excludedIds, new Paging(request.page(), request.size()), getUserIdFromJwt(jwt)))
+                        request.query(), excludedIds, new Paging(request.page(), request.size()),
+                        getUserIdFromJwt(jwt)))
                 .stream()
                 .map(IngredientDto::fromDomain)
                 .toList();

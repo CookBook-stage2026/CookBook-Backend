@@ -22,9 +22,10 @@ public record Ingredient(
             throw new IllegalArgumentException("Ingredient default unit cannot be null!");
         }
         if (categories == null) {
-            throw new IllegalArgumentException("Ingredient category cannot be null!");
+            throw new IllegalArgumentException("Ingredient categories cannot be null!");
         }
 
         name = Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
+        categories = List.copyOf(categories);
     }
 }

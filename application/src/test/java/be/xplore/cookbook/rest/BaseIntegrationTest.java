@@ -10,6 +10,7 @@ import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
+import be.xplore.cookbook.core.domain.recipe.Macro;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
@@ -274,7 +275,25 @@ public abstract class BaseIntegrationTest {
                 details,
                 recipeIngredients,
                 isPublic,
-                user
+                user,
+                List.of()
+        );
+        return recipeRepository.save(recipe);
+    }
+
+    protected Recipe createAndSaveRecipe(RecipeId recipeId, RecipeDetails details, List<Ingredient> ingredients,
+                                         boolean isPublic, User user, List<Macro> macros) {
+        List<RecipeIngredient> recipeIngredients = ingredients.stream()
+                .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY))
+                .toList();
+
+        Recipe recipe = new Recipe(
+                recipeId,
+                details,
+                recipeIngredients,
+                isPublic,
+                user,
+                macros == null ? List.of() : macros
         );
         return recipeRepository.save(recipe);
     }

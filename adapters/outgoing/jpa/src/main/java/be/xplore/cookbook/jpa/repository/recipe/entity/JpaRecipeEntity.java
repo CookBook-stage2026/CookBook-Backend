@@ -6,6 +6,7 @@ import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeIngredient;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.jpa.repository.ingredient.entity.JpaIngredientEntity;
+import be.xplore.cookbook.jpa.repository.ingredient.entity.JpaMacroEmbeddable;
 import be.xplore.cookbook.jpa.repository.user.entity.JpaUserEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -19,6 +20,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -58,6 +60,13 @@ public class JpaRecipeEntity {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<JpaRecipeIngredientEntity> ingredients = new HashSet<>();
 
+    @ElementCollection
+    @CollectionTable(
+            name = "recipe_macros",
+            joinColumns = @JoinColumn(name = "recipe_id")
+    )
+    private List<JpaMacroEmbeddable> macros = new ArrayList<>();
+
     @Column(nullable = false)
     private boolean isPublic;
 
@@ -78,6 +87,7 @@ public class JpaRecipeEntity {
         entity.servings = recipe.getServings();
         entity.isPublic = recipe.isPublic();
         entity.user = JpaUserEntity.fromDomain(recipe.getUser());
+        entity.macros = recipe.getMacros().stream().map(JpaMacroEmbeddable::fromDomain).toList();
 
         recipe.getIngredients().forEach(entity::addIngredient);
 
@@ -100,7 +110,8 @@ public class JpaRecipeEntity {
                 ),
                 domainIngredients,
                 isPublic,
-                user.toDomain()
+                user.toDomain(),
+                macros != null ? macros.stream().map(JpaMacroEmbeddable::toDomain).toList() : List.of()
         );
     }
 

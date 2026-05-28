@@ -11,13 +11,18 @@ public record RecipeDto(
         String name,
         String description,
         int durationInMinutes,
-        List<String> steps,
-        List<RecipeIngredientDto> ingredients,
         int servings,
+        List<String> steps,
         boolean isPublic,
-        boolean isCreator
+        boolean isOwner,
+        List<RecipeIngredientDto> ingredients,
+        List<MacroDto> totalMacros
 ) {
-    public static RecipeDto fromDomain(Recipe recipe, UserId userId) {
+    public static RecipeDto fromDomain(Recipe recipe, UserId requestingUserId) {
+        List<MacroDto> totalMacros = recipe.getMacros().stream()
+                .map(MacroDto::fromDomain)
+                .toList();
+
         List<RecipeIngredientDto> ingredientDtos = recipe.getIngredients().stream()
                 .map(RecipeIngredientDto::fromDomain)
                 .toList();
@@ -27,11 +32,12 @@ public record RecipeDto(
                 recipe.getName(),
                 recipe.getDescription(),
                 recipe.getDurationInMinutes(),
-                recipe.getSteps(),
-                ingredientDtos,
                 recipe.getServings(),
+                recipe.getSteps(),
                 recipe.isPublic(),
-                userId.equals(recipe.getUser().id())
+                recipe.getUser().id().equals(requestingUserId),
+                ingredientDtos,
+                totalMacros
         );
     }
 }

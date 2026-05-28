@@ -23,6 +23,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "ingredients")
 public class JpaIngredientEntity {
+
     @Id
     @Column(name = "ingredient_id")
     private UUID id;

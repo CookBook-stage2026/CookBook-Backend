@@ -1,6 +1,7 @@
 package be.xplore.cookbook.rest.controller.recipe;
 
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
+import be.xplore.cookbook.core.domain.ingredient.MacroType;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -133,6 +135,7 @@ public class RecipeController {
     }
 
     @PutMapping("/{id}/visibility")
+    @Transactional
     public void changeVisibility(
             @PathVariable UUID id,
             @RequestBody ChangeRecipeVisibilityRequest request,
@@ -151,6 +154,14 @@ public class RecipeController {
     ) {
         UserId userId = getUserIdFromJwt(jwt);
         recipeCommandService.deleteRecipe(new DeleteRecipeCommand(new RecipeId(id), userId));
+    }
+
+    @GetMapping("/macro-types")
+    @ResponseStatus(HttpStatus.OK)
+    public List<String> getMacroTypes() {
+        return Arrays.stream(MacroType.values())
+                .map(MacroType::name)
+                .toList();
     }
 
     private UserId getUserIdFromJwt(Jwt jwt) {

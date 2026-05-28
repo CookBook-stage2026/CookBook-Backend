@@ -11,13 +11,15 @@ public class Recipe {
     private List<RecipeIngredient> ingredients;
     private boolean isPublic;
     private final User user;
+    private List<Macro> macros;
 
     public Recipe(
             RecipeId id,
             RecipeDetails details,
             List<RecipeIngredient> ingredients,
             boolean isPublic,
-            User user
+            User user,
+            List<Macro> macros
     ) {
         if (id == null) {
             throw new IllegalArgumentException("A recipe must have an id");
@@ -28,12 +30,16 @@ public class Recipe {
         if (user == null) {
             throw new IllegalArgumentException("A recipe must have a creator");
         }
+        if (macros == null) {
+            throw new IllegalArgumentException("Recipe macros cannot be null");
+        }
 
         this.id = id;
         this.details = details;
         this.ingredients = List.copyOf(ingredients);
         this.isPublic = isPublic;
         this.user = user;
+        this.macros = List.copyOf(macros);
     }
 
     public RecipeSummary summarize() {
@@ -76,6 +82,10 @@ public class Recipe {
         return user;
     }
 
+    public List<Macro> getMacros() {
+        return macros;
+    }
+
     public void changeVisibility(boolean newIsPublic) {
         this.isPublic = newIsPublic;
     }
@@ -83,5 +93,12 @@ public class Recipe {
     public void updateDetails(RecipeDetails newDetails, List<RecipeIngredient> newIngredients) {
         this.details = newDetails;
         this.ingredients = List.copyOf(newIngredients);
+    }
+
+    public void updateMacros(List<Macro> newMacros) {
+        if (newMacros == null) {
+            throw new IllegalArgumentException("Recipe macros cannot be null");
+        }
+        this.macros = List.copyOf(newMacros);
     }
 }

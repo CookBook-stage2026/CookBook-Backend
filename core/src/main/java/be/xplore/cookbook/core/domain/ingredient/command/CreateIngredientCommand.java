@@ -6,5 +6,10 @@ import be.xplore.cookbook.core.domain.user.UserId;
 
 import java.util.List;
 
-public record CreateIngredientCommand(String name, Unit defaultUnit, List<Category> categories, UserId userId) {
+public record CreateIngredientCommand(
+        String name,
+        Unit defaultUnit,
+        List<Category> categories,
+        UserId userId
+) {
 }

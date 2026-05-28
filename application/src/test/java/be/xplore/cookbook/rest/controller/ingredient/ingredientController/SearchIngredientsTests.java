@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest
 class SearchIngredientsTests extends BaseIntegrationTest {
-
     private static final int DEFAULT_PAGE_SIZE = 10;
     private static final int EXPECTED_3_ITEMS = 3;
 

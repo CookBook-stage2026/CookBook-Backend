@@ -49,14 +49,25 @@ class ImportRecipeTests extends BaseIntegrationTest {
     private static final String IMPORT_RECIPE_INGREDIENT_2_CATEGORY = "EGG";
     private static final String IMPORT_RECIPE_URL = "https://example.com/recipes/spaghetti-carbonara";
 
+    private static final double TOTAL_CALORIES = 450.0;
+    private static final double TOTAL_PROTEIN = 24.0;
+    private static final double TOTAL_CARBS = 60.0;
+    private static final double TOTAL_FAT = 12.0;
+
+    private static final int AMOUNT_OF_TOTAL_MACROS = 4;
+
     private static WireMockServer wireMockServer;
+
     private static String mockAiBaseUrl;
 
     @BeforeAll
     static void startWireMock() {
         wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
+
         wireMockServer.start();
+
         WireMock.configureFor("localhost", wireMockServer.port());
+
         mockAiBaseUrl = "http://localhost:" + wireMockServer.port();
     }
 
@@ -71,11 +82,11 @@ class ImportRecipeTests extends BaseIntegrationTest {
     }
 
     @BeforeEach
-    void stubOllamaChat() {
+    void stubOllamaChat() throws Exception {
         String responseBody = buildOllamaResponseBodyWithContent(buildValidImportResponseContent());
+
         WireMock.stubFor(WireMock.post(WireMock.urlPathMatching("/api/chat"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
+                .willReturn(WireMock.aResponse().withHeader("Content-Type", "application/json")
                         .withBody(responseBody)));
     }
 
@@ -86,19 +97,15 @@ class ImportRecipeTests extends BaseIntegrationTest {
 
     @Override
     protected String[] getTablesToClear() {
-        return new String[]{
-                "recipe_ingredients", "recipes", "ingredients",
-                "recipe_steps", "ingredient_categories", "users"
-        };
+        return new String[]
+                {"recipe_ingredients", "recipes", "ingredients", "recipe_steps", "ingredient_categories", "users"};
     }
 
     @Test
     void importRecipe_shouldReturnCreatedRecipe_whenValidRequest() throws Exception {
         createUser();
         ImportRecipeRequest request = new ImportRecipeRequest(IMPORT_RECIPE_URL);
-
-        String responseContent = performImportRecipe(request)
-                .andExpect(status().isCreated())
+        String responseContent = performImportRecipe(request).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", is(IMPORT_RECIPE_TITLE)))
                 .andExpect(jsonPath("$.description", is(IMPORT_RECIPE_DESCRIPTION)))
                 .andExpect(jsonPath("$.durationInMinutes", is(IMPORT_RECIPE_DURATION)))
@@ -107,116 +114,178 @@ class ImportRecipeTests extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.steps[0]", is(IMPORT_RECIPE_STEP_1)))
                 .andExpect(jsonPath("$.steps[1]", is(IMPORT_RECIPE_STEP_2)))
                 .andExpect(jsonPath("$.ingredients", hasSize(2)))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
+                .andExpect(jsonPath("$.totalMacros", hasSize(AMOUNT_OF_TOTAL_MACROS)))
+                .andExpect(jsonPath("$.totalMacros[0].type", is("CALORIES")))
+                .andExpect(jsonPath("$.totalMacros[0].value", is(TOTAL_CALORIES)))
+                .andExpect(jsonPath("$.totalMacros[1].type", is("PROTEIN")))
+                .andExpect(jsonPath("$.totalMacros[1].value", is(TOTAL_PROTEIN)))
+                .andExpect(jsonPath("$.totalMacros[2].type", is("CARBS")))
+                .andExpect(jsonPath("$.totalMacros[2].value", is(TOTAL_CARBS)))
+                .andExpect(jsonPath("$.totalMacros[3].type", is("FAT")))
+                .andExpect(jsonPath("$.totalMacros[3].value", is(TOTAL_FAT)))
+                .andReturn().getResponse().getContentAsString();
         RecipeDto importedRecipeDto = getMapper().readValue(responseContent, RecipeDto.class);
+
         assertThat(importedRecipeDto.id()).isNotNull();
         assertThat(getRecipeRepository().findById(new RecipeId(importedRecipeDto.id()), createUser()));
     }
 
     @Test
     void importRecipe_shouldReturn400_whenUrlIsInvalid() throws Exception {
+
         ImportRecipeRequest request = new ImportRecipeRequest("invalid-url");
-        performImportRecipe(request)
-                .andExpect(status().isBadRequest());
+
+        performImportRecipe(request).andExpect(status().isBadRequest());
     }
 
     @Test
     void importRecipe_shouldReturn401_whenNotAuthenticated() throws Exception {
+
         ImportRecipeRequest request = new ImportRecipeRequest(IMPORT_RECIPE_URL);
+
         getMockMvc().perform(post("/api/recipes/import")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(request))
-                        .with(csrf()))
-                .andExpect(status().isUnauthorized());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(getMapper().writeValueAsString(request))
+                .with(csrf())).andExpect(status().isUnauthorized());
     }
 
     @Test
     void importRecipe_shouldReturn502_whenAiReturnsInvalidJson() throws Exception {
+
         WireMock.stubFor(WireMock.post(WireMock.urlPathMatching("/api/chat"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
+                .willReturn(WireMock.aResponse().withHeader("Content-Type", "application/json")
                         .withBody("this is not valid json")));
 
         createUser();
+
         ImportRecipeRequest request = new ImportRecipeRequest(IMPORT_RECIPE_URL);
-        performImportRecipe(request)
-                .andExpect(status().isBadGateway());
+
+        performImportRecipe(request).andExpect(status().isBadGateway());
     }
 
     @Test
     void importRecipe_shouldReturn502_whenAiReturnsInvalidStructure() throws Exception {
+
         WireMock.stubFor(WireMock.post(WireMock.urlPathMatching("/api/chat"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(buildOllamaResponseBodyWithContent("{\"invalid\": \"structure\"}"))));
+                .willReturn(WireMock.aResponse().withHeader("Content-Type", "application/json")
+                        .withBody(buildOllamaResponseBodyWithContent("""
+                                {
+                                  "title": "Test",
+                                  "description": "Test",
+                                  "durationInMinutes": 30,
+                                  "servings": 2,
+                                  "steps": [],
+                                  "ingredients": []
+                                }
+                                """))));
 
         createUser();
+
         ImportRecipeRequest request = new ImportRecipeRequest(IMPORT_RECIPE_URL);
-        performImportRecipe(request)
-                .andExpect(status().isBadGateway());
+
+        performImportRecipe(request).andExpect(status().isBadGateway());
     }
 
     @Test
     void importRecipe_shouldReturn502_whenAiReturnsNullForRequiredField() throws Exception {
+
         WireMock.stubFor(WireMock.post(WireMock.urlPathMatching("/api/chat"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withBody(buildOllamaResponseBodyWithContent(
-                                "{\"title\": null, \"description\": \"test\", \"durationInMinutes\": 30,"
-                                        + " \"servings\": 4, \"steps\": [], \"ingredients\": []}"))));
+                        .withBody(buildOllamaResponseBodyWithContent("""
+                                {
+                                  "title": null,
+                                  "description": "test",
+                                  "durationInMinutes": 30,
+                                  "servings": 4,
+                                  "steps": [],
+                                  "ingredients": [],
+                                  "macros": []
+                                }
+                                """))));
 
         createUser();
+
         ImportRecipeRequest request = new ImportRecipeRequest(IMPORT_RECIPE_URL);
-        performImportRecipe(request)
-                .andExpect(status().isBadGateway());
+
+        performImportRecipe(request).andExpect(status().isBadGateway());
     }
 
     @Test
     void importRecipe_shouldReturn503_whenAiUnavailable() throws Exception {
+
         WireMock.stubFor(WireMock.post(WireMock.urlPathMatching("/api/chat"))
-                .willReturn(WireMock.aResponse()
-                        .withFault(Fault.CONNECTION_RESET_BY_PEER)));
+                .willReturn(WireMock.aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
 
         createUser();
+
         ImportRecipeRequest request = new ImportRecipeRequest(IMPORT_RECIPE_URL);
-        performImportRecipe(request)
-                .andExpect(status().isServiceUnavailable());
+
+        performImportRecipe(request).andExpect(status().isServiceUnavailable());
     }
 
     private ResultActions performImportRecipe(ImportRecipeRequest request) throws Exception {
+
         return getMockMvc().perform(post("/api/recipes/import")
-                        .with(validJwt())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(request)))
-                .andDo(print());
+                .with(validJwt()).contentType(MediaType.APPLICATION_JSON)
+                .content(getMapper().writeValueAsString(request))).andDo(print());
     }
 
-    private String buildOllamaResponseBodyWithContent(String content) {
+    private String buildOllamaResponseBodyWithContent(String content) throws Exception {
+
         record Message(String role, String content) {
         }
+
         record OllamaResponse(Message message, boolean done) {
         }
-        return getMapper().writeValueAsString(
-                new OllamaResponse(new Message("assistant", content), true)
-        );
+
+        return getMapper().writeValueAsString(new OllamaResponse(new Message("assistant", content), true));
     }
 
     private String buildValidImportResponseContent() {
-        return String.format(Locale.US,
-                "{"
-                        + "\"title\": \"%s\","
-                        + "\"description\": \"%s\","
-                        + "\"durationInMinutes\": %d,"
-                        + "\"servings\": %d,"
-                        + "\"steps\": [\"%s\", \"%s\"],"
-                        + "\"ingredients\": ["
-                        + "{\"name\": \"%s\", \"unit\": \"%s\", \"quantity\": %.1f, \"categories\": [\"%s\"]},"
-                        + "{\"name\": \"%s\", \"unit\": \"%s\", \"quantity\": %.1f, \"categories\": [\"%s\"]}"
-                        + "]"
-                        + "}",
+
+        return String.format(Locale.US, """
+                        {
+                            "title": "%s",
+                            "description": "%s",
+                            "durationInMinutes": %d,
+                            "servings": %d,
+                            "steps": ["%s", "%s"],
+                            "ingredients": [
+                                {
+                                    "name": "%s",
+                                    "unit": "%s",
+                                    "quantity": %.1f,
+                                    "categories": ["%s"]
+                                },
+                                {
+                                    "name": "%s",
+                                    "unit": "%s",
+                                    "quantity": %.1f,
+                                    "categories": ["%s"]
+                                }
+                            ],
+                            "macros": [
+                                {
+                                    "type": "CALORIES",
+                                    "valuePerUnit": %.1f
+                                },
+                                {
+                                    "type": "PROTEIN",
+                                    "valuePerUnit": %.1f
+                                },
+                                {
+                                    "type": "CARBS",
+                                    "valuePerUnit": %.1f
+                                },
+                                {
+                                    "type": "FAT",
+                                    "valuePerUnit": %.1f
+                                }
+                            ]
+                        }
+                        """,
+
                 IMPORT_RECIPE_TITLE,
                 IMPORT_RECIPE_DESCRIPTION,
                 IMPORT_RECIPE_DURATION,
@@ -230,7 +299,7 @@ class ImportRecipeTests extends BaseIntegrationTest {
                 IMPORT_RECIPE_INGREDIENT_2_NAME,
                 IMPORT_RECIPE_INGREDIENT_2_UNIT,
                 IMPORT_RECIPE_INGREDIENT_2_QUANTITY,
-                IMPORT_RECIPE_INGREDIENT_2_CATEGORY
-        );
+                IMPORT_RECIPE_INGREDIENT_2_CATEGORY,
+                TOTAL_CALORIES, TOTAL_PROTEIN, TOTAL_CARBS, TOTAL_FAT);
     }
 }

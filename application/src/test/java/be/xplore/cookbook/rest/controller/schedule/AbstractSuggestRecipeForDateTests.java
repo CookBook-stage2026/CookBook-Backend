@@ -2,12 +2,12 @@ package be.xplore.cookbook.rest.controller.schedule;
 
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
-import be.xplore.cookbook.core.domain.ingredient.IngredientId;
+import be.xplore.cookbook.core.domain.ingredient.MacroType;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
+import be.xplore.cookbook.core.domain.recipe.Macro;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
-import be.xplore.cookbook.core.domain.recipe.RecipeIngredient;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
@@ -42,6 +42,7 @@ public abstract class AbstractSuggestRecipeForDateTests extends BaseIntegrationT
     private static final LocalDate TARGET_DATE = LocalDate.now().plusDays(2);
     private static final LocalDate TARGET_MONDAY = TARGET_DATE.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
     private static final RecipeId RECIPE_ID = RecipeId.create();
+    private static final double DEFAULT_CALORIES = 50;
 
     @BeforeEach
     void stubAi() {
@@ -76,7 +77,14 @@ public abstract class AbstractSuggestRecipeForDateTests extends BaseIntegrationT
     void suggestRecipeForDay_shouldReturnUpdatedWeekSchedule_whenValidRequest() throws Exception {
         // Arrange
         User user = createUser();
-        Recipe recipe = createRecipe(user);
+        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG, null);
+        Recipe recipe = createAndSaveRecipe(RECIPE_ID,
+                new RecipeDetails("Recipe", "Description", 1, 1, List.of("Step 1")),
+                List.of(ingredient),
+                true,
+                user,
+                List.of(new Macro(MacroType.CALORIES, DEFAULT_CALORIES))
+        );
         ScheduleOwner owner = setupOwner(user);
 
         createWeekSchedule(owner,
@@ -96,8 +104,16 @@ public abstract class AbstractSuggestRecipeForDateTests extends BaseIntegrationT
     void suggestRecipeForDay_shouldReturnUpdatedWeekSchedule_whenOverwritingExistingDaySchedule() throws Exception {
         // Arrange
         User user = createUser();
-        Recipe recipe = createRecipe(user);
         ScheduleOwner owner = setupOwner(user);
+
+        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG, null);
+        Recipe recipe = createAndSaveRecipe(RECIPE_ID,
+                new RecipeDetails("Recipe", "Description", 1, 1, List.of("Step 1")),
+                List.of(ingredient),
+                true,
+                user,
+                List.of(new Macro(MacroType.CALORIES, DEFAULT_CALORIES))
+        );
 
         createWeekSchedule(owner,
                 Map.of(TARGET_DATE.getDayOfWeek(), recipe),
@@ -119,7 +135,15 @@ public abstract class AbstractSuggestRecipeForDateTests extends BaseIntegrationT
     void suggestRecipeForDay_shouldSaveNewEmptyWeekSchedule_whenValidRequestAndNoExistingSchedule() throws Exception {
         // Arrange
         User user = createUser();
-        createRecipe(user);
+
+        Ingredient ingredient = createAndSaveIngredient("Ingredient", Unit.GRAM, Category.EGG, null);
+        createAndSaveRecipe(RECIPE_ID,
+                new RecipeDetails("Recipe", "Description", 1, 1, List.of("Step 1")),
+                List.of(ingredient),
+                true,
+                user,
+                List.of(new Macro(MacroType.CALORIES, DEFAULT_CALORIES))
+        );
         ScheduleOwner owner = setupOwner(user);
 
         // Act & Assert
@@ -185,21 +209,6 @@ public abstract class AbstractSuggestRecipeForDateTests extends BaseIntegrationT
 
         getMockMvc().perform(suggestRequest(TARGET_DATE))
                 .andExpect(status().isServiceUnavailable());
-    }
-
-    private Recipe createRecipe(User user) {
-        Ingredient ingredient = new Ingredient(
-                IngredientId.create(), "Ingredient", Unit.GRAM, List.of(Category.EGG), null);
-        getIngredientRepository().save(ingredient);
-        Recipe recipe = new Recipe(
-                RECIPE_ID,
-                new RecipeDetails("Recipe", "Description", 1, 1, List.of("Step 1")),
-                List.of(new RecipeIngredient(ingredient, 1)),
-                true,
-                user
-        );
-        getRecipeRepository().save(recipe);
-        return recipe;
     }
 
     private String buildAiResponse() {
