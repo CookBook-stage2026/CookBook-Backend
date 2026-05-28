@@ -28,4 +28,8 @@ public record Ingredient(
         name = Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
         categories = List.copyOf(categories);
     }
+
+    public Ingredient update(String newName, Unit newDefaultUnit, List<Category> newCategories) {
+        return new Ingredient(this.id, newName, newDefaultUnit, newCategories, this.user);
+    }
 }

@@ -79,12 +79,12 @@ public class JpaIngredientEntity {
         );
     }
 
-    public Ingredient toDomainWithoutCategoriesAndUser() {
+    public Ingredient toDomainWithoutUser() {
         return new Ingredient(
                 new IngredientId(id),
                 name,
                 defaultUnit,
-                List.of(),
+                categories,
                 null
         );
     }

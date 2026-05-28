@@ -31,12 +31,13 @@ import java.time.Duration;
 public class AppConfig {
 
     @Bean
-    @Transactional(readOnly = true)
+    @Transactional()
     public IngredientService ingredientService(
             IngredientRepository ingredientRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            RecipeRepository recipeRepository
     ) {
-        return new IngredientService(ingredientRepository, userRepository);
+        return new IngredientService(ingredientRepository, userRepository, recipeRepository);
     }
 
     @Bean

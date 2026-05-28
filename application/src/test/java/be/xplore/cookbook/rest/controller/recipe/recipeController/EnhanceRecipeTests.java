@@ -144,7 +144,7 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
         Recipe recipe = createAndSaveRecipe(user, ing);
 
         int ingredientCountBefore = getIngredientRepository()
-                .searchByNameExcludingIds("", List.of(), PAGING, user)
+                .searchByNameExcludingIds("", List.of(), PAGING, user).content()
                 .size();
 
         performEnhanceRecipe(recipe.getId().id().toString())
@@ -153,7 +153,7 @@ class EnhanceRecipeTests extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.ingredients[*].unit", containsInAnyOrder("CUP", "GRAM")));
 
         List<Ingredient> ingredients = getIngredientRepository()
-                .searchByNameExcludingIds("", List.of(), PAGING, user);
+                .searchByNameExcludingIds("", List.of(), PAGING, user).content();
         assertThat(ingredients).hasSize(ingredientCountBefore);
     }
 
