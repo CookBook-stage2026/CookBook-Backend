@@ -31,7 +31,7 @@ import java.time.Duration;
 public class AppConfig {
 
     @Bean
-    @Transactional()
+    @Transactional
     public IngredientService ingredientService(
             IngredientRepository ingredientRepository,
             UserRepository userRepository,

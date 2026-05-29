@@ -38,7 +38,7 @@ public class IngredientRepositoryImpl implements IngredientRepository {
     @Override
     public Optional<Ingredient> findByIdWithoutCategoriesAndUser(IngredientId id) {
         return jpaIngredientRepository.findById(id.id())
-                .map(JpaIngredientEntity::toDomainWithoutUser);
+                .map(JpaIngredientEntity::toDomainWithoutUserAndCategories);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class IngredientRepositoryImpl implements IngredientRepository {
         List<UUID> uuids = ids.stream().map(IngredientId::id).toList();
         return jpaIngredientRepository.findAllById(uuids)
                 .stream()
-                .map(JpaIngredientEntity::toDomainWithoutUser)
+                .map(JpaIngredientEntity::toDomainWithoutUserAndCategories)
                 .toList();
     }
 
@@ -57,7 +57,14 @@ public class IngredientRepositoryImpl implements IngredientRepository {
         Page<JpaIngredientEntity> page = jpaIngredientRepository
                 .searchPersonalByNamePrioritizingStartsWith(
                         toSearchName(name), toUuids(selectedIds), user.id().id(), pageable);
-        return toPagedResult(page);
+        return new PagedResult<>(
+                page.getContent().stream()
+                        .map(JpaIngredientEntity::toDomainWithoutUser)
+                        .toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements()
+        );
     }
 
     @Override
@@ -67,19 +74,26 @@ public class IngredientRepositoryImpl implements IngredientRepository {
         Page<JpaIngredientEntity> page = jpaIngredientRepository
                 .searchByNamePrioritizingStartsWith(
                         toSearchName(name), toUuids(selectedIds), user.id().id(), pageable);
-        return toPagedResult(page);
+        return new PagedResult<>(
+                page.getContent().stream()
+                        .map(JpaIngredientEntity::toDomainWithoutUserAndCategories)
+                        .toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements()
+        );
     }
 
     @Override
     public Optional<Ingredient> findByNameIgnoreCaseGlobalOrUser(String name, User user) {
         return jpaIngredientRepository.findExactByNameIgnoreCaseGlobalOrUser(name, user.id().id())
-                .map(JpaIngredientEntity::toDomainWithoutUser);
+                .map(JpaIngredientEntity::toDomainWithoutUserAndCategories);
     }
 
     @Override
     public Optional<Ingredient> findByNameIgnoreCaseAndUser(String name, User user) {
         return jpaIngredientRepository.findExactByNameIgnoreCaseAndUser_Id(name, user.id().id())
-                .map(JpaIngredientEntity::toDomainWithoutUser);
+                .map(JpaIngredientEntity::toDomainWithoutUserAndCategories);
     }
 
     @Override
@@ -95,16 +109,5 @@ public class IngredientRepositoryImpl implements IngredientRepository {
         return ids != null
                 ? ids.stream().map(IngredientId::id).toList()
                 : List.of();
-    }
-
-    private PagedResult<Ingredient> toPagedResult(Page<JpaIngredientEntity> page) {
-        return new PagedResult<>(
-                page.getContent().stream()
-                        .map(JpaIngredientEntity::toDomainWithoutUser)
-                        .toList(),
-                page.getNumber(),
-                page.getSize(),
-                page.getTotalElements()
-        );
     }
 }

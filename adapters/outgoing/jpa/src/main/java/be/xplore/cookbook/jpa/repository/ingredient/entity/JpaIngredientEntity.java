@@ -89,6 +89,16 @@ public class JpaIngredientEntity {
         );
     }
 
+    public Ingredient toDomainWithoutUserAndCategories() {
+        return new Ingredient(
+                new IngredientId(id),
+                name,
+                defaultUnit,
+                List.of(),
+                null
+        );
+    }
+
     public UUID getId() {
         return id;
     }

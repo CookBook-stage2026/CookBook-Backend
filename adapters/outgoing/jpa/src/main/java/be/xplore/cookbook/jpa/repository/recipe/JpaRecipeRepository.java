@@ -61,7 +61,7 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
 
     @Query("""
                 SELECT r FROM JpaRecipeEntity r
-                JOIN r.ingredients i
+                LEFT JOIN r.ingredients i
                 WHERE (:#{#ingredientIds.size()} = 0 OR i.id.ingredientId IN :ingredientIds)
                     AND (:#{#excludedIngredientIds.size()} = 0 OR i.id.ingredientId NOT IN :excludedIngredientIds)
                     AND (
@@ -99,7 +99,7 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
 
     @Query("""
                 SELECT r FROM JpaRecipeEntity r
-                JOIN r.ingredients i
+                LEFT JOIN r.ingredients i
                 WHERE (:#{#ingredientIds.size()} = 0 OR i.id.ingredientId IN :ingredientIds)
                     AND (:#{#excludedIngredientIds.size()} = 0 OR i.id.ingredientId NOT IN :excludedIngredientIds)
                     AND (
