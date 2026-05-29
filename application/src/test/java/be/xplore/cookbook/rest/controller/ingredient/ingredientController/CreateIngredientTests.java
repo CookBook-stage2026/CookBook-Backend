@@ -64,7 +64,7 @@ class CreateIngredientTests extends BaseIntegrationTest {
         );
 
         Ingredient ingredient = getIngredientRepository()
-                .findById(new IngredientId(response.id()))
+                .findByIdWithoutCategoriesAndUser(new IngredientId(response.id()))
                 .orElseThrow(() -> new Exception("Ingredient not found"));
 
         assertThat(ingredient.name()).isEqualTo("Flour");
@@ -166,7 +166,7 @@ class CreateIngredientTests extends BaseIntegrationTest {
         );
 
         Ingredient ingredient = getIngredientRepository()
-                .findById(new IngredientId(response.id()))
+                .findByIdWithoutCategoriesAndUser(new IngredientId(response.id()))
                 .orElseThrow(() -> new Exception("Ingredient not found"));
 
         assertThat(ingredient.name()).isEqualTo("Flour");
@@ -215,7 +215,7 @@ class CreateIngredientTests extends BaseIntegrationTest {
         assertThat(secondResponse.id()).isEqualTo(firstResponse.id());
 
         Ingredient ingredient = getIngredientRepository()
-                .findById(new IngredientId(secondResponse.id()))
+                .findByIdWithoutCategoriesAndUser(new IngredientId(secondResponse.id()))
                 .orElseThrow(() -> new Exception("Ingredient not found"));
 
         assertThat(ingredient.name()).isEqualTo("Flour");

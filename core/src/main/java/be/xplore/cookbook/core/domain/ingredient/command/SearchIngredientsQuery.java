@@ -6,5 +6,6 @@ import be.xplore.cookbook.core.domain.user.UserId;
 
 import java.util.List;
 
-public record SearchIngredientsQuery(String name, List<IngredientId> excludedIds, Paging paging, UserId userId) {
+public record SearchIngredientsQuery(String name, List<IngredientId> excludedIds, Paging paging,
+                                     boolean onlyPersonal, UserId userId) {
 }

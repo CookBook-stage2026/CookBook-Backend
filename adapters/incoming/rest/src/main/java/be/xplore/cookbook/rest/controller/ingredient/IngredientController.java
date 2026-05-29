@@ -5,19 +5,26 @@ import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.ingredient.command.CreateIngredientCommand;
+import be.xplore.cookbook.core.domain.ingredient.command.DeleteIngredientCommand;
 import be.xplore.cookbook.core.domain.ingredient.command.SearchIngredientsQuery;
+import be.xplore.cookbook.core.domain.ingredient.command.UpdateIngredientCommand;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.service.ingredient.IngredientService;
+import be.xplore.cookbook.rest.dto.common.response.PaginatedResponse;
 import be.xplore.cookbook.rest.dto.ingredient.request.CreateIngredientDto;
 import be.xplore.cookbook.rest.dto.ingredient.request.IngredientSearchRequest;
+import be.xplore.cookbook.rest.dto.ingredient.request.UpdateIngredientDto;
 import be.xplore.cookbook.rest.dto.ingredient.response.IngredientDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -55,7 +62,7 @@ public class IngredientController {
 
     @PostMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<IngredientDto> searchIngredients(
+    public PaginatedResponse<IngredientDto> searchIngredients(
             @RequestBody @Valid IngredientSearchRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
@@ -63,12 +70,45 @@ public class IngredientController {
                 .map(IngredientId::new)
                 .toList();
 
-        return ingredientService.searchByNameExcludingIds(new SearchIngredientsQuery(
-                        request.query(), excludedIds, new Paging(request.page(), request.size()),
-                        getUserIdFromJwt(jwt)))
-                .stream()
-                .map(IngredientDto::fromDomain)
-                .toList();
+        var result = ingredientService.searchByNameExcludingIds(new SearchIngredientsQuery(
+                request.query(), excludedIds, new Paging(request.page(), request.size()),
+                request.onlyPersonal(), getUserIdFromJwt(jwt)
+        ));
+
+        return new PaginatedResponse<>(
+                result.content().stream().map(IngredientDto::fromDomain).toList(),
+                new PaginatedResponse.PageMetadata(
+                        result.pageNumber(), result.pageSize(), result.totalElements(), result.totalPages()
+                )
+        );
+    }
+
+    @PutMapping("/{id}")
+    @Transactional
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateIngredient(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateIngredientDto dto
+    ) {
+        ingredientService.updateIngredient(new UpdateIngredientCommand(
+                new IngredientId(id),
+                dto.name(),
+                dto.defaultUnit(),
+                dto.categories(),
+                getUserIdFromJwt(jwt)
+        ));
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteIngredient(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID id
+    ) {
+        UserId userId = getUserIdFromJwt(jwt);
+        ingredientService.deleteIngredient(new DeleteIngredientCommand(new IngredientId(id), userId));
     }
 
     @GetMapping("/categories")

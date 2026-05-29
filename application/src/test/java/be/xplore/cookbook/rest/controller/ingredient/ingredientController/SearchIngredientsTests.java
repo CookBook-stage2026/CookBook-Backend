@@ -45,15 +45,16 @@ class SearchIngredientsTests extends BaseIntegrationTest {
                 "Flour",
                 List.of(),
                 0,
-                DEFAULT_PAGE_SIZE
+                DEFAULT_PAGE_SIZE,
+                false
         );
 
         // Act & Assert
         performSearch(dto)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].name").exists())
-                .andExpect(jsonPath("$[1].name").exists());
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].name").exists())
+                .andExpect(jsonPath("$.content[1].name").exists());
     }
 
     @Test
@@ -67,13 +68,14 @@ class SearchIngredientsTests extends BaseIntegrationTest {
                 "Pepper",
                 List.of(),
                 0,
-                DEFAULT_PAGE_SIZE
+                DEFAULT_PAGE_SIZE,
+                false
         );
 
         // Act & Assert
         performSearch(dto)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(jsonPath("$.content", hasSize(0)));
     }
 
     @Test
@@ -89,25 +91,27 @@ class SearchIngredientsTests extends BaseIntegrationTest {
                 "Apple",
                 List.of(),
                 0,
-                2
+                2,
+                false
         );
 
         IngredientSearchRequest dto2 = new IngredientSearchRequest(
                 "Apple",
                 List.of(),
                 1,
-                2
+                2,
+                false
         );
 
         // Act & Assert - Page 0, Size 2
         performSearch(dto1)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(jsonPath("$.content", hasSize(2)));
 
         // Act & Assert - Page 1, Size 2
         performSearch(dto2)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
+                .andExpect(jsonPath("$.content", hasSize(1)));
     }
 
     @Test
@@ -121,13 +125,14 @@ class SearchIngredientsTests extends BaseIntegrationTest {
                 "flour",
                 List.of(),
                 0,
-                DEFAULT_PAGE_SIZE
+                DEFAULT_PAGE_SIZE,
+                false
         );
 
         // Act & Assert
         performSearch(dto)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
+                .andExpect(jsonPath("$.content", hasSize(1)));
     }
 
     @Test
@@ -143,13 +148,14 @@ class SearchIngredientsTests extends BaseIntegrationTest {
                 null,
                 List.of(),
                 0,
-                DEFAULT_PAGE_SIZE
+                DEFAULT_PAGE_SIZE,
+                false
         );
 
         // Act & Assert
         performSearch(dto)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(EXPECTED_3_ITEMS)));
+                .andExpect(jsonPath("$.content", hasSize(EXPECTED_3_ITEMS)));
     }
 
     @Test
@@ -165,14 +171,15 @@ class SearchIngredientsTests extends BaseIntegrationTest {
                 null,
                 List.of(flour.id().id(), sugar.id().id()),
                 0,
-                DEFAULT_PAGE_SIZE
+                DEFAULT_PAGE_SIZE,
+                false
         );
 
         // Act & Assert
         performSearch(dto)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name").value("Salt"));
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].name").value("Salt"));
     }
 
     @Test
@@ -188,14 +195,15 @@ class SearchIngredientsTests extends BaseIntegrationTest {
                 "Salt",
                 List.of(flour.id().id()),
                 0,
-                DEFAULT_PAGE_SIZE
+                DEFAULT_PAGE_SIZE,
+                false
         );
 
         // Act & Assert
         performSearch(dto)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name").value("Salt"));
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].name").value("Salt"));
     }
 
     @Test
@@ -211,14 +219,15 @@ class SearchIngredientsTests extends BaseIntegrationTest {
                 "Choc",
                 List.of(),
                 0,
-                DEFAULT_PAGE_SIZE
+                DEFAULT_PAGE_SIZE,
+                false
         );
 
         // Act & Assert
         performSearch(dto)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(EXPECTED_3_ITEMS)))
-                .andExpect(jsonPath("$[0].name").value("Chocolate milk"));
+                .andExpect(jsonPath("$.content", hasSize(EXPECTED_3_ITEMS)))
+                .andExpect(jsonPath("$.content[0].name").value("Chocolate milk"));
     }
 
     @Test
@@ -235,13 +244,14 @@ class SearchIngredientsTests extends BaseIntegrationTest {
                 "",
                 List.of(),
                 0,
-                DEFAULT_PAGE_SIZE
+                DEFAULT_PAGE_SIZE,
+                false
         );
 
         // Act & Assert
         performSearchWithUserId(dto, user.id())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(jsonPath("$.content", hasSize(2)));
     }
 
     @Test
@@ -256,14 +266,15 @@ class SearchIngredientsTests extends BaseIntegrationTest {
                 "",
                 List.of(),
                 0,
-                DEFAULT_PAGE_SIZE
+                DEFAULT_PAGE_SIZE,
+                false
         );
 
         // Act & Assert
         performSearchWithUserId(dto, user.id())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].defaultUnit").value("GRAM"));
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].defaultUnit").value("GRAM"));
     }
 
     private ResultActions performSearch(IngredientSearchRequest request) throws Exception {

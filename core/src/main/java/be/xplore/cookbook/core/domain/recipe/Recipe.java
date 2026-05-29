@@ -24,9 +24,6 @@ public class Recipe {
         if (id == null) {
             throw new IllegalArgumentException("A recipe must have an id");
         }
-        if (ingredients == null || ingredients.isEmpty()) {
-            throw new IllegalArgumentException("A recipe must have at least one ingredient");
-        }
         if (user == null) {
             throw new IllegalArgumentException("A recipe must have a creator");
         }

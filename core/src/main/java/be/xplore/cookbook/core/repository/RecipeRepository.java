@@ -32,4 +32,6 @@ public interface RecipeRepository {
     Optional<Recipe> findOwnById(RecipeId recipeId, User user);
 
     void delete(Recipe recipe);
+
+    void removeIngredient(IngredientId ingredientId);
 }

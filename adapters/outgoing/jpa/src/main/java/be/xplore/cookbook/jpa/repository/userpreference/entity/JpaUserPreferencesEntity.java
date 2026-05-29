@@ -55,7 +55,7 @@ public class JpaUserPreferencesEntity {
                 user.toDomain(),
                 excludedCategories.stream().toList(),
                 excludedIngredients.stream()
-                        .map(JpaIngredientEntity::toDomainWithoutCategoriesAndUser)
+                        .map(JpaIngredientEntity::toDomainWithoutUser)
                         .toList()
         );
     }

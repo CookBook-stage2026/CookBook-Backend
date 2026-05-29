@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -60,7 +61,7 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
 
     @Query("""
                 SELECT r FROM JpaRecipeEntity r
-                JOIN r.ingredients i
+                LEFT JOIN r.ingredients i
                 WHERE (:#{#ingredientIds.size()} = 0 OR i.id.ingredientId IN :ingredientIds)
                     AND (:#{#excludedIngredientIds.size()} = 0 OR i.id.ingredientId NOT IN :excludedIngredientIds)
                     AND (
@@ -98,7 +99,7 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
 
     @Query("""
                 SELECT r FROM JpaRecipeEntity r
-                JOIN r.ingredients i
+                LEFT JOIN r.ingredients i
                 WHERE (:#{#ingredientIds.size()} = 0 OR i.id.ingredientId IN :ingredientIds)
                     AND (:#{#excludedIngredientIds.size()} = 0 OR i.id.ingredientId NOT IN :excludedIngredientIds)
                     AND (
@@ -155,4 +156,13 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
             Pageable pageable);
 
     List<JpaRecipeEntity> findByUser_IdInAndIsPublicTrue(List<UUID> userIds);
+
+    @Modifying
+    @Query("""
+        DELETE FROM JpaRecipeIngredientEntity ri
+        WHERE ri.id.ingredientId = :ingredientId
+        """)
+    void deleteRecipeIngredientsByIngredientId(
+            @Param("ingredientId") UUID ingredientId
+    );
 }

@@ -127,4 +127,9 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     public void delete(Recipe recipe) {
         jpaRecipeRepository.delete(JpaRecipeEntity.fromDomain(recipe));
     }
+
+    @Override
+    public void removeIngredient(IngredientId ingredientId) {
+        jpaRecipeRepository.deleteRecipeIngredientsByIngredientId(ingredientId.id());
+    }
 }
