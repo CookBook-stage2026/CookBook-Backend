@@ -68,6 +68,10 @@ public enum Unit {
         };
     }
 
+    public static double roundToTwoDecimals(double value) {
+        return round(value, 2);
+    }
+
     private static double round(double value, int scale) {
         return BigDecimal.valueOf(value).setScale(scale, RoundingMode.HALF_UP).doubleValue();
     }
