@@ -20,7 +20,7 @@ public class AiConfig {
     }
 
     @Bean
-    public ScheduleAiService scheduleAiService(ChatModel chatModel, ToolProvider toolProvider) {
+    public ScheduleAiService scheduleAiService(ChatModel chatModel) {
         return AiServices.builder(ScheduleAiService.class)
                 .chatModel(chatModel)
                 .build();
