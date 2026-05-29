@@ -2,7 +2,7 @@ package be.xplore.cookbook.jpa.repository.weekschedule;
 
 import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwnerType;
 import be.xplore.cookbook.jpa.repository.weekschedule.entity.JpaWeekScheduleEntity;
-import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -33,25 +33,33 @@ public interface JpaWeekScheduleRepository extends CrudRepository<JpaWeekSchedul
             LocalDate weekStartDate
     );
 
-    @Modifying(clearAutomatically = true)
+    @EntityGraph(attributePaths = {
+            "daySchedules",
+            "daySchedules.recipe"
+    })
     @Query("""
-                DELETE FROM JpaDayScheduleEntity d
-                WHERE d.recipe.user.id = :userId
-                AND d.weekSchedule.owner.ownerId = :ownerId
-            """)
-    void deleteAllByOwnerAndRecipeUser(
-            @Param("ownerId") UUID ownerId,
-            @Param("userId") UUID userId
-    );
-
-    @Modifying(clearAutomatically = true)
-    @Query("""
-                DELETE FROM JpaDayScheduleEntity d
+                SELECT DISTINCT ws FROM JpaWeekScheduleEntity ws
+                JOIN ws.daySchedules d
                 WHERE d.recipe.id = :recipeId
-                AND d.weekSchedule.owner.ownerType = :ownerType
+                AND ws.owner.ownerType = :ownerType
             """)
-    void deleteByRecipeIdAndOwnerType(
+    List<JpaWeekScheduleEntity> findAllByRecipeAndOwnerTypeWithDays(
             @Param("recipeId") UUID recipeId,
             @Param("ownerType") ScheduleOwnerType ownerType
+    );
+
+    @EntityGraph(attributePaths = {
+            "daySchedules",
+            "owner"
+    })
+    @Query("""
+                SELECT DISTINCT ws FROM JpaWeekScheduleEntity ws
+                JOIN ws.daySchedules d
+                WHERE d.recipe.user.id = :userId
+                AND ws.owner.ownerId = :householdId
+            """)
+    List<JpaWeekScheduleEntity> findAllByUserAndOwnerTypeWithDays(
+            @Param("userId") UUID userId,
+            @Param("householdId") UUID householdId
     );
 }

@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -157,12 +156,13 @@ public interface JpaRecipeRepository extends JpaRepository<JpaRecipeEntity, UUID
 
     List<JpaRecipeEntity> findByUser_IdInAndIsPublicTrue(List<UUID> userIds);
 
-    @Modifying
     @Query("""
-        DELETE FROM JpaRecipeIngredientEntity ri
-        WHERE ri.id.ingredientId = :ingredientId
-        """)
-    void deleteRecipeIngredientsByIngredientId(
+        SELECT DISTINCT r
+        FROM JpaRecipeEntity r
+        JOIN r.ingredients ri
+        WHERE ri.ingredient.id = :ingredientId
+    """)
+    List<JpaRecipeEntity> findRecipesContainingIngredient(
             @Param("ingredientId") UUID ingredientId
     );
 }

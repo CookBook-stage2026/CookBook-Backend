@@ -1,5 +1,6 @@
 package be.xplore.cookbook.core.domain.recipe;
 
+import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.user.User;
 
 import java.util.List;
@@ -92,10 +93,20 @@ public class Recipe {
         this.ingredients = List.copyOf(newIngredients);
     }
 
-    public void updateMacros(List<Macro> newMacros) {
+    public void setMacros(List<Macro> newMacros) {
         if (newMacros == null) {
             throw new IllegalArgumentException("Recipe macros cannot be null");
         }
         this.macros = List.copyOf(newMacros);
+    }
+
+    public void removeIngredient(IngredientId ingredientId) {
+        if (ingredientId == null) {
+            throw new IllegalArgumentException("Ingredient ID to remove cannot be null");
+        }
+
+        this.ingredients = this.ingredients.stream()
+                .filter(recipeIngredient -> !recipeIngredient.ingredient().id().equals(ingredientId))
+                .toList();
     }
 }

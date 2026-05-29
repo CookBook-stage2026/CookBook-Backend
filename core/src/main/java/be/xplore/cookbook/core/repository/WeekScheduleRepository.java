@@ -1,5 +1,6 @@
 package be.xplore.cookbook.core.repository;
 
+import be.xplore.cookbook.core.domain.household.HouseholdId;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
@@ -24,7 +25,7 @@ public interface WeekScheduleRepository {
 
     void delete(WeekSchedule schedule);
 
-    void deleteAllScheduledRecipesFromUser(ScheduleOwner owner, UserId userId);
+    List<WeekSchedule> findAllByRecipeAndOwnerType(RecipeId recipeId, ScheduleOwnerType ownerType);
 
-    void deleteByRecipeIdAndOwnerType(RecipeId recipeId, ScheduleOwnerType ownerType);
+    List<WeekSchedule> findAllByUserAndOwnerType(UserId userId, HouseholdId householdId);
 }

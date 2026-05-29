@@ -8,23 +8,13 @@ import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
 import be.xplore.cookbook.rest.dto.recipe.request.NewRecipeIngredientDto;
 import be.xplore.cookbook.rest.dto.recipe.request.UpdateRecipeDto;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -42,52 +32,12 @@ class UpdateRecipeTests extends BaseIntegrationTest {
     private static final String UPDATED_STEP_2 = "Updated step 2";
     private static final int UPDATED_SERVINGS = 4;
 
-    private static final double TOTAL_CALORIES = 720.0;
-    private static final double TOTAL_FAT = 2.0;
-
-    private static WireMockServer wireMockServer;
-    private static String mockAiBaseUrl;
-
-    @BeforeAll
-    static void startWireMock() {
-        wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
-        wireMockServer.start();
-
-        WireMock.configureFor("localhost", wireMockServer.port());
-
-        mockAiBaseUrl = "http://localhost:" + wireMockServer.port();
-    }
-
-    @AfterAll
-    static void stopWireMock() {
-        wireMockServer.stop();
-    }
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("ollama.base-url", () -> mockAiBaseUrl);
-    }
-
-    @BeforeEach
-    void stubOllamaChat() {
-        WireMock.stubFor(WireMock.post(WireMock.urlPathEqualTo("/api/chat"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(buildOllamaResponseBody(buildMacrosResponseContent()))));
-    }
-
-    @AfterEach
-    void resetWireMock() {
-        WireMock.reset();
-    }
-
     @Override
     protected String[] getTablesToClear() {
         return new String[]{
                 "recipe_ingredients",
                 "recipe_steps",
                 "recipes",
-                "recipe_macros",
                 "ingredients",
                 "users"
         };
@@ -194,37 +144,5 @@ class UpdateRecipeTests extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(getMapper().writeValueAsString(dto)))
                 .andDo(print());
-    }
-
-    private String buildOllamaResponseBody(String content) {
-        record Message(String role, String content) {
-        }
-        record Response(Message message, boolean done) {
-        }
-
-        return getMapper().writeValueAsString(
-                new Response(new Message("assistant", content), true)
-        );
-    }
-
-    private String buildMacrosResponseContent() {
-        return String.format(Locale.US,
-                """
-                        {
-                            "macros": [
-                                {
-                                    "type": "CALORIES",
-                                    "valuePerUnit": %.1f
-                                },
-                                {
-                                    "type": "FAT",
-                                    "valuePerUnit": %.1f
-                                }
-                            ]
-                        }
-                        """,
-                TOTAL_CALORIES,
-                TOTAL_FAT
-        );
     }
 }
