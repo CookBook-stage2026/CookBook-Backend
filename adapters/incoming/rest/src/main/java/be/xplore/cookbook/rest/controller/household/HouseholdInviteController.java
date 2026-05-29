@@ -5,12 +5,14 @@ import be.xplore.cookbook.core.domain.householdinvite.HouseholdInviteId;
 import be.xplore.cookbook.core.domain.householdinvite.command.AcceptInviteCommand;
 import be.xplore.cookbook.core.domain.householdinvite.command.CreateInviteCommand;
 import be.xplore.cookbook.core.domain.householdinvite.command.FindHouseholdInvitationByTokenQuery;
+import be.xplore.cookbook.core.domain.householdinvite.command.FindHouseholdInviteByHouseholdIdQuery;
 import be.xplore.cookbook.core.domain.householdinvite.command.RevokeInviteCommand;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.service.household.HouseholdInviteService;
 import be.xplore.cookbook.rest.dto.household.request.CreateInviteRequestDto;
 import be.xplore.cookbook.rest.dto.household.response.HouseholdInviteDto;
 import be.xplore.cookbook.rest.dto.household.response.HouseholdInviteResponseDto;
+import be.xplore.cookbook.rest.dto.household.response.HouseholdInviteTokenResponseDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -49,7 +52,7 @@ public class HouseholdInviteController {
     @PostMapping("/{householdId}/invites")
     @Transactional
     @ResponseStatus(HttpStatus.CREATED)
-    public HouseholdInviteResponseDto createInvite(
+    public HouseholdInviteTokenResponseDto createInvite(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID householdId,
             @RequestBody(required = false) @Valid CreateInviteRequestDto request
@@ -57,11 +60,22 @@ public class HouseholdInviteController {
         Duration duration = (request != null && request.durationMinutes() != null)
                 ? Duration.ofMinutes(request.durationMinutes())
                 : null;
-        return HouseholdInviteResponseDto.fromDomain(householdInviteService.createInvite(new CreateInviteCommand(
+        return HouseholdInviteTokenResponseDto.fromDomain(householdInviteService.createInvite(new CreateInviteCommand(
                 new HouseholdId(householdId),
                 new UserId(UUID.fromString(jwt.getSubject())),
                 duration
         )));
+    }
+
+    @GetMapping("/{householdId}/invites")
+    public List<HouseholdInviteResponseDto> getInvitesForHousehold(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID householdId
+    ) {
+        return householdInviteService.getInvitesForHousehold(new FindHouseholdInviteByHouseholdIdQuery(
+                new HouseholdId(householdId),
+                new UserId(UUID.fromString(jwt.getSubject()))
+        )).stream().map(HouseholdInviteResponseDto::fromDomain).toList();
     }
 
     @PostMapping("/invites/{token}/accept")

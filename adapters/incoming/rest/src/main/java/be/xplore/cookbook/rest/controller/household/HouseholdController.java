@@ -7,9 +7,11 @@ import be.xplore.cookbook.core.domain.household.command.DeleteByIdCommand;
 import be.xplore.cookbook.core.domain.household.command.FindAllHouseholdsForUserCommand;
 import be.xplore.cookbook.core.domain.household.command.FindHouseholdByIdQuery;
 import be.xplore.cookbook.core.domain.household.command.RemoveMemberFromHouseholdCommand;
+import be.xplore.cookbook.core.domain.household.command.UpdateHouseholdByIdCommand;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.service.household.HouseholdService;
 import be.xplore.cookbook.rest.dto.household.request.CreateHouseholdDto;
+import be.xplore.cookbook.rest.dto.household.request.EditHouseholdDto;
 import be.xplore.cookbook.rest.dto.household.response.HouseholdDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -93,6 +96,22 @@ public class HouseholdController {
         householdService.deleteById(
                 new DeleteByIdCommand(new HouseholdId(id), getUserIdFromJwt(jwt))
         );
+    }
+
+    @PutMapping("/{id}")
+    @Transactional
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateHousehold(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody EditHouseholdDto dto,
+            @PathVariable UUID id
+    ) {
+        householdService.updateById(new UpdateHouseholdByIdCommand(
+                new HouseholdId(id),
+                dto.name(),
+                dto.description(),
+                getUserIdFromJwt(jwt)
+        ));
     }
 
     private UserId getUserIdFromJwt(Jwt jwt) {

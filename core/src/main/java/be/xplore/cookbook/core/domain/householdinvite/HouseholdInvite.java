@@ -11,11 +11,18 @@ public record HouseholdInvite(
         HouseholdId householdId,
         String tokenHash,
         Instant expiresAt,
+        Instant createdOn,
         boolean revoked,
         UserId createdBy
 ) {
     public HouseholdInvite(HouseholdId householdId, String tokenHash, Duration duration, UserId createdBy) {
-        this(HouseholdInviteId.create(), householdId, tokenHash, Instant.now().plus(duration), false, createdBy);
+        this(HouseholdInviteId.create(),
+                householdId,
+                tokenHash,
+                Instant.now().plus(duration),
+                Instant.now(),
+                false,
+                createdBy);
     }
 
     public boolean isValid() {
@@ -23,6 +30,6 @@ public record HouseholdInvite(
     }
 
     public HouseholdInvite revoke() {
-        return new HouseholdInvite(id, householdId, tokenHash, expiresAt, true, createdBy);
+        return new HouseholdInvite(id, householdId, tokenHash, expiresAt, createdOn, true, createdBy);
     }
 }
