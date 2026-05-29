@@ -1,6 +1,7 @@
 package be.xplore.cookbook.ai;
 
 import be.xplore.cookbook.ai.dto.DaySuggestionInput;
+import be.xplore.cookbook.ai.dto.RecipeForServingsInput;
 import be.xplore.cookbook.ai.dto.RecipeInput;
 import be.xplore.cookbook.ai.dto.SuggestedWeekScheduleIds;
 import be.xplore.cookbook.ai.dto.WeekSuggestionInput;
@@ -16,6 +17,7 @@ import be.xplore.cookbook.core.port.recipe.ImportedRecipe;
 import be.xplore.cookbook.core.port.recipe.RecipeImportPort;
 import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
 import be.xplore.cookbook.core.port.recipe.SuggestedRecipeEnhancement;
+import be.xplore.cookbook.core.port.recipe.SuggestedRecipeForServings;
 import be.xplore.cookbook.core.port.recipe.SuggestedRecipeId;
 import be.xplore.cookbook.core.port.weekschedule.ScheduleSuggestionsPort;
 import be.xplore.cookbook.core.port.weekschedule.SuggestedDayRecipe;
@@ -63,6 +65,16 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
         String recipeJson = serialize(RecipeInput.fromDomain(recipe));
         try {
             return recipeAiService.generateMacros(recipeJson).macros();
+        } catch (RuntimeException e) {
+            throw handleException(e);
+        }
+    }
+
+    @Override
+    public SuggestedRecipeForServings generateRecipeForServings(Recipe recipe, int desiredServings) {
+        String recipeJson = serialize(RecipeForServingsInput.fromDomain(recipe, desiredServings));
+        try {
+            return recipeAiService.generateRecipeForServings(recipeJson);
         } catch (RuntimeException e) {
             throw handleException(e);
         }
@@ -141,7 +153,7 @@ public class AiAdapter implements RecipeSuggestionsPort, ScheduleSuggestionsPort
     }
 
     private WeekSuggestionInput buildWeekSuggestionInput(LocalDate weekStartDate, List<WeekSchedule> weekSchedules,
-                                                     List<RecipeSummary> availableRecipes) {
+                                                         List<RecipeSummary> availableRecipes) {
         return WeekSuggestionInput.fromDomain(
                 weekStartDate,
                 availableRecipes,

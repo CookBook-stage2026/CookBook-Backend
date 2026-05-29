@@ -7,6 +7,7 @@ import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
 import be.xplore.cookbook.core.domain.household.Household;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
+import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeIngredient;
@@ -14,6 +15,7 @@ import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.recipe.command.EnhanceRecipeQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FindRecipeByIdQuery;
+import be.xplore.cookbook.core.domain.recipe.command.GetRecipeForServingsQuery;
 import be.xplore.cookbook.core.domain.recipe.command.SearchHouseholdRecipesByNameQuery;
 import be.xplore.cookbook.core.domain.recipe.command.SearchPersonalRecipesByNameQuery;
 import be.xplore.cookbook.core.domain.user.User;
@@ -21,6 +23,7 @@ import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
 import be.xplore.cookbook.core.port.recipe.SuggestedRecipeEnhancement;
+import be.xplore.cookbook.core.port.recipe.SuggestedRecipeForServings;
 import be.xplore.cookbook.core.repository.HouseholdRepository;
 import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.RecipeRepository;
@@ -131,6 +134,47 @@ public class RecipeQueryService {
         );
     }
 
+    public Recipe getRecipeForServings(GetRecipeForServingsQuery query) {
+        User user = userRepository.findById(query.userId())
+                .orElseThrow(UserNotFoundException::new);
+
+        Recipe recipe = recipeRepository.findById(query.recipeId(), user)
+                .orElseThrow(() -> new NotFoundException("Recipe not found"));
+
+        SuggestedRecipeForServings suggestion = recipeSuggestionsPort
+                .generateRecipeForServings(recipe, query.desiredServings());
+
+        List<RecipeIngredient> scaledIngredients = suggestion.scaledIngredients().stream()
+                .map(scaled -> resolveScaledIngredient(scaled, recipe))
+                .toList();
+
+        return new Recipe(
+                recipe.getId(),
+                new RecipeDetails(
+                        recipe.getName(),
+                        recipe.getDescription(),
+                        suggestion.durationInMinutes(),
+                        suggestion.servings(),
+                        suggestion.updatedSteps()
+                ),
+                scaledIngredients,
+                recipe.isPublic(),
+                recipe.getUser(),
+                suggestion.macros()
+        );
+    }
+
+    private RecipeIngredient resolveScaledIngredient(
+            SuggestedRecipeForServings.ScaledIngredient scaled, Recipe originalRecipe) {
+        return originalRecipe.getIngredients().stream()
+                .filter(ri -> ri.ingredient().name().equalsIgnoreCase(scaled.name()))
+                .findFirst()
+                .map(ri -> new RecipeIngredient(ri.ingredient(),
+                        Unit.roundToTwoDecimals(scaled.quantity()), scaled.unit()))
+                .orElseThrow(() -> new NotFoundException("Scaled ingredient not found in original recipe: "
+                        + scaled.name()));
+    }
+
     private RecipeIngredient resolveRecipeIngredient(
             SuggestedRecipeEnhancement.SuggestedIngredient newIngredient, User user) {
         Ingredient ingredient = ingredientRepository.findByNameIgnoreCaseGlobalOrUser(newIngredient.name(), user)
@@ -141,6 +185,7 @@ public class RecipeQueryService {
                         newIngredient.categories(),
                         user
                 )));
-        return new RecipeIngredient(ingredient, newIngredient.quantity(), newIngredient.unit());
+        return new RecipeIngredient(ingredient, Unit.roundToTwoDecimals(newIngredient.quantity()),
+                newIngredient.unit());
     }
 }
