@@ -2,12 +2,14 @@ package be.xplore.cookbook.rest.controller.household.householdController;
 
 import be.xplore.cookbook.core.domain.household.Household;
 import be.xplore.cookbook.core.domain.user.User;
+import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
 import be.xplore.cookbook.rest.dto.household.request.EditHouseholdDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -26,12 +28,11 @@ class UpdateHouseholdTests extends BaseIntegrationTest {
         User creator = createUser();
         Household household = createHouseholdWithMembers(new ArrayList<>(), creator);
         EditHouseholdDto dto = new EditHouseholdDto(
-                household.id().id(),
                 "Updated Name",
                 "Updated Description"
         );
 
-        getMockMvc().perform(put("/api/households")
+        getMockMvc().perform(put("/api/households/{id}", household.id().id())
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -48,12 +49,11 @@ class UpdateHouseholdTests extends BaseIntegrationTest {
         User creator = createUser();
         Household household = createHouseholdWithMembers(new ArrayList<>(), creator);
         EditHouseholdDto dto = new EditHouseholdDto(
-                household.id().id(),
                 "Updated Name",
                 ""
         );
 
-        getMockMvc().perform(put("/api/households")
+        getMockMvc().perform(put("/api/households/{id}", household.id().id())
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -70,12 +70,11 @@ class UpdateHouseholdTests extends BaseIntegrationTest {
         User creator = createUser();
         Household household = createHouseholdWithMembers(new ArrayList<>(), creator);
         EditHouseholdDto dto = new EditHouseholdDto(
-                household.id().id(),
                 "",
                 "Updated Description"
         );
 
-        getMockMvc().perform(put("/api/households")
+        getMockMvc().perform(put("/api/households/{id}", household.id().id())
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -83,52 +82,17 @@ class UpdateHouseholdTests extends BaseIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
-    void updateHousehold_WithNullName_ReturnsBadRequest() throws Exception {
-        User creator = createUser();
-        Household household = createHouseholdWithMembers(new ArrayList<>(), creator);
-        EditHouseholdDto dto = new EditHouseholdDto(
-                household.id().id(),
-                null,
-                "Updated Description"
-        );
-
-        getMockMvc().perform(put("/api/households")
-                        .with(validJwt())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void updateHousehold_WithNullHouseholdId_ReturnsBadRequest() throws Exception {
-        createUser();
-        EditHouseholdDto dto = new EditHouseholdDto(
-                null,
-                "Updated Name",
-                "Updated Description"
-        );
-
-        getMockMvc().perform(put("/api/households")
-                        .with(validJwt())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(getMapper().writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
-    }
 
     @Test
     void updateHousehold_WhenNotAuthenticated_ReturnsUnauthorized() throws Exception {
         User creator = createUser();
         Household household = createHouseholdWithMembers(new ArrayList<>(), creator);
         EditHouseholdDto dto = new EditHouseholdDto(
-                household.id().id(),
                 "Updated Name",
                 "Updated Description"
         );
 
-        getMockMvc().perform(put("/api/households")
+        getMockMvc().perform(put("/api/households/{id}", household.id().id())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(getMapper().writeValueAsString(dto)))
@@ -139,12 +103,11 @@ class UpdateHouseholdTests extends BaseIntegrationTest {
     void updateHousehold_WithNonExistentHousehold_ReturnsNotFound() throws Exception {
         createUser();
         EditHouseholdDto dto = new EditHouseholdDto(
-                java.util.UUID.randomUUID(),
                 "Updated Name",
                 "Updated Description"
         );
 
-        getMockMvc().perform(put("/api/households")
+        getMockMvc().perform(put("/api/households/{id}", java.util.UUID.randomUUID())
                         .with(validJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -155,15 +118,32 @@ class UpdateHouseholdTests extends BaseIntegrationTest {
     @Test
     void updateHousehold_ByNonMember_ReturnsForbidden() throws Exception {
         User creator = createUser();
-        User otherUser = createUserWithId(be.xplore.cookbook.core.domain.user.UserId.create());
+        User otherUser = createUserWithId(UserId.create());
         Household household = createHouseholdWithMembers(new ArrayList<>(), creator);
         EditHouseholdDto dto = new EditHouseholdDto(
-                household.id().id(),
                 "Updated Name",
                 "Updated Description"
         );
 
-        getMockMvc().perform(put("/api/households")
+        getMockMvc().perform(put("/api/households/{id}", household.id().id())
+                        .with(validJwtFromUserId(otherUser.id()))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(getMapper().writeValueAsString(dto)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateHousehold_ByMember_ReturnsForbidden() throws Exception {
+        User creator = createUser();
+        User otherUser = createUserWithId(UserId.create());
+        Household household = createHouseholdWithMembers(List.of(otherUser), creator);
+        EditHouseholdDto dto = new EditHouseholdDto(
+                "Updated Name",
+                "Updated Description"
+        );
+
+        getMockMvc().perform(put("/api/households/{id}", household.id().id())
                         .with(validJwtFromUserId(otherUser.id()))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)

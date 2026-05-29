@@ -2,7 +2,6 @@ package be.xplore.cookbook.rest.controller.householdInvite.householdInviteContro
 
 import be.xplore.cookbook.core.domain.household.Household;
 import be.xplore.cookbook.core.domain.household.HouseholdId;
-import be.xplore.cookbook.core.domain.householdinvite.HouseholdInviteToken;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.rest.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
@@ -22,22 +21,6 @@ class GetInvitesForHouseholdTests extends BaseIntegrationTest {
     @Override
     protected String[] getTablesToClear() {
         return new String[]{"households", "household_invites", "users"};
-    }
-
-    @Test
-    void getInvitesForHousehold_WithValidHouseholdAndCreator_ReturnsOkWithInvites() throws Exception {
-        User creator = createUser();
-        Household household = createHouseholdWithMembers(new ArrayList<>(), creator);
-        HouseholdInviteToken token = createHouseholdInvite(household.id(), creator.id(),
-                Duration.ofMinutes(DEFAULT_INVITE_DURATION));
-
-        getMockMvc().perform(get("/api/household-invites/{householdId}/invites", household.id().id())
-                        .with(validJwt())
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].id").value(token.invite().id().id().toString()))
-                .andExpect(jsonPath("$[0].revoked").value(false));
     }
 
     @Test

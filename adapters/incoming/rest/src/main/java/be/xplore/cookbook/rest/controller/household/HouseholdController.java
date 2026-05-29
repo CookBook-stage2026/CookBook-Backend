@@ -7,6 +7,7 @@ import be.xplore.cookbook.core.domain.household.command.DeleteByIdCommand;
 import be.xplore.cookbook.core.domain.household.command.FindAllHouseholdsForUserCommand;
 import be.xplore.cookbook.core.domain.household.command.FindHouseholdByIdQuery;
 import be.xplore.cookbook.core.domain.household.command.RemoveMemberFromHouseholdCommand;
+import be.xplore.cookbook.core.domain.household.command.UpdateHouseholdByIdCommand;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.service.household.HouseholdService;
 import be.xplore.cookbook.rest.dto.household.request.CreateHouseholdDto;
@@ -97,15 +98,16 @@ public class HouseholdController {
         );
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     @Transactional
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateHousehold(
             @AuthenticationPrincipal Jwt jwt,
-            @Valid @RequestBody EditHouseholdDto dto
+            @Valid @RequestBody EditHouseholdDto dto,
+            @PathVariable UUID id
     ) {
-        householdService.updateById(new be.xplore.cookbook.core.domain.household.command.UpdateHouseholdByIdCommand(
-                new HouseholdId(dto.householdId()),
+        householdService.updateById(new UpdateHouseholdByIdCommand(
+                new HouseholdId(id),
                 dto.name(),
                 dto.description(),
                 getUserIdFromJwt(jwt)
