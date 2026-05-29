@@ -10,6 +10,7 @@ import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.DeleteRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.EnhanceRecipeQuery;
 import be.xplore.cookbook.core.domain.recipe.command.FindRecipeByIdQuery;
+import be.xplore.cookbook.core.domain.recipe.command.GetRecipeForServingsQuery;
 import be.xplore.cookbook.core.domain.recipe.command.ImportRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.IngredientWithQuantity;
 import be.xplore.cookbook.core.domain.recipe.command.UpdateRecipeCommand;
@@ -95,6 +96,20 @@ public class RecipeController {
         UserId userId = getUserIdFromJwt(jwt);
 
         Recipe recipe = recipeQueryService.enhanceRecipe(new EnhanceRecipeQuery(new RecipeId(id), userId));
+
+        return RecipeDto.fromDomain(recipe, userId);
+    }
+
+    @GetMapping("/{id}/servings/{numberOfServings}")
+    @ResponseStatus(HttpStatus.OK)
+    public RecipeDto getRecipeForServings(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID id,
+            @PathVariable int numberOfServings
+    ) {
+        UserId userId = getUserIdFromJwt(jwt);
+        Recipe recipe = recipeQueryService.getRecipeForServings(new GetRecipeForServingsQuery(
+                new RecipeId(id), numberOfServings, userId));
 
         return RecipeDto.fromDomain(recipe, userId);
     }
