@@ -3,6 +3,7 @@ package be.xplore.cookbook.rest.controller.recipe;
 import be.xplore.cookbook.core.common.Paging;
 import be.xplore.cookbook.core.domain.household.HouseholdId;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
+import be.xplore.cookbook.core.domain.recipe.RecipeSortingOptions;
 import be.xplore.cookbook.core.domain.recipe.command.FilterRecipesQuery;
 import be.xplore.cookbook.core.domain.recipe.command.SearchHouseholdRecipesByNameQuery;
 import be.xplore.cookbook.core.domain.recipe.command.SearchPersonalRecipesByNameQuery;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,7 +51,8 @@ public class RecipeDiscoveryController {
         ));
 
         return new PaginatedResponse<>(
-                result.content().stream().map(RecipeSummaryDto::fromDomain).toList(),
+                result.content().stream().map(recipe -> RecipeSummaryDto.fromDomain(recipe, getUserIdFromJwt(jwt)))
+                        .toList(),
                 new PaginatedResponse.PageMetadata(
                         result.pageNumber(), result.pageSize(), result.totalElements(), result.totalPages()
                 )
@@ -66,7 +69,7 @@ public class RecipeDiscoveryController {
         return recipeQueryService.searchPersonalSummariesByName(
                         new SearchPersonalRecipesByNameQuery(new Paging(page, size), getUserIdFromJwt(jwt), query)
                 ).stream()
-                .map(RecipeSummaryDto::fromDomain)
+                .map(recipe -> RecipeSummaryDto.fromDomain(recipe, getUserIdFromJwt(jwt)))
                 .toList();
     }
 
@@ -82,7 +85,14 @@ public class RecipeDiscoveryController {
                         new SearchHouseholdRecipesByNameQuery(new Paging(page, size),
                                 new HouseholdId(householdId), getUserIdFromJwt(jwt), query)
                 ).stream()
-                .map(RecipeSummaryDto::fromDomain)
+                .map(recipe -> RecipeSummaryDto.fromDomain(recipe, getUserIdFromJwt(jwt)))
+                .toList();
+    }
+
+    @GetMapping("/sorting-options")
+    public List<String> getSortingOptions() {
+        return Arrays.stream(RecipeSortingOptions.values())
+                .map(Enum::name)
                 .toList();
     }
 

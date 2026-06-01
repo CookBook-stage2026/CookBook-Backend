@@ -2,10 +2,12 @@ package be.xplore.cookbook.jpa.repository.recipe;
 
 import be.xplore.cookbook.core.common.PagedResult;
 import be.xplore.cookbook.core.common.Paging;
+import be.xplore.cookbook.core.common.SortDirection;
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
+import be.xplore.cookbook.core.domain.recipe.RecipeSortingOptions;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
@@ -58,18 +60,12 @@ public class RecipeRepositoryImpl implements RecipeRepository {
             boolean includeAccessibleRecipes,
             User user,
             Paging paging,
-            String sortBy,
-            String sortDirection
+            RecipeSortingOptions sortBy,
+            SortDirection sortDirection
     ) {
-        Sort.Direction direction = "desc".equalsIgnoreCase(sortDirection)
+        Sort.Direction direction = "descending".equalsIgnoreCase(sortDirection.name())
                 ?
                 Sort.Direction.DESC : Sort.Direction.ASC;
-
-        String entitySortProperty = switch (sortBy == null ? "" : sortBy.toLowerCase()) {
-            case "duration" -> "durationInMinutes";
-            case "name" -> "name";
-            default -> "user.displayName";
-        };
 
         List<UUID> ingredientUuids = ingredientIds.stream()
                 .map(IngredientId::id)
@@ -81,7 +77,7 @@ public class RecipeRepositoryImpl implements RecipeRepository {
 
         List<Category> excludedCategories = preferences.excludedCategories();
         Pageable pageable = PageRequest.of(paging.page(), paging.size(),
-                Sort.by(direction, entitySortProperty));
+                Sort.by(direction, sortBy.getFieldName()));
 
         JpaUserEntity jpaUser = JpaUserEntity.fromDomain(user);
 

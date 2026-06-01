@@ -1,9 +1,11 @@
 package be.xplore.cookbook.rest.controller.recipe.recipeDiscoveryController;
 
+import be.xplore.cookbook.core.common.SortDirection;
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
+import be.xplore.cookbook.core.domain.recipe.RecipeSortingOptions;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
@@ -96,7 +98,8 @@ class FilterRecipesTests extends BaseIntegrationTest {
         long totalElements = getRecipeRepository().count();
 
         // Act & Assert
-        performFilter(new RecipeSearchRequest(List.of(), true, true, firstPageIndex, pageSize, null, null))
+        performFilter(new RecipeSearchRequest(List.of(), true, true, firstPageIndex, pageSize,
+                RecipeSortingOptions.NAME, SortDirection.ASCENDING))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(expectedFirstPageCount)))
                 .andExpect(jsonPath("$.page.totalElements").value(totalElements))
@@ -104,7 +107,8 @@ class FilterRecipesTests extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.page.number").value(firstPageIndex))
                 .andExpect(jsonPath("$.page.size").value(pageSize));
 
-        performFilter(new RecipeSearchRequest(List.of(), true, true, secondPageIndex, pageSize, null, null))
+        performFilter(new RecipeSearchRequest(List.of(), true, true, secondPageIndex, pageSize,
+                RecipeSortingOptions.NAME, SortDirection.ASCENDING))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(expectedSecondPageCount)))
                 .andExpect(jsonPath("$.page.number").value(secondPageIndex))
@@ -156,7 +160,8 @@ class FilterRecipesTests extends BaseIntegrationTest {
         createAndSaveRecipeWithIngredients(List.of(salt), user);
 
         RecipeSearchRequest dto = new RecipeSearchRequest(List.of(flour.id().id(), sugar.id().id()),
-                true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, null, null);
+                true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE,
+                RecipeSortingOptions.NAME, SortDirection.ASCENDING);
 
         // Act & Assert
         performFilter(dto)
@@ -178,7 +183,8 @@ class FilterRecipesTests extends BaseIntegrationTest {
 
         // Act & Assert
         performFilter(new RecipeSearchRequest(List.of(UUID.randomUUID()), true, true,
-                DEFAULT_PAGE, DEFAULT_PAGE_SIZE, null, null))
+                DEFAULT_PAGE, DEFAULT_PAGE_SIZE,
+                RecipeSortingOptions.NAME, SortDirection.ASCENDING))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)))
                 .andExpect(jsonPath("$.page.totalElements").value(0));
@@ -320,8 +326,8 @@ class FilterRecipesTests extends BaseIntegrationTest {
         createAndSaveRecipe(user3);
 
         RecipeSearchRequest dto = new RecipeSearchRequest(
-                List.of(), true, false, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, null, null
-        );
+                List.of(), true, false, DEFAULT_PAGE, DEFAULT_PAGE_SIZE,
+                RecipeSortingOptions.NAME, SortDirection.ASCENDING);
 
         // Act & Assert
         performFilterWithPredefinedUserId(dto, user1.id())
@@ -374,8 +380,8 @@ class FilterRecipesTests extends BaseIntegrationTest {
 
         RecipeSearchRequest dto = new RecipeSearchRequest(
                 List.of(flour.id().id()),
-                true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, null, null
-        );
+                true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE,
+                RecipeSortingOptions.NAME, SortDirection.ASCENDING);
 
         // Act & Assert
         performFilterWithPredefinedUserId(dto, user1.id())
@@ -425,7 +431,8 @@ class FilterRecipesTests extends BaseIntegrationTest {
         Recipe recipeA = createAndSaveRecipe("Apple Pie", user);
 
         RecipeSearchRequest request = new RecipeSearchRequest(
-                List.of(), true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, "name", "asc"
+                List.of(), true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE,
+                RecipeSortingOptions.NAME, SortDirection.ASCENDING
         );
 
         // Act & Assert
@@ -445,7 +452,8 @@ class FilterRecipesTests extends BaseIntegrationTest {
         Recipe longRecipe = createAndSaveRecipe("Test2", LONG_DURATION, user);
 
         RecipeSearchRequest request = new RecipeSearchRequest(
-                List.of(), true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, "duration", "desc"
+                List.of(), true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE,
+                RecipeSortingOptions.DURATION, SortDirection.DESCENDING
         );
 
         // Act & Assert
@@ -457,7 +465,8 @@ class FilterRecipesTests extends BaseIntegrationTest {
     }
 
     private RecipeSearchRequest defaultRequest() {
-        return new RecipeSearchRequest(List.of(), true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, null, null);
+        return new RecipeSearchRequest(List.of(), true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE,
+                RecipeSortingOptions.NAME, SortDirection.ASCENDING);
     }
 
     private ResultActions performFilter(RecipeSearchRequest request) throws Exception {

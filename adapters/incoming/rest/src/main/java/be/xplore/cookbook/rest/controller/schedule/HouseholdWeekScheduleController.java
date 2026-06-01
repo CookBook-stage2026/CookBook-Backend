@@ -53,7 +53,7 @@ public class HouseholdWeekScheduleController {
         return WeekScheduleDto.fromDomain(scheduleService.saveHouseholdWeekSchedule(
                 new CreateHouseholdWeekScheduleCommand(dto.weekStartDate(), toDayEntries(dto.days()),
                         new HouseholdId(householdId), userId)
-        ));
+        ), userId);
     }
 
     @GetMapping
@@ -67,7 +67,7 @@ public class HouseholdWeekScheduleController {
         return scheduleService.findHouseholdSchedules(
                         new FindHouseholdWeekSchedulesQuery(new HouseholdId(householdId), from, to, userId)
                 ).stream()
-                .map(WeekScheduleDto::fromDomain)
+                .map(weekSchedule -> WeekScheduleDto.fromDomain(weekSchedule, userId))
                 .toList();
     }
 
@@ -80,7 +80,7 @@ public class HouseholdWeekScheduleController {
         UserId userId = getUserIdFromJwt(jwt);
         WeekSchedule schedule = scheduleService.suggestHouseholdRecipeForDay(
                 new SuggestHouseholdRecipeForDayQuery(new HouseholdId(householdId), date, userId));
-        return WeekScheduleDto.fromDomain(schedule);
+        return WeekScheduleDto.fromDomain(schedule, userId);
     }
 
     @GetMapping("/suggest/week/{weekStartDate}")
@@ -92,7 +92,7 @@ public class HouseholdWeekScheduleController {
         UserId userId = getUserIdFromJwt(jwt);
         WeekSchedule schedule = scheduleService.suggestHouseholdWeekSchedule(
                 new SuggestHouseholdWeekScheduleQuery(new HouseholdId(householdId), weekStartDate, userId));
-        return WeekScheduleDto.fromDomain(schedule);
+        return WeekScheduleDto.fromDomain(schedule, userId);
     }
 
     private UserId getUserIdFromJwt(Jwt jwt) {

@@ -1,5 +1,6 @@
 package be.xplore.cookbook.rest.dto.schedule.response;
 
+import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.weekschedule.DaySchedule;
 import be.xplore.cookbook.rest.dto.recipe.response.RecipeSummaryDto;
 
@@ -11,8 +12,8 @@ public record DayScheduleDto(
         RecipeSummaryDto recipeSummary,
         DayOfWeek day
 ) {
-    public static DayScheduleDto fromDomain(DaySchedule daySchedule) {
+    public static DayScheduleDto fromDomain(DaySchedule daySchedule, UserId loggedInUserId) {
         return new DayScheduleDto(daySchedule.id().id(),
-                RecipeSummaryDto.fromDomain(daySchedule.recipe().summarize()), daySchedule.day());
+                RecipeSummaryDto.fromDomain(daySchedule.recipe().summarize(), loggedInUserId), daySchedule.day());
     }
 }

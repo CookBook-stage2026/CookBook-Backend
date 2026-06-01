@@ -1,6 +1,7 @@
 package be.xplore.cookbook.core.service.schedule;
 
 import be.xplore.cookbook.core.common.Paging;
+import be.xplore.cookbook.core.common.SortDirection;
 import be.xplore.cookbook.core.domain.exception.ForbiddenException;
 import be.xplore.cookbook.core.domain.exception.NotFoundException;
 import be.xplore.cookbook.core.domain.exception.UserNotFoundException;
@@ -8,6 +9,7 @@ import be.xplore.cookbook.core.domain.household.Household;
 import be.xplore.cookbook.core.domain.household.HouseholdId;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
+import be.xplore.cookbook.core.domain.recipe.RecipeSortingOptions;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
@@ -277,7 +279,7 @@ public class WeekScheduleService {
 
             return recipeRepository
                     .findAllSummariesWithFilter(List.of(), preferences, false, user,
-                            Paging.unpaged(), "", "")
+                            Paging.unpaged(), RecipeSortingOptions.NAME, SortDirection.ASCENDING)
                     .content();
         }
 
