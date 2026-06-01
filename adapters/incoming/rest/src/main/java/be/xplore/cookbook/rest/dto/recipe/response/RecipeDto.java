@@ -1,8 +1,11 @@
 package be.xplore.cookbook.rest.dto.recipe.response;
 
+import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
+import be.xplore.cookbook.core.domain.recipe.RecipeIngredient;
 import be.xplore.cookbook.core.domain.user.UserId;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +27,9 @@ public record RecipeDto(
                 .toList();
 
         List<RecipeIngredientDto> ingredientDtos = recipe.getIngredients().stream()
+                .sorted(Comparator.comparing(RecipeDto::highestPriorityCategory)
+                        .thenComparingDouble(RecipeIngredient::baseQuantity)
+                        .thenComparing(ri -> ri.ingredient().name()))
                 .map(RecipeIngredientDto::fromDomain)
                 .toList();
 
@@ -39,5 +45,11 @@ public record RecipeDto(
                 ingredientDtos,
                 totalMacros
         );
+    }
+
+    private static Category highestPriorityCategory(RecipeIngredient recipeIngredient) {
+        return recipeIngredient.ingredient().categories().stream()
+                .min(Comparator.comparingInt(Category::ordinal))
+                .orElse(Category.values()[Category.values().length - 1]);
     }
 }

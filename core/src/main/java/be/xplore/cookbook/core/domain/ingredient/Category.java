@@ -1,25 +1,25 @@
 package be.xplore.cookbook.core.domain.ingredient;
 
 public enum Category {
-    VEGETABLE,
-    FRUIT,
     MEAT,
     POULTRY,
     FISH,
     SHELLFISH,
-    EGG,
-    DAIRY,
+    FUNGI,
     GRAIN,
     LEGUME,
+    VEGETABLE,
+    FRUIT,
+    OIL_FAT,
+    DAIRY,
+    EGG,
     NUT,
     SEED,
-    HERB,
-    SPICE,
-    OIL_FAT,
-    SWEETENER,
-    FUNGI,
     SEAWEED,
     SAUCE_CONDIMENT,
+    SWEETENER,
     BEVERAGE,
-    ADDITIVE
+    ADDITIVE,
+    HERB,
+    SPICE
 }
