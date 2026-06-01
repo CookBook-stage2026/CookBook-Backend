@@ -276,7 +276,8 @@ public class WeekScheduleService {
                     .orElseThrow(UserNotFoundException::new);
 
             return recipeRepository
-                    .findAllSummariesWithFilter(List.of(), preferences, false, user, Paging.unpaged())
+                    .findAllSummariesWithFilter(List.of(), preferences, false, user,
+                            Paging.unpaged(), "", "")
                     .content();
         }
 

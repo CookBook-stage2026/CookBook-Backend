@@ -10,6 +10,8 @@ public record RecipeSearchRequest(
         boolean shouldApplyPreferences,
         boolean includeAccessibleRecipes,
         int page,
-        int size
+        int size,
+        String sortBy,
+        String sortDirection
 ) {
 }

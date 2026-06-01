@@ -19,7 +19,8 @@ public interface RecipeRepository {
     Optional<Recipe> findById(RecipeId id, User user);
 
     PagedResult<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, UserPreferences preferences,
-                                                          boolean includeAccessibleRecipes, User user, Paging pageable);
+                                                          boolean includeAccessibleRecipes, User user, Paging pageable,
+                                                          String sortBy, String sortDirection);
 
     List<RecipeSummary> findAllSummariesByUserIds(List<UserId> userIds);
 

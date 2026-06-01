@@ -16,6 +16,7 @@ import be.xplore.cookbook.jpa.repository.user.entity.JpaUserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -56,8 +57,20 @@ public class RecipeRepositoryImpl implements RecipeRepository {
             UserPreferences preferences,
             boolean includeAccessibleRecipes,
             User user,
-            Paging paging
+            Paging paging,
+            String sortBy,
+            String sortDirection
     ) {
+        Sort.Direction direction = "desc".equalsIgnoreCase(sortDirection)
+                ?
+                Sort.Direction.DESC : Sort.Direction.ASC;
+
+        String entitySortProperty = switch (sortBy == null ? "" : sortBy.toLowerCase()) {
+            case "duration" -> "durationInMinutes";
+            case "name" -> "name";
+            default -> "user.displayName";
+        };
+
         List<UUID> ingredientUuids = ingredientIds.stream()
                 .map(IngredientId::id)
                 .toList();
@@ -67,7 +80,8 @@ public class RecipeRepositoryImpl implements RecipeRepository {
                 .toList();
 
         List<Category> excludedCategories = preferences.excludedCategories();
-        Pageable pageable = PageRequest.of(paging.page(), paging.size());
+        Pageable pageable = PageRequest.of(paging.page(), paging.size(),
+                Sort.by(direction, entitySortProperty));
 
         JpaUserEntity jpaUser = JpaUserEntity.fromDomain(user);
 

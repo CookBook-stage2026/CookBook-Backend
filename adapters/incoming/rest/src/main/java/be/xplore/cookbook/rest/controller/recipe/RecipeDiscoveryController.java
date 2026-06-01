@@ -44,7 +44,8 @@ public class RecipeDiscoveryController {
 
         var result = recipeQueryService.findAllSummariesWithFilter(new FilterRecipesQuery(
                 ingredients, new Paging(request.page(), request.size()), request.shouldApplyPreferences(),
-                request.includeAccessibleRecipes(), getUserIdFromJwt(jwt)
+                request.includeAccessibleRecipes(), getUserIdFromJwt(jwt), request.sortBy(),
+                request.sortDirection()
         ));
 
         return new PaginatedResponse<>(

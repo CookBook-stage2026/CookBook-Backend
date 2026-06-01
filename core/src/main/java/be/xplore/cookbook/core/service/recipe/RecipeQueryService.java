@@ -73,7 +73,8 @@ public class RecipeQueryService {
         }
 
         return recipeRepository.findAllSummariesWithFilter(query.ingredientIds(), preferences,
-                query.includeAccessibleRecipes(), user, query.paging());
+                query.includeAccessibleRecipes(), user, query.paging(), query.sortBy(),
+                query.sortDirection());
     }
 
     public List<RecipeSummary> searchPersonalSummariesByName(SearchPersonalRecipesByNameQuery query) {
