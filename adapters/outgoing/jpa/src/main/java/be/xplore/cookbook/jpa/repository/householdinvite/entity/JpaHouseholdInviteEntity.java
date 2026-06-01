@@ -11,6 +11,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -33,13 +35,17 @@ public class JpaHouseholdInviteEntity {
     @Column(nullable = false)
     private UUID createdBy;
 
+    @Column(nullable = false)
+    private Instant createdOn;
+
     @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private JpaHouseholdEntity household;
 
     protected JpaHouseholdInviteEntity() {
     }
 
-    public JpaHouseholdInviteEntity(UUID id, String tokenHash, Instant expiresAt,
+    public JpaHouseholdInviteEntity(UUID id, String tokenHash, Instant expiresAt, Instant createdOn,
                                     boolean revoked, UUID createdBy, JpaHouseholdEntity household) {
         this.id = id;
         this.tokenHash = tokenHash;
@@ -47,6 +53,7 @@ public class JpaHouseholdInviteEntity {
         this.revoked = revoked;
         this.createdBy = createdBy;
         this.household = household;
+        this.createdOn = createdOn;
     }
 
     public HouseholdInvite toDomain() {
@@ -55,6 +62,7 @@ public class JpaHouseholdInviteEntity {
                 new HouseholdId(household.getId()),
                 tokenHash,
                 expiresAt,
+                createdOn,
                 revoked,
                 new UserId(createdBy)
         );
@@ -65,6 +73,7 @@ public class JpaHouseholdInviteEntity {
                 invite.id().id(),
                 invite.tokenHash(),
                 invite.expiresAt(),
+                invite.createdOn(),
                 invite.revoked(),
                 invite.createdBy().id(),
                 householdRef

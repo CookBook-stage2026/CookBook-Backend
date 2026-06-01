@@ -4,7 +4,7 @@ import be.xplore.cookbook.security.exception.OAuth2Exception;
 import be.xplore.cookbook.security.AuthService;
 import be.xplore.cookbook.security.CookieUtils;
 import be.xplore.cookbook.security.JwtService;
-import be.xplore.cookbook.core.service.UserService;
+import be.xplore.cookbook.core.service.user.UserService;
 import be.xplore.cookbook.security.CookieAuthorizationRequestRepository;
 import be.xplore.cookbook.security.OAuth2AuthenticationSuccessHandler;
 import org.junit.jupiter.api.Test;

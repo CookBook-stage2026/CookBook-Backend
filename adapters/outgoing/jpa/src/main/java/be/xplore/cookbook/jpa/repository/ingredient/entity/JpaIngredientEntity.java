@@ -4,6 +4,7 @@ import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
+import be.xplore.cookbook.jpa.repository.user.entity.JpaUserEntity;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -12,6 +13,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "ingredients")
 public class JpaIngredientEntity {
+
     @Id
     @Column(name = "ingredient_id")
     private UUID id;
@@ -30,7 +33,7 @@ public class JpaIngredientEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Unit unit;
+    private Unit defaultUnit;
 
     @ElementCollection(targetClass = Category.class)
     @CollectionTable(
@@ -41,11 +44,16 @@ public class JpaIngredientEntity {
     @Column(name = "category", nullable = false)
     private List<Category> categories = new ArrayList<>();
 
-    public JpaIngredientEntity(UUID id, String name, Unit unit, List<Category> categories) {
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private JpaUserEntity user;
+
+    public JpaIngredientEntity(UUID id, String name, Unit defaultUnit, List<Category> categories, JpaUserEntity user) {
         this.id = id;
         this.name = name;
-        this.unit = unit;
+        this.defaultUnit = defaultUnit;
         this.categories = categories;
+        this.user = user;
     }
 
     protected JpaIngredientEntity() {
@@ -55,8 +63,9 @@ public class JpaIngredientEntity {
         return new JpaIngredientEntity(
                 ingredient.id().id(),
                 ingredient.name(),
-                ingredient.unit(),
-                ingredient.categories()
+                ingredient.defaultUnit(),
+                ingredient.categories(),
+                ingredient.user() != null ? JpaUserEntity.fromDomain(ingredient.user()) : null
         );
     }
 
@@ -64,17 +73,29 @@ public class JpaIngredientEntity {
         return new Ingredient(
                 new IngredientId(id),
                 name,
-                unit,
-                categories
+                defaultUnit,
+                categories,
+                user != null ? user.toDomain() : null
         );
     }
 
-    public Ingredient toDomainWithoutCategories() {
+    public Ingredient toDomainWithoutUser() {
         return new Ingredient(
                 new IngredientId(id),
                 name,
-                unit,
-                List.of()
+                defaultUnit,
+                categories,
+                null
+        );
+    }
+
+    public Ingredient toDomainWithoutUserAndCategories() {
+        return new Ingredient(
+                new IngredientId(id),
+                name,
+                defaultUnit,
+                List.of(),
+                null
         );
     }
 

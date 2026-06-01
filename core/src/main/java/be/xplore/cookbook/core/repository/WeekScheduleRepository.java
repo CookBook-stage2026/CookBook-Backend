@@ -1,6 +1,10 @@
 package be.xplore.cookbook.core.repository;
 
+import be.xplore.cookbook.core.domain.household.HouseholdId;
+import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.user.UserId;
+import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
+import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwnerType;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
 import be.xplore.cookbook.core.domain.weekschedule.WeekScheduleId;
 
@@ -10,9 +14,18 @@ import java.util.Optional;
 
 public interface WeekScheduleRepository {
     WeekSchedule save(WeekSchedule schedule);
-    List<WeekSchedule> findAllByUserId(UserId userId);
-    List<WeekSchedule> findAllByUserIdAndDateRange(UserId userId, LocalDate from, LocalDate to);
+
+    List<WeekSchedule> findAllByOwner(ScheduleOwner owner);
+
+    List<WeekSchedule> findAllByOwnerAndDateRange(ScheduleOwner owner, LocalDate from, LocalDate to);
+
     Optional<WeekSchedule> findById(WeekScheduleId id);
-    Optional<WeekSchedule> findByUserIdAndWeekStartDate(UserId userId, LocalDate weekStartDate);
-    void deleteById(WeekScheduleId id);
+
+    Optional<WeekSchedule> findByOwnerAndWeekStartDate(ScheduleOwner owner, LocalDate weekStartDate);
+
+    void delete(WeekSchedule schedule);
+
+    List<WeekSchedule> findAllByRecipeAndOwnerType(RecipeId recipeId, ScheduleOwnerType ownerType);
+
+    List<WeekSchedule> findAllByUserAndOwnerType(UserId userId, HouseholdId householdId);
 }

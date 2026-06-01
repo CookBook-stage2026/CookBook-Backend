@@ -1,7 +1,7 @@
 -- ---------------------------------------------------------
 -- INGREDIENTS
 -- ---------------------------------------------------------
-INSERT INTO ingredients (ingredient_id, name, unit)
+INSERT INTO ingredients (ingredient_id, name, default_unit)
 VALUES ('91b60a9d-be30-46e1-8499-ee668a4c2d7d', 'Spaghetti', 'GRAM'),
        ('df2e8703-4a38-45a7-a747-bb3f28afbf82', 'Pancetta', 'GRAM'),
        ('1f821767-f0a9-4e03-ad70-c288f73efd9a', 'Eggs', 'PIECE'),
@@ -94,132 +94,133 @@ VALUES ('91b60a9d-be30-46e1-8499-ee668a4c2d7d', 'GRAIN'),
        ('66052757-9a96-4ee4-841d-2a8ab973c91a', 'MEAT'),
        ('bc516cd6-e283-4efe-969a-40d6a6021033', 'GRAIN'),
        ('6e6c67ba-dbdb-4d51-a523-af54d3523c16', 'DAIRY');
+
 /*
 -- ---------------------------------------------------------
 -- RECIPES
 -- ---------------------------------------------------------
-INSERT INTO recipes (recipe_id, name, description, duration_in_minutes, servings)
+INSERT INTO recipes (recipe_id, name, description, duration_in_minutes, servings, is_public)
 VALUES ('1ecba55b-a63c-43f6-a849-d736e6773f2d',
         'A classic Italian pasta dish originating from Rome, made with spaghetti, eggs, aged cheese, pancetta, and freshly ground black pepper, known for its rich texture and simple, traditional ingredients',
         'Spaghetti Carbonara prepared with al dente pasta, crisp pancetta, eggs, Pecorino Romano cheese, black pepper, and a silky sauce created by emulsifying the ingredients without using cream',
-        30, 2),
+        30, 2, TRUE),
        ('8d96d734-11ea-408d-adc5-763311de5573', 'Chicken Tikka Masala',
-        'Creamy and spiced Indian curry with tender chicken', 45, 4),
+        'Creamy and spiced Indian curry with tender chicken', 45, 4, TRUE),
        ('3265de7a-3053-4e5c-97e6-5050e68aa8d0', 'Beef Tacos', 'Mexican street-style tacos with seasoned ground beef',
-        25, 4),
+        25, 4, TRUE),
        ('203138be-1e83-4dcb-8130-07a60f2860b4', 'Vegetable Stir Fry', 'Quick and healthy Asian-inspired stir fry', 20,
-        2),
+        2, TRUE),
        ('07b9c24b-efe4-4ea9-b3a0-f53a7eff9c1d', 'French Onion Soup',
-        'Rich and hearty French classic topped with melted cheese', 60, 4),
-       ('ba581df1-3a58-474d-a824-f62f63ce0858', 'Banana Pancakes', 'Fluffy pancakes with a hint of banana', 20, 2),
-       ('3a529f82-0fcc-48d4-99ce-c8b5cf945622', 'Greek Salad', 'Fresh Mediterranean salad with feta and olives', 15, 2),
+        'Rich and hearty French classic topped with melted cheese', 60, 4, TRUE),
+       ('ba581df1-3a58-474d-a824-f62f63ce0858', 'Banana Pancakes', 'Fluffy pancakes with a hint of banana', 20, 2, TRUE),
+       ('3a529f82-0fcc-48d4-99ce-c8b5cf945622', 'Greek Salad', 'Fresh Mediterranean salad with feta and olives', 15, 2, TRUE),
        ('65fc2e5d-4b24-4db1-bab7-d8172257c32e', 'Beef Bourguignon', 'Classic French braised beef stew in red wine', 180,
-        6),
+        6, TRUE),
        ('89b1dcef-112f-4226-9cb8-727a57cee5ca', 'Margherita Pizza',
-        'Simple Neapolitan pizza with fresh basil and mozzarella', 40, 2),
+        'Simple Neapolitan pizza with fresh basil and mozzarella', 40, 2, TRUE),
        ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', 'Chocolate Lava Cake',
-        'Decadent warm chocolate cake with a molten center', 25, 4),
-       ('c36cf075-1ef3-4d31-b835-20dad2ed5de9', 'Cevapi', 'Grilled Balkan minced meat sausages', 35, 4),
-       ('9a31274b-00f8-4d76-be78-743208dcaa2b', 'Glass of Water', 'Refreshing glass of cold water', 1, 1),
-       ('334765e0-9a97-48f7-9085-6988ab5f8fec', 'Bowl of Cereal', 'Quick breakfast with cereal and milk', 3, 1),
-       ('35a52c50-446c-4dba-8f8e-b0ef3e591ff4', 'Banana Split', 'Classic dessert with bananas and ice cream', 10, 2),
-       ('5ad53fc9-04a3-4bdd-b4b1-250168faf391', 'Goulash', 'Slow-cooked hearty beef stew', 120, 6);
+        'Decadent warm chocolate cake with a molten center', 25, 4, TRUE),
+       ('c36cf075-1ef3-4d31-b835-20dad2ed5de9', 'Cevapi', 'Grilled Balkan minced meat sausages', 35, 4, TRUE),
+       ('9a31274b-00f8-4d76-be78-743208dcaa2b', 'Glass of Water', 'Refreshing glass of cold water', 1, 1, TRUE),
+       ('334765e0-9a97-48f7-9085-6988ab5f8fec', 'Bowl of Cereal', 'Quick breakfast with cereal and milk', 3, 1, TRUE),
+       ('35a52c50-446c-4dba-8f8e-b0ef3e591ff4', 'Banana Split', 'Classic dessert with bananas and ice cream', 10, 2, TRUE),
+       ('5ad53fc9-04a3-4bdd-b4b1-250168faf391', 'Goulash', 'Slow-cooked hearty beef stew', 120, 6, TRUE);
 
 -- ---------------------------------------------------------
 -- RECIPE INGREDIENTS
 -- ---------------------------------------------------------
-INSERT INTO recipe_ingredients (recipe_id, ingredient_id, base_quantity)
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id, base_quantity, unit)
 VALUES
     -- Spaghetti Carbonara
-    ('1ecba55b-a63c-43f6-a849-d736e6773f2d', '91b60a9d-be30-46e1-8499-ee668a4c2d7d', 200),
-    ('1ecba55b-a63c-43f6-a849-d736e6773f2d', 'df2e8703-4a38-45a7-a747-bb3f28afbf82', 100),
-    ('1ecba55b-a63c-43f6-a849-d736e6773f2d', '1f821767-f0a9-4e03-ad70-c288f73efd9a', 2),
+    ('1ecba55b-a63c-43f6-a849-d736e6773f2d', '91b60a9d-be30-46e1-8499-ee668a4c2d7d', 200, 'GRAM'),
+    ('1ecba55b-a63c-43f6-a849-d736e6773f2d', 'df2e8703-4a38-45a7-a747-bb3f28afbf82', 100, 'GRAM'),
+    ('1ecba55b-a63c-43f6-a849-d736e6773f2d', '1f821767-f0a9-4e03-ad70-c288f73efd9a', 2, 'PIECE'),
 
     -- Chicken Tikka Masala
-    ('8d96d734-11ea-408d-adc5-763311de5573', '046835e1-0e45-424f-9885-68b228b6f00b', 500),
-    ('8d96d734-11ea-408d-adc5-763311de5573', 'fca5db5d-f38f-4d59-96a2-7c06200748eb', 200),
-    ('8d96d734-11ea-408d-adc5-763311de5573', 'ff1ac84b-ee97-40d2-9f38-ae919d48f9e8', 400),
-    ('8d96d734-11ea-408d-adc5-763311de5573', 'fcc8d46c-780b-484c-bfe6-5b677805ca3c', 100),
-    ('8d96d734-11ea-408d-adc5-763311de5573', 'b89b2345-fc75-44c0-89b3-3e04d74124b4', 2),
+    ('8d96d734-11ea-408d-adc5-763311de5573', '046835e1-0e45-424f-9885-68b228b6f00b', 500, 'GRAM'),
+    ('8d96d734-11ea-408d-adc5-763311de5573', 'fca5db5d-f38f-4d59-96a2-7c06200748eb', 200, 'GRAM'),
+    ('8d96d734-11ea-408d-adc5-763311de5573', 'ff1ac84b-ee97-40d2-9f38-ae919d48f9e8', 400, 'GRAM'),
+    ('8d96d734-11ea-408d-adc5-763311de5573', 'fcc8d46c-780b-484c-bfe6-5b677805ca3c', 100, 'MILLILITER'),
+    ('8d96d734-11ea-408d-adc5-763311de5573', 'b89b2345-fc75-44c0-89b3-3e04d74124b4', 2, 'TEASPOON'),
 
     -- Beef Tacos
-    ('3265de7a-3053-4e5c-97e6-5050e68aa8d0', 'eade830d-1bc4-47de-8052-d1b91df42f1d', 400),
-    ('3265de7a-3053-4e5c-97e6-5050e68aa8d0', '3f03ff9b-31e5-4d48-a6a4-28d5fd81c898', 8),
-    ('3265de7a-3053-4e5c-97e6-5050e68aa8d0', '3eddeece-5867-4416-824d-c627f2aa5979', 100),
-    ('3265de7a-3053-4e5c-97e6-5050e68aa8d0', '307f5492-e16a-431a-9cdb-75c9c6815a3f', 150),
-    ('3265de7a-3053-4e5c-97e6-5050e68aa8d0', '4b434f28-cef0-4d8b-82a3-01fbf534cf22', 100),
+    ('3265de7a-3053-4e5c-97e6-5050e68aa8d0', 'eade830d-1bc4-47de-8052-d1b91df42f1d', 400, 'GRAM'),
+    ('3265de7a-3053-4e5c-97e6-5050e68aa8d0', '3f03ff9b-31e5-4d48-a6a4-28d5fd81c898', 8, 'PIECE'),
+    ('3265de7a-3053-4e5c-97e6-5050e68aa8d0', '3eddeece-5867-4416-824d-c627f2aa5979', 100, 'GRAM'),
+    ('3265de7a-3053-4e5c-97e6-5050e68aa8d0', '307f5492-e16a-431a-9cdb-75c9c6815a3f', 150, 'GRAM'),
+    ('3265de7a-3053-4e5c-97e6-5050e68aa8d0', '4b434f28-cef0-4d8b-82a3-01fbf534cf22', 100, 'GRAM'),
 
     -- Vegetable Stir Fry
-    ('203138be-1e83-4dcb-8130-07a60f2860b4', '09b582cb-a0ea-4c18-bd4f-c814e66c50dd', 2),
-    ('203138be-1e83-4dcb-8130-07a60f2860b4', 'f6e83d4b-4d67-4044-9ee8-eedd8b347d4a', 200),
-    ('203138be-1e83-4dcb-8130-07a60f2860b4', '683a34ed-13d9-4c92-bf04-27e852716210', 2),
-    ('203138be-1e83-4dcb-8130-07a60f2860b4', '69639b8d-d1e8-4cb7-879f-5a9bf362d87c', 3),
-    ('203138be-1e83-4dcb-8130-07a60f2860b4', '39d1ac57-8bf9-478e-ac53-3036a240610a', 1),
+    ('203138be-1e83-4dcb-8130-07a60f2860b4', '09b582cb-a0ea-4c18-bd4f-c814e66c50dd', 2, 'PIECE'),
+    ('203138be-1e83-4dcb-8130-07a60f2860b4', 'f6e83d4b-4d67-4044-9ee8-eedd8b347d4a', 200, 'GRAM'),
+    ('203138be-1e83-4dcb-8130-07a60f2860b4', '683a34ed-13d9-4c92-bf04-27e852716210', 2, 'PIECE'),
+    ('203138be-1e83-4dcb-8130-07a60f2860b4', '69639b8d-d1e8-4cb7-879f-5a9bf362d87c', 3, 'TABLESPOON'),
+    ('203138be-1e83-4dcb-8130-07a60f2860b4', '39d1ac57-8bf9-478e-ac53-3036a240610a', 1, 'TABLESPOON'),
 
     -- French Onion Soup
-    ('07b9c24b-efe4-4ea9-b3a0-f53a7eff9c1d', 'cb2e829b-fa70-4a66-a667-5473e3e8b723', 4),
-    ('07b9c24b-efe4-4ea9-b3a0-f53a7eff9c1d', 'cffb78b8-2cd4-4658-91ca-1da17e4f7a3a', 1),
-    ('07b9c24b-efe4-4ea9-b3a0-f53a7eff9c1d', '246de5df-8917-4530-8b91-06f7d7d32412', 150),
-    ('07b9c24b-efe4-4ea9-b3a0-f53a7eff9c1d', '6cd4fe2d-c2c0-4e1e-aa5a-ed773e116747', 4),
-    ('07b9c24b-efe4-4ea9-b3a0-f53a7eff9c1d', '1b194de6-4e86-4b46-b3a0-bebcbad0e15e', 50),
+    ('07b9c24b-efe4-4ea9-b3a0-f53a7eff9c1d', 'cb2e829b-fa70-4a66-a667-5473e3e8b723', 4, 'PIECE'),
+    ('07b9c24b-efe4-4ea9-b3a0-f53a7eff9c1d', 'cffb78b8-2cd4-4658-91ca-1da17e4f7a3a', 1, 'LITER'),
+    ('07b9c24b-efe4-4ea9-b3a0-f53a7eff9c1d', '246de5df-8917-4530-8b91-06f7d7d32412', 150, 'GRAM'),
+    ('07b9c24b-efe4-4ea9-b3a0-f53a7eff9c1d', '6cd4fe2d-c2c0-4e1e-aa5a-ed773e116747', 4, 'PIECE'),
+    ('07b9c24b-efe4-4ea9-b3a0-f53a7eff9c1d', '1b194de6-4e86-4b46-b3a0-bebcbad0e15e', 50, 'GRAM'),
 
     -- Banana Pancakes
-    ('ba581df1-3a58-474d-a824-f62f63ce0858', 'cc95f369-dda7-42d4-8035-bbaaacea963c', 2),
-    ('ba581df1-3a58-474d-a824-f62f63ce0858', 'b83a4fc3-e819-4edc-9f40-6841beaa3b80', 150),
-    ('ba581df1-3a58-474d-a824-f62f63ce0858', '48b21301-e07c-4118-92b9-f173336093ba', 200),
-    ('ba581df1-3a58-474d-a824-f62f63ce0858', '1f821767-f0a9-4e03-ad70-c288f73efd9a', 2),
-    ('ba581df1-3a58-474d-a824-f62f63ce0858', '1b194de6-4e86-4b46-b3a0-bebcbad0e15e', 30),
+    ('ba581df1-3a58-474d-a824-f62f63ce0858', 'cc95f369-dda7-42d4-8035-bbaaacea963c', 2, 'PIECE'),
+    ('ba581df1-3a58-474d-a824-f62f63ce0858', 'b83a4fc3-e819-4edc-9f40-6841beaa3b80', 150, 'GRAM'),
+    ('ba581df1-3a58-474d-a824-f62f63ce0858', '48b21301-e07c-4118-92b9-f173336093ba', 200, 'MILLILITER'),
+    ('ba581df1-3a58-474d-a824-f62f63ce0858', '1f821767-f0a9-4e03-ad70-c288f73efd9a', 2, 'PIECE'),
+    ('ba581df1-3a58-474d-a824-f62f63ce0858', '1b194de6-4e86-4b46-b3a0-bebcbad0e15e', 30, 'GRAM'),
 
     -- Greek Salad
-    ('3a529f82-0fcc-48d4-99ce-c8b5cf945622', '8ea17cd5-fea4-45f4-bfb6-35f0f04e583c', 3),
-    ('3a529f82-0fcc-48d4-99ce-c8b5cf945622', '1834b787-3ceb-49e2-9207-e3de61020049', 1),
-    ('3a529f82-0fcc-48d4-99ce-c8b5cf945622', '4725715a-2570-4737-a62c-ac43cbd7ea90', 150),
-    ('3a529f82-0fcc-48d4-99ce-c8b5cf945622', '7cf382d1-b6c9-4424-93b8-59ad6e3c879e', 100),
-    ('3a529f82-0fcc-48d4-99ce-c8b5cf945622', 'a4378573-1d8d-44f5-80f6-22175b0c4f9c', 3),
+    ('3a529f82-0fcc-48d4-99ce-c8b5cf945622', '8ea17cd5-fea4-45f4-bfb6-35f0f04e583c', 3, 'PIECE'),
+    ('3a529f82-0fcc-48d4-99ce-c8b5cf945622', '1834b787-3ceb-49e2-9207-e3de61020049', 1, 'PIECE'),
+    ('3a529f82-0fcc-48d4-99ce-c8b5cf945622', '4725715a-2570-4737-a62c-ac43cbd7ea90', 150, 'GRAM'),
+    ('3a529f82-0fcc-48d4-99ce-c8b5cf945622', '7cf382d1-b6c9-4424-93b8-59ad6e3c879e', 100, 'GRAM'),
+    ('3a529f82-0fcc-48d4-99ce-c8b5cf945622', 'a4378573-1d8d-44f5-80f6-22175b0c4f9c', 3, 'TABLESPOON'),
 
     -- Beef Bourguignon
-    ('65fc2e5d-4b24-4db1-bab7-d8172257c32e', 'f63a1464-ce64-44e7-9088-046f044645e7', 800),
-    ('65fc2e5d-4b24-4db1-bab7-d8172257c32e', '084ed9bf-48c4-42c7-afd1-ca63e6a95b0d', 500),
-    ('65fc2e5d-4b24-4db1-bab7-d8172257c32e', '683a34ed-13d9-4c92-bf04-27e852716210', 3),
-    ('65fc2e5d-4b24-4db1-bab7-d8172257c32e', '5245895d-bffe-4af2-89eb-7ed5e729d394', 200),
-    ('65fc2e5d-4b24-4db1-bab7-d8172257c32e', '655c0e6e-a675-4a10-a0e7-55cde4ec19c6', 150),
+    ('65fc2e5d-4b24-4db1-bab7-d8172257c32e', 'f63a1464-ce64-44e7-9088-046f044645e7', 800, 'GRAM'),
+    ('65fc2e5d-4b24-4db1-bab7-d8172257c32e', '084ed9bf-48c4-42c7-afd1-ca63e6a95b0d', 500, 'MILLILITER'),
+    ('65fc2e5d-4b24-4db1-bab7-d8172257c32e', '683a34ed-13d9-4c92-bf04-27e852716210', 3, 'PIECE'),
+    ('65fc2e5d-4b24-4db1-bab7-d8172257c32e', '5245895d-bffe-4af2-89eb-7ed5e729d394', 200, 'GRAM'),
+    ('65fc2e5d-4b24-4db1-bab7-d8172257c32e', '655c0e6e-a675-4a10-a0e7-55cde4ec19c6', 150, 'GRAM'),
 
     -- Margherita Pizza
-    ('89b1dcef-112f-4226-9cb8-727a57cee5ca', '332343ec-3fde-4ef0-ae83-97d42ab8f861', 300),
-    ('89b1dcef-112f-4226-9cb8-727a57cee5ca', 'ff1ac84b-ee97-40d2-9f38-ae919d48f9e8', 150),
-    ('89b1dcef-112f-4226-9cb8-727a57cee5ca', '373507a5-b659-4ca9-868c-8f39319946b2', 200),
-    ('89b1dcef-112f-4226-9cb8-727a57cee5ca', '6c81d1a3-66f7-42de-9ad1-05a5d748bcc8', 10),
-    ('89b1dcef-112f-4226-9cb8-727a57cee5ca', 'a4378573-1d8d-44f5-80f6-22175b0c4f9c', 2),
+    ('89b1dcef-112f-4226-9cb8-727a57cee5ca', '332343ec-3fde-4ef0-ae83-97d42ab8f861', 300, 'GRAM'),
+    ('89b1dcef-112f-4226-9cb8-727a57cee5ca', 'ff1ac84b-ee97-40d2-9f38-ae919d48f9e8', 150, 'GRAM'),
+    ('89b1dcef-112f-4226-9cb8-727a57cee5ca', '373507a5-b659-4ca9-868c-8f39319946b2', 200, 'GRAM'),
+    ('89b1dcef-112f-4226-9cb8-727a57cee5ca', '6c81d1a3-66f7-42de-9ad1-05a5d748bcc8', 10, 'GRAM'),
+    ('89b1dcef-112f-4226-9cb8-727a57cee5ca', 'a4378573-1d8d-44f5-80f6-22175b0c4f9c', 2, 'TABLESPOON'),
 
     -- Chocolate Lava Cake
-    ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', '00885e1e-20a0-4c3d-aa23-ce1bd5ddc385', 150),
-    ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', '1b194de6-4e86-4b46-b3a0-bebcbad0e15e', 100),
-    ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', '1f821767-f0a9-4e03-ad70-c288f73efd9a', 3),
-    ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', '78223711-7e76-4f37-99c1-6c80daa63f2e', 80),
-    ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', 'b83a4fc3-e819-4edc-9f40-6841beaa3b80', 50),
+    ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', '00885e1e-20a0-4c3d-aa23-ce1bd5ddc385', 150, 'GRAM'),
+    ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', '1b194de6-4e86-4b46-b3a0-bebcbad0e15e', 100, 'GRAM'),
+    ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', '1f821767-f0a9-4e03-ad70-c288f73efd9a', 3, 'PIECE'),
+    ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', '78223711-7e76-4f37-99c1-6c80daa63f2e', 80, 'GRAM'),
+    ('6bd1c2d0-11d1-4efd-a0ea-d94474f5f4c3', 'b83a4fc3-e819-4edc-9f40-6841beaa3b80', 50, 'GRAM'),
 
     -- Cevapi
-    ('c36cf075-1ef3-4d31-b835-20dad2ed5de9', '66052757-9a96-4ee4-841d-2a8ab973c91a', 500),
+    ('c36cf075-1ef3-4d31-b835-20dad2ed5de9', '66052757-9a96-4ee4-841d-2a8ab973c91a', 500, 'GRAM'),
 
     -- Glass of Water
-    ('9a31274b-00f8-4d76-be78-743208dcaa2b', '5008d28b-a36b-41de-a6e0-2a9dd0db9feb', 250),
+    ('9a31274b-00f8-4d76-be78-743208dcaa2b', '5008d28b-a36b-41de-a6e0-2a8ab973c91a', 250, 'MILLILITER'),
 
     -- Bowl of Cereal
-    ('334765e0-9a97-48f7-9085-6988ab5f8fec', 'bc516cd6-e283-4efe-969a-40d6a6021033', 100),
-    ('334765e0-9a97-48f7-9085-6988ab5f8fec', '48b21301-e07c-4118-92b9-f173336093ba', 200),
+    ('334765e0-9a97-48f7-9085-6988ab5f8fec', 'bc516cd6-e283-4efe-969a-40d6a6021033', 100, 'GRAM'),
+    ('334765e0-9a97-48f7-9085-6988ab5f8fec', '48b21301-e07c-4118-92b9-f173336093ba', 200, 'MILLILITER'),
 
     -- Banana Split
-    ('35a52c50-446c-4dba-8f8e-b0ef3e591ff4', 'cc95f369-dda7-42d4-8035-bbaaacea963c', 2),
-    ('35a52c50-446c-4dba-8f8e-b0ef3e591ff4', '6e6c67ba-dbdb-4d51-a523-af54d3523c16', 300),
+    ('35a52c50-446c-4dba-8f8e-b0ef3e591ff4', 'cc95f369-dda7-42d4-8035-bbaaacea963c', 2, 'PIECE'),
+    ('35a52c50-446c-4dba-8f8e-b0ef3e591ff4', '6e6c67ba-dbdb-4d51-a523-af54d3523c16', 300, 'GRAM'),
 
     -- Goulash
-    ('5ad53fc9-04a3-4bdd-b4b1-250168faf391', 'f63a1464-ce64-44e7-9088-046f044645e7', 800),
-    ('5ad53fc9-04a3-4bdd-b4b1-250168faf391', 'cb2e829b-fa70-4a66-a667-5473e3e8b723', 3);
+    ('5ad53fc9-04a3-4bdd-b4b1-250168faf391', 'f63a1464-ce64-44e7-9088-046f044645e7', 800, 'GRAM'),
+    ('5ad53fc9-04a3-4bdd-b4b1-250168faf391', 'cb2e829b-fa70-4a66-a667-5473e3e8b723', 3, 'PIECE');
 
 -- ---------------------------------------------------------
 -- RECIPE STEPS
 -- ---------------------------------------------------------
-INSERT INTO recipe_steps (recipe_id, step_order, steps)
+INSERT INTO recipe_steps (recipe_id, step_order, step)
 VALUES
     -- Spaghetti Carbonara
     ('1ecba55b-a63c-43f6-a849-d736e6773f2d', 0,

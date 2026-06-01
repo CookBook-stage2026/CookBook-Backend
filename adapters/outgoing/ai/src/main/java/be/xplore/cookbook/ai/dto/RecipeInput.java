@@ -42,7 +42,7 @@ public record RecipeInput(
             return new IngredientInput(
                     ingredient.name(),
                     ri.baseQuantity(),
-                    ingredient.unit(),
+                    ingredient.defaultUnit(),
                     ingredient.categories()
             );
         }

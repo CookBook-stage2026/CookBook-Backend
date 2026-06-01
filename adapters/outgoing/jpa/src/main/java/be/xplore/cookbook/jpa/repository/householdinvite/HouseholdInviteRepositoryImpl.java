@@ -1,5 +1,6 @@
 package be.xplore.cookbook.jpa.repository.householdinvite;
 
+import be.xplore.cookbook.core.domain.household.HouseholdId;
 import be.xplore.cookbook.core.domain.householdinvite.HouseholdInvite;
 import be.xplore.cookbook.core.domain.householdinvite.HouseholdInviteId;
 import be.xplore.cookbook.core.repository.HouseholdInviteRepository;
@@ -8,6 +9,7 @@ import be.xplore.cookbook.jpa.repository.householdinvite.entity.JpaHouseholdInvi
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -39,5 +41,13 @@ public class HouseholdInviteRepositoryImpl implements HouseholdInviteRepository 
     public Optional<HouseholdInvite> findById(HouseholdInviteId id) {
         return jpaHouseholdInviteRepository.findById(id.id())
                 .map(JpaHouseholdInviteEntity::toDomain);
+    }
+
+    @Override
+    public List<HouseholdInvite> findAllByHouseholdId(HouseholdId householdId) {
+        return jpaHouseholdInviteRepository.findAllByHouseholdId(householdId.id())
+                .stream()
+                .map(JpaHouseholdInviteEntity::toDomain)
+                .toList();
     }
 }

@@ -10,6 +10,7 @@ import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.Ingredient;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.ingredient.Unit;
+import be.xplore.cookbook.core.domain.recipe.Macro;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
@@ -19,6 +20,7 @@ import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.domain.weekschedule.DaySchedule;
 import be.xplore.cookbook.core.domain.weekschedule.DayScheduleId;
+import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
 import be.xplore.cookbook.core.domain.weekschedule.WeekScheduleId;
 import be.xplore.cookbook.core.repository.HouseholdInviteRepository;
@@ -63,6 +65,7 @@ public abstract class BaseIntegrationTest {
     private static final int DEFAULT_DURATION_IN_MINUTES = 60;
     private static final int DEFAULT_SERVINGS = 2;
     private static final List<String> DEFAULT_STEPS = List.of("This is step 1", "This is step 2");
+    private static final boolean DEFAULT_IS_PUBLIC = true;
     private static final double DEFAULT_QUANTITY = 1.0;
 
     @Autowired
@@ -132,6 +135,10 @@ public abstract class BaseIntegrationTest {
         return householdRepository;
     }
 
+    public HouseholdInviteRepository getHouseholdInviteRepository() {
+        return householdInviteRepository;
+    }
+
     public JsonMapper getMapper() {
         return mapper;
     }
@@ -143,7 +150,19 @@ public abstract class BaseIntegrationTest {
         dailyRecipes.forEach((day, recipe) ->
                 daySchedules.add(new DaySchedule(DayScheduleId.create(), recipe, day))
         );
-        WeekSchedule weekSchedule = new WeekSchedule(WeekScheduleId.create(), user, weekStartDate, daySchedules);
+        WeekSchedule weekSchedule = new WeekSchedule(
+                WeekScheduleId.create(), ScheduleOwner.forUser(user.id()), weekStartDate, daySchedules);
+        getWeekScheduleRepository().save(weekSchedule);
+    }
+
+    protected void createWeekSchedule(ScheduleOwner owner, Map<DayOfWeek, Recipe> dailyRecipes,
+                                      LocalDate weekStartDate) {
+        List<DaySchedule> daySchedules = new ArrayList<>();
+        dailyRecipes.forEach((day, recipe) ->
+                daySchedules.add(new DaySchedule(DayScheduleId.create(), recipe, day))
+        );
+        WeekSchedule weekSchedule = new WeekSchedule(
+                WeekScheduleId.create(), owner, weekStartDate, daySchedules);
         getWeekScheduleRepository().save(weekSchedule);
     }
 
@@ -167,30 +186,54 @@ public abstract class BaseIntegrationTest {
 
     protected Recipe createAndSaveRecipe(User user) {
         Ingredient ingredient = createAndSaveIngredient("Ingredient");
-        return createAndSaveRecipe(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
-                DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS,
-                List.of(ingredient), user);
+        return createAndSaveRecipe(new RecipeDetails(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
+                        DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS),
+                List.of(ingredient), DEFAULT_IS_PUBLIC, user);
+    }
+
+    protected Recipe createAndSaveRecipe(User user, Ingredient ingredient) {
+        return createAndSaveRecipe(new RecipeDetails(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
+                        DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS),
+                List.of(ingredient), DEFAULT_IS_PUBLIC, user);
     }
 
     protected Recipe createAndSaveRecipe(String name, User user) {
         Ingredient ingredient = createAndSaveIngredient("Ingredient");
-        return createAndSaveRecipe(name, DEFAULT_RECIPE_DESCRIPTION,
-                DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS,
-                List.of(ingredient), user);
+        return createAndSaveRecipe(new RecipeDetails(name, DEFAULT_RECIPE_DESCRIPTION,
+                        DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS),
+                List.of(ingredient), DEFAULT_IS_PUBLIC, user);
+    }
+
+    protected Recipe createAndSaveRecipe(String name, boolean isPublic, User user) {
+        Ingredient ingredient = createAndSaveIngredient("Ingredient");
+        return createAndSaveRecipe(new RecipeDetails(name, DEFAULT_RECIPE_DESCRIPTION,
+                        DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS),
+                List.of(ingredient), isPublic, user);
+    }
+
+    protected Recipe createAndSaveRecipe(boolean isPublic, User user) {
+        Ingredient ingredient = createAndSaveIngredient("Ingredient");
+        return createAndSaveRecipe(new RecipeDetails(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
+                        DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS),
+                List.of(ingredient), isPublic, user);
     }
 
     protected Recipe createAndSaveRecipeWithIngredients(List<Ingredient> ingredients, User user) {
-        return createAndSaveRecipe(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
-                DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS,
-                ingredients, user);
+        return createAndSaveRecipe(new RecipeDetails(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
+                        DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS),
+                ingredients, DEFAULT_IS_PUBLIC, user);
     }
 
     protected Ingredient createAndSaveIngredient(String name) {
-        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE);
+        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE, null);
     }
 
-    protected Ingredient createAndSaveIngredient(String name, Unit unit, Category category) {
-        Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit, List.of(category));
+    protected Ingredient createAndSaveIngredient(String name, User user) {
+        return createAndSaveIngredient(name, Unit.GRAM, Category.ADDITIVE, user);
+    }
+
+    protected Ingredient createAndSaveIngredient(String name, Unit unit, Category category, User user) {
+        Ingredient ingredient = new Ingredient(IngredientId.create(), name, unit, List.of(category), user);
         return ingredientRepository.save(ingredient);
     }
 
@@ -208,7 +251,7 @@ public abstract class BaseIntegrationTest {
         String tokenHash = InviteTokenGenerator.hash(plainToken);
         HouseholdInvite expired = new HouseholdInvite(
                 HouseholdInviteId.create(), householdId, tokenHash,
-                Instant.now().minus(Duration.ofMinutes(1)), false, createdBy
+                Instant.now().minus(Duration.ofMinutes(1)), Instant.now(), false, createdBy
         );
         return new HouseholdInviteToken(householdInviteRepository.save(expired), plainToken);
     }
@@ -227,20 +270,36 @@ public abstract class BaseIntegrationTest {
                 .claim("name", USER_NAME));
     }
 
-
-
-    private Recipe createAndSaveRecipe(String name, String description, int durationInMinutes,
-                                       int servings, List<String> steps, List<Ingredient> ingredients,
-                                       User user) {
+    private Recipe createAndSaveRecipe(RecipeDetails details, List<Ingredient> ingredients,
+                                       boolean isPublic, User user) {
         List<RecipeIngredient> recipeIngredients = ingredients.stream()
-                .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY))
+                .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY, ing.defaultUnit()))
                 .toList();
 
         Recipe recipe = new Recipe(
                 RecipeId.create(),
-                new RecipeDetails(name, description, durationInMinutes, servings, steps),
+                details,
                 recipeIngredients,
-                user
+                isPublic,
+                user,
+                List.of()
+        );
+        return recipeRepository.save(recipe);
+    }
+
+    protected Recipe createAndSaveRecipe(RecipeId recipeId, RecipeDetails details, List<Ingredient> ingredients,
+                                         boolean isPublic, User user, List<Macro> macros) {
+        List<RecipeIngredient> recipeIngredients = ingredients.stream()
+                .map(ing -> new RecipeIngredient(ing, DEFAULT_QUANTITY, ing.defaultUnit()))
+                .toList();
+
+        Recipe recipe = new Recipe(
+                recipeId,
+                details,
+                recipeIngredients,
+                isPublic,
+                user,
+                macros == null ? List.of() : macros
         );
         return recipeRepository.save(recipe);
     }

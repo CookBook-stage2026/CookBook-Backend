@@ -1,7 +1,9 @@
 package be.xplore.cookbook.ai;
 
 import be.xplore.cookbook.ai.dto.ImportedRecipeAiDto;
+import be.xplore.cookbook.ai.dto.SuggestedMacros;
 import be.xplore.cookbook.core.port.recipe.SuggestedRecipeEnhancement;
+import be.xplore.cookbook.core.port.recipe.SuggestedRecipeForServings;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 
@@ -14,4 +16,12 @@ public interface RecipeAiService {
     @SystemMessage(fromResource = "prompts/import-recipe.txt")
     @UserMessage("Extract and translate the recipe from this text: {{it}}")
     ImportedRecipeAiDto importFromUrl(String url);
+
+    @SystemMessage(fromResource = "prompts/generate-recipe-macros.txt")
+    @UserMessage("Generate macros for this recipe: {{it}}")
+    SuggestedMacros generateMacros(String recipeJson);
+
+    @SystemMessage(fromResource = "prompts/generate-recipe-for-servings.txt")
+    @UserMessage("Adjust the recipe to match the new serving size: {{it}}")
+    SuggestedRecipeForServings generateRecipeForServings(String recipeJson);
 }

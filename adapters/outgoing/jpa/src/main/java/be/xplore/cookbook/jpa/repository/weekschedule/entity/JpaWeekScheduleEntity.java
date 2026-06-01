@@ -2,13 +2,11 @@ package be.xplore.cookbook.jpa.repository.weekschedule.entity;
 
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
 import be.xplore.cookbook.core.domain.weekschedule.WeekScheduleId;
-import be.xplore.cookbook.jpa.repository.user.entity.JpaUserEntity;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -24,9 +22,8 @@ public class JpaWeekScheduleEntity {
     @Id
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private JpaUserEntity user;
+    @Embedded
+    private JpaScheduleOwner owner;
 
     @OneToMany(
             mappedBy = "weekSchedule",
@@ -41,27 +38,23 @@ public class JpaWeekScheduleEntity {
     protected JpaWeekScheduleEntity() {
     }
 
-    public JpaWeekScheduleEntity(UUID id, JpaUserEntity user, LocalDate weekStartDate,
-                                 List<JpaDayScheduleEntity> daySchedules) {
-        this.id = id;
-        this.daySchedules = daySchedules;
-        this.user = user;
-        this.weekStartDate = weekStartDate;
-    }
-
     public WeekSchedule toDomain() {
-        return new WeekSchedule(new WeekScheduleId(id), user.toDomain(), weekStartDate,
+        return new WeekSchedule(
+                new WeekScheduleId(id),
+                owner.toDomain(),
+                weekStartDate,
                 daySchedules.stream()
-                .map(JpaDayScheduleEntity::toDomain).toList());
+                        .map(JpaDayScheduleEntity::toDomain)
+                        .toList()
+        );
     }
 
     public static JpaWeekScheduleEntity fromDomain(WeekSchedule schedule) {
-        JpaWeekScheduleEntity entity = new JpaWeekScheduleEntity(
-                schedule.id().id(),
-                JpaUserEntity.fromDomain(schedule.user()),
-                schedule.weekStartDate(),
-                new ArrayList<>()
-        );
+        JpaWeekScheduleEntity entity = new JpaWeekScheduleEntity();
+
+        entity.id = schedule.id().id();
+        entity.owner = JpaScheduleOwner.fromDomain(schedule.owner());
+        entity.weekStartDate = schedule.weekStartDate();
 
         schedule.dailyRecipes().forEach(day -> {
             JpaDayScheduleEntity dayEntity = JpaDayScheduleEntity.fromDomain(day, entity);

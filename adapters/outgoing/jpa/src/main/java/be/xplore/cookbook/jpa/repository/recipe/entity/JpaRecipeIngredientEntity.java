@@ -1,10 +1,13 @@
 package be.xplore.cookbook.jpa.repository.recipe.entity;
 
+import be.xplore.cookbook.core.domain.ingredient.Unit;
 import be.xplore.cookbook.core.domain.recipe.RecipeIngredient;
 import be.xplore.cookbook.jpa.repository.ingredient.entity.JpaIngredientEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -18,8 +21,12 @@ public class JpaRecipeIngredientEntity {
     @EmbeddedId
     private JpaRecipeIngredientId id;
 
-    @Column(name = "base_quantity", nullable = false)
+    @Column(nullable = false)
     private double baseQuantity;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Unit unit;
 
     @ManyToOne()
     @MapsId("recipeId")
@@ -43,12 +50,14 @@ public class JpaRecipeIngredientEntity {
         this.recipe = recipe;
         this.ingredient = ingredient;
         this.baseQuantity = recipeIngredient.baseQuantity();
+        this.unit = recipeIngredient.unit();
     }
 
     public RecipeIngredient toDomain() {
         return new RecipeIngredient(
-                ingredient.toDomainWithoutCategories(),
-                baseQuantity
+                ingredient.toDomainWithoutUser(),
+                baseQuantity,
+                unit
         );
     }
 

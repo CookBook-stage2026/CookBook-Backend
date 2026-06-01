@@ -13,6 +13,7 @@ import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.jpa.repository.recipe.entity.JpaRecipeEntity;
 import be.xplore.cookbook.jpa.repository.user.entity.JpaUserEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -38,8 +39,14 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public Optional<Recipe> findById(RecipeId id, UserId userId) {
-        return jpaRecipeRepository.findByIdAndUserId(id.id(), userId.id())
+    public Optional<Recipe> findById(RecipeId id, User user) {
+        return jpaRecipeRepository.findByIdAndAccessibleByUser(id.id(), JpaUserEntity.fromDomain(user))
+                .map(JpaRecipeEntity::toDomain);
+    }
+
+    @Override
+    public Optional<Recipe> findOwnById(RecipeId id, User user) {
+        return jpaRecipeRepository.findByIdAndUserId(id.id(), user.id().id())
                 .map(JpaRecipeEntity::toDomain);
     }
 
@@ -47,6 +54,7 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     public PagedResult<RecipeSummary> findAllSummariesWithFilter(
             List<IngredientId> ingredientIds,
             UserPreferences preferences,
+            boolean includeAccessibleRecipes,
             User user,
             Paging paging
     ) {
@@ -61,13 +69,13 @@ public class RecipeRepositoryImpl implements RecipeRepository {
         List<Category> excludedCategories = preferences.excludedCategories();
         Pageable pageable = PageRequest.of(paging.page(), paging.size());
 
-        var page = jpaRecipeRepository.findAllSummariesWithFilterByCreatorId(
-                ingredientUuids,
-                excludedIngredientUuids,
-                excludedCategories,
-                JpaUserEntity.fromDomain(user),
-                pageable
-        );
+        JpaUserEntity jpaUser = JpaUserEntity.fromDomain(user);
+
+        Page<JpaRecipeEntity> page = includeAccessibleRecipes
+                ? jpaRecipeRepository.findAllSummariesWithFilterIncludingHousehold(
+                ingredientUuids, excludedIngredientUuids, excludedCategories, jpaUser, pageable)
+                : jpaRecipeRepository.findAllSummariesWithFilterOwnOnly(
+                ingredientUuids, excludedIngredientUuids, excludedCategories, jpaUser, pageable);
 
         return new PagedResult<>(
                 page.getContent().stream()
@@ -80,15 +88,51 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public List<RecipeSummary> querySummaries(Paging paging, User user, String query) {
+    public List<RecipeSummary> findAllSummariesByUserIds(List<UserId> userIds) {
+        return jpaRecipeRepository.findByUser_IdInAndIsPublicTrue(userIds.stream().map(UserId::id).toList()).stream()
+                .map(JpaRecipeEntity::toSummary)
+                .toList();
+    }
+
+    @Override
+    public List<RecipeSummary> queryPersonalSummaries(Paging paging, User user, String query) {
         Pageable pageable = PageRequest.of(paging.page(), paging.size());
 
-        return jpaRecipeRepository.searchByNamePrioritizingStartsWith(query, JpaUserEntity.fromDomain(user), pageable)
-                .stream().map(JpaRecipeEntity::toSummary).toList();
+        return jpaRecipeRepository
+                .searchOwnByNamePrioritizingStartsWith(query, JpaUserEntity.fromDomain(user), pageable)
+                .stream()
+                .map(JpaRecipeEntity::toSummary)
+                .toList();
+    }
+
+    @Override
+    public List<RecipeSummary> querySummaries(Paging paging, List<UserId> userIds, String query) {
+        Pageable pageable = PageRequest.of(paging.page(), paging.size());
+        List<UUID> userUuids = userIds.stream()
+                .map(UserId::id)
+                .toList();
+
+        return jpaRecipeRepository.searchByNamePrioritizingStartsWith(query, userUuids, pageable)
+                .stream()
+                .map(JpaRecipeEntity::toSummary)
+                .toList();
     }
 
     @Override
     public long count() {
         return jpaRecipeRepository.count();
+    }
+
+    @Override
+    public void delete(Recipe recipe) {
+        jpaRecipeRepository.delete(JpaRecipeEntity.fromDomain(recipe));
+    }
+
+    @Override
+    public List<Recipe> findRecipesContainingIngredient(IngredientId ingredientId) {
+        return jpaRecipeRepository.findRecipesContainingIngredient(ingredientId.id())
+                .stream()
+                .map(JpaRecipeEntity::toDomain)
+                .toList();
     }
 }

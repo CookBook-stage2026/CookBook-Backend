@@ -1,5 +1,7 @@
 package be.xplore.cookbook.core.port.recipe;
 
+import be.xplore.cookbook.core.domain.recipe.Macro;
+
 import java.util.List;
 
 public record ImportedRecipe(
@@ -8,7 +10,8 @@ public record ImportedRecipe(
         int durationInMinutes,
         int servings,
         List<String> steps,
-        List<ImportedIngredient> ingredients
+        List<ImportedIngredient> ingredients,
+        List<Macro> macros
 ) {
     public ImportedRecipe {
         if (title == null || title.isBlank()) {
@@ -19,6 +22,9 @@ public record ImportedRecipe(
         }
         if (ingredients == null || ingredients.isEmpty()) {
             throw new IllegalArgumentException("Scraped recipe must have at least one ingredient");
+        }
+        if (macros == null || macros.isEmpty()) {
+            throw new IllegalArgumentException("Scraped recipe must have at least one macro");
         }
         steps = List.copyOf(steps);
         ingredients = List.copyOf(ingredients);

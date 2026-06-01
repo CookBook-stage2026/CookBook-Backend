@@ -6,6 +6,7 @@ import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeIngredient;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.jpa.repository.ingredient.entity.JpaIngredientEntity;
+import be.xplore.cookbook.jpa.repository.ingredient.entity.JpaMacroEmbeddable;
 import be.xplore.cookbook.jpa.repository.user.entity.JpaUserEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -19,6 +20,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -58,34 +60,37 @@ public class JpaRecipeEntity {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<JpaRecipeIngredientEntity> ingredients = new HashSet<>();
 
+    @ElementCollection
+    @CollectionTable(
+            name = "recipe_macros",
+            joinColumns = @JoinColumn(name = "recipe_id")
+    )
+    private List<JpaMacroEmbeddable> macros = new ArrayList<>();
+
+    @Column(nullable = false)
+    private boolean isPublic;
+
     @ManyToOne
     private JpaUserEntity user;
 
     protected JpaRecipeEntity() {
     }
 
-    public JpaRecipeEntity(UUID id, String name, String description, int durationInMinutes,
-                           List<String> steps, int servings, JpaUserEntity user) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.durationInMinutes = durationInMinutes;
-        this.steps = steps;
-        this.servings = servings;
-        this.user = user;
-    }
-
     public static JpaRecipeEntity fromDomain(Recipe recipe) {
-        JpaRecipeEntity entity = new JpaRecipeEntity(
-                recipe.getId().id(),
-                recipe.getName(),
-                recipe.getDescription(),
-                recipe.getDurationInMinutes(),
-                recipe.getSteps(),
-                recipe.getServings(),
-                JpaUserEntity.fromDomain(recipe.getUser())
-        );
+        JpaRecipeEntity entity = new JpaRecipeEntity();
+
+        entity.id = recipe.getId().id();
+        entity.name = recipe.getName();
+        entity.description = recipe.getDescription();
+        entity.durationInMinutes = recipe.getDurationInMinutes();
+        entity.steps = recipe.getSteps();
+        entity.servings = recipe.getServings();
+        entity.isPublic = recipe.isPublic();
+        entity.user = JpaUserEntity.fromDomain(recipe.getUser());
+        entity.macros = recipe.getMacros().stream().map(JpaMacroEmbeddable::fromDomain).toList();
+
         recipe.getIngredients().forEach(entity::addIngredient);
+
         return entity;
     }
 
@@ -104,7 +109,9 @@ public class JpaRecipeEntity {
                         steps
                 ),
                 domainIngredients,
-                user.toDomain()
+                isPublic,
+                user.toDomain(),
+                macros != null ? macros.stream().map(JpaMacroEmbeddable::toDomain).toList() : List.of()
         );
     }
 
@@ -113,7 +120,8 @@ public class JpaRecipeEntity {
                 new RecipeId(id),
                 name,
                 description,
-                durationInMinutes
+                durationInMinutes,
+                user.toDomain()
         );
     }
 

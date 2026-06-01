@@ -3,7 +3,7 @@ package be.xplore.cookbook.config;
 import be.xplore.cookbook.config.properties.HouseholdInviteProperties;
 import be.xplore.cookbook.core.port.recipe.RecipeImportPort;
 import be.xplore.cookbook.core.port.recipe.RecipeSuggestionsPort;
-import be.xplore.cookbook.core.port.recipe.ScheduleSuggestionsPort;
+import be.xplore.cookbook.core.port.weekschedule.ScheduleSuggestionsPort;
 import be.xplore.cookbook.core.repository.HouseholdInviteRepository;
 import be.xplore.cookbook.core.repository.HouseholdRepository;
 import be.xplore.cookbook.core.repository.IngredientRepository;
@@ -11,13 +11,14 @@ import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserPreferenceRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
 import be.xplore.cookbook.core.repository.WeekScheduleRepository;
-import be.xplore.cookbook.core.service.HouseholdInviteService;
-import be.xplore.cookbook.core.service.HouseholdService;
-import be.xplore.cookbook.core.service.IngredientService;
-import be.xplore.cookbook.core.service.RecipeService;
-import be.xplore.cookbook.core.service.UserPreferenceService;
-import be.xplore.cookbook.core.service.UserService;
-import be.xplore.cookbook.core.service.WeekScheduleService;
+import be.xplore.cookbook.core.service.household.HouseholdInviteService;
+import be.xplore.cookbook.core.service.household.HouseholdService;
+import be.xplore.cookbook.core.service.ingredient.IngredientService;
+import be.xplore.cookbook.core.service.recipe.RecipeCommandService;
+import be.xplore.cookbook.core.service.recipe.RecipeQueryService;
+import be.xplore.cookbook.core.service.schedule.WeekScheduleService;
+import be.xplore.cookbook.core.service.user.UserPreferenceService;
+import be.xplore.cookbook.core.service.user.UserService;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,23 +31,41 @@ import java.time.Duration;
 public class AppConfig {
 
     @Bean
-    @Transactional(readOnly = true)
-    public IngredientService ingredientService(IngredientRepository ingredientRepository) {
-        return new IngredientService(ingredientRepository);
+    @Transactional
+    public IngredientService ingredientService(
+            IngredientRepository ingredientRepository,
+            UserRepository userRepository,
+            RecipeRepository recipeRepository
+    ) {
+        return new IngredientService(ingredientRepository, userRepository, recipeRepository);
+    }
+
+    @Bean
+    @Transactional
+    public RecipeCommandService recipeCommandService(
+            RecipeRepository recipeRepository,
+            IngredientRepository ingredientRepository,
+            UserRepository userRepository,
+            WeekScheduleRepository weekScheduleRepository,
+            RecipeImportPort recipeImportPort,
+            RecipeSuggestionsPort recipeSuggestionsPort
+    ) {
+        return new RecipeCommandService(recipeRepository, ingredientRepository, userRepository,
+                weekScheduleRepository, recipeImportPort, recipeSuggestionsPort);
     }
 
     @Bean
     @Transactional(readOnly = true)
-    public RecipeService recipeService(
+    public RecipeQueryService recipeQueryService(
             RecipeRepository recipeRepository,
             IngredientRepository ingredientRepository,
             UserRepository userRepository,
             UserPreferenceRepository userPreferenceRepository,
-            RecipeSuggestionsPort recipeSuggestionsPort,
-            RecipeImportPort recipeImportPort
+            HouseholdRepository householdRepository,
+            RecipeSuggestionsPort recipeSuggestionsPort
     ) {
-        return new RecipeService(recipeRepository, ingredientRepository, userRepository,
-                userPreferenceRepository, recipeSuggestionsPort, recipeImportPort);
+        return new RecipeQueryService(recipeRepository, ingredientRepository, userRepository, userPreferenceRepository,
+                householdRepository, recipeSuggestionsPort);
     }
 
     @Bean
@@ -74,19 +93,21 @@ public class AppConfig {
             UserRepository userRepository,
             RecipeRepository recipeRepository,
             UserPreferenceRepository userPreferenceRepository,
+            HouseholdRepository householdRepository,
             ScheduleSuggestionsPort scheduleSuggestionsPort
     ) {
         return new WeekScheduleService(weekScheduleRepository, userRepository, recipeRepository,
-                userPreferenceRepository, scheduleSuggestionsPort);
+                userPreferenceRepository, householdRepository, scheduleSuggestionsPort);
     }
 
     @Bean
     @Transactional(readOnly = true)
     public HouseholdService householdService(
             HouseholdRepository houseHoldRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            WeekScheduleRepository weekScheduleRepository
     ) {
-        return new HouseholdService(houseHoldRepository, userRepository);
+        return new HouseholdService(houseHoldRepository, userRepository, weekScheduleRepository);
     }
 
     @Bean
