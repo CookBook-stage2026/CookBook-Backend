@@ -10,6 +10,7 @@ import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.recipe.RecipeIngredient;
+import be.xplore.cookbook.core.domain.recipe.command.CalculateMacrosCommand;
 import be.xplore.cookbook.core.domain.recipe.command.ChangeVisibilityCommand;
 import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.DeleteRecipeCommand;
@@ -18,6 +19,7 @@ import be.xplore.cookbook.core.domain.recipe.command.IngredientWithQuantity;
 import be.xplore.cookbook.core.domain.recipe.command.UpdateRecipeCommand;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwnerType;
+import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
 import be.xplore.cookbook.core.port.recipe.ImportedIngredient;
 import be.xplore.cookbook.core.port.recipe.ImportedRecipe;
 import be.xplore.cookbook.core.port.recipe.RecipeImportPort;
@@ -69,9 +71,6 @@ public class RecipeCommandService {
                 List.of()
         );
 
-        List<Macro> macros = aiPort.generateMacros(recipe);
-        recipe.updateMacros(macros);
-
         return recipeRepository.save(recipe);
     }
 
@@ -92,8 +91,7 @@ public class RecipeCommandService {
 
         recipe.changeVisibility(command.isPublic());
 
-        List<Macro> macros = aiPort.generateMacros(recipe);
-        recipe.updateMacros(macros);
+        recipe.setMacros(List.of());
 
         recipeRepository.save(recipe);
     }
@@ -125,7 +123,7 @@ public class RecipeCommandService {
                 List.of()
         );
 
-        recipe.updateMacros(scraped.macros());
+        recipe.setMacros(scraped.macros());
 
         return recipeRepository.save(recipe);
     }
@@ -142,7 +140,14 @@ public class RecipeCommandService {
         recipeRepository.save(recipe);
 
         if (!command.isPublic()) {
-            scheduleRepository.deleteByRecipeIdAndOwnerType(recipe.getId(), ScheduleOwnerType.HOUSEHOLD);
+            List<WeekSchedule> schedules = new ArrayList<>(
+                    scheduleRepository.findAllByRecipeAndOwnerType(recipe.getId(), ScheduleOwnerType.HOUSEHOLD)
+            );
+
+            for (WeekSchedule schedule : schedules) {
+                schedule = schedule.removeByRecipeId(recipe.getId());
+                scheduleRepository.save(schedule);
+            }
         }
     }
 
@@ -153,10 +158,29 @@ public class RecipeCommandService {
         Recipe recipe = recipeRepository.findOwnById(command.recipeId(), user)
                 .orElseThrow(command.recipeId()::notFound);
 
-        scheduleRepository.deleteByRecipeIdAndOwnerType(recipe.getId(), ScheduleOwnerType.PERSONAL);
-        scheduleRepository.deleteByRecipeIdAndOwnerType(recipe.getId(), ScheduleOwnerType.HOUSEHOLD);
+        List<WeekSchedule> schedules = new ArrayList<>();
+        schedules.addAll(scheduleRepository.findAllByRecipeAndOwnerType(recipe.getId(), ScheduleOwnerType.HOUSEHOLD));
+        schedules.addAll(scheduleRepository.findAllByRecipeAndOwnerType(recipe.getId(), ScheduleOwnerType.PERSONAL));
+
+        for (WeekSchedule schedule : schedules) {
+            schedule = schedule.removeByRecipeId(recipe.getId());
+            scheduleRepository.save(schedule);
+        }
 
         recipeRepository.delete(recipe);
+    }
+
+    public Recipe calculateMacros(CalculateMacrosCommand command) {
+        User user = userRepository.findById(command.userId())
+                .orElseThrow(command.userId()::notFound);
+
+        Recipe recipe = recipeRepository.findOwnById(command.recipeId(), user)
+                .orElseThrow(command.recipeId()::notFound);
+
+        List<Macro> macros = aiPort.generateMacros(recipe);
+        recipe.setMacros(macros);
+
+        return recipeRepository.save(recipe);
     }
 
     private RecipeIngredient resolveRecipeIngredient(ImportedIngredient scraped, User user) {

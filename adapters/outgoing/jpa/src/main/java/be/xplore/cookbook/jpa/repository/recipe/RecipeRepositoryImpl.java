@@ -129,7 +129,10 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public void removeIngredient(IngredientId ingredientId) {
-        jpaRecipeRepository.deleteRecipeIngredientsByIngredientId(ingredientId.id());
+    public List<Recipe> findRecipesContainingIngredient(IngredientId ingredientId) {
+        return jpaRecipeRepository.findRecipesContainingIngredient(ingredientId.id())
+                .stream()
+                .map(JpaRecipeEntity::toDomain)
+                .toList();
     }
 }

@@ -11,11 +11,12 @@ import be.xplore.cookbook.core.domain.household.command.RemoveMemberFromHousehol
 import be.xplore.cookbook.core.domain.household.command.UpdateHouseholdByIdCommand;
 import be.xplore.cookbook.core.domain.household.exception.HouseholdNotFoundException;
 import be.xplore.cookbook.core.domain.user.User;
-import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
+import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
 import be.xplore.cookbook.core.repository.HouseholdRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
 import be.xplore.cookbook.core.repository.WeekScheduleRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class HouseholdService {
@@ -66,8 +67,14 @@ public class HouseholdService {
         boolean isRemoved = householdRepository.removeMember(command.householdId(), command.memberId());
 
         if (isRemoved) {
-            scheduleRepository.deleteAllScheduledRecipesFromUser(
-                    ScheduleOwner.forHousehold(household.id()), command.memberId());
+            List<WeekSchedule> schedules = new ArrayList<>(
+                    scheduleRepository.findAllByUserAndOwnerType(command.memberId(), household.id())
+            );
+
+            for (WeekSchedule schedule : schedules) {
+                schedule = schedule.removeByUserId(command.memberId());
+                scheduleRepository.save(schedule);
+            }
         }
     }
 

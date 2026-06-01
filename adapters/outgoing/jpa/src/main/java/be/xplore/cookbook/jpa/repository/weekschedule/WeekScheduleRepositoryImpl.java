@@ -1,5 +1,6 @@
 package be.xplore.cookbook.jpa.repository.weekschedule;
 
+import be.xplore.cookbook.core.domain.household.HouseholdId;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.weekschedule.ScheduleOwner;
@@ -9,7 +10,6 @@ import be.xplore.cookbook.core.domain.weekschedule.WeekScheduleId;
 import be.xplore.cookbook.core.repository.WeekScheduleRepository;
 import be.xplore.cookbook.jpa.repository.weekschedule.entity.JpaWeekScheduleEntity;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -69,14 +69,18 @@ public class WeekScheduleRepositoryImpl implements WeekScheduleRepository {
     }
 
     @Override
-    @Transactional
-    public void deleteAllScheduledRecipesFromUser(ScheduleOwner owner, UserId userId) {
-        scheduleRepository.deleteAllByOwnerAndRecipeUser(owner.ownerId(), userId.id());
+    public List<WeekSchedule> findAllByRecipeAndOwnerType(RecipeId recipeId, ScheduleOwnerType ownerType) {
+        return scheduleRepository.findAllByRecipeAndOwnerTypeWithDays(recipeId.id(), ownerType)
+                .stream()
+                .map(JpaWeekScheduleEntity::toDomain)
+                .toList();
     }
 
     @Override
-    @Transactional
-    public void deleteByRecipeIdAndOwnerType(RecipeId recipeId, ScheduleOwnerType ownerType) {
-        scheduleRepository.deleteByRecipeIdAndOwnerType(recipeId.id(), ownerType);
+    public List<WeekSchedule> findAllByUserAndOwnerType(UserId userId, HouseholdId householdId) {
+        return scheduleRepository.findAllByUserAndOwnerTypeWithDays(userId.id(), householdId.id())
+                .stream()
+                .map(JpaWeekScheduleEntity::toDomain)
+                .toList();
     }
 }

@@ -5,6 +5,7 @@ import be.xplore.cookbook.core.domain.ingredient.MacroType;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeDetails;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
+import be.xplore.cookbook.core.domain.recipe.command.CalculateMacrosCommand;
 import be.xplore.cookbook.core.domain.recipe.command.ChangeVisibilityCommand;
 import be.xplore.cookbook.core.domain.recipe.command.CreateRecipeCommand;
 import be.xplore.cookbook.core.domain.recipe.command.DeleteRecipeCommand;
@@ -177,6 +178,22 @@ public class RecipeController {
         return Arrays.stream(MacroType.values())
                 .map(MacroType::name)
                 .toList();
+    }
+
+    @PostMapping("/{id}/macros")
+    @Transactional
+    @ResponseStatus(HttpStatus.CREATED)
+    public RecipeDto calculateMacros(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID id
+    ) {
+        UserId userId = getUserIdFromJwt(jwt);
+
+        Recipe recipe = recipeCommandService.calculateMacros(
+                new CalculateMacrosCommand(new RecipeId(id), userId)
+        );
+
+        return RecipeDto.fromDomain(recipe, userId);
     }
 
     private UserId getUserIdFromJwt(Jwt jwt) {

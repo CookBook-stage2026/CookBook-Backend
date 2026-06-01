@@ -1,6 +1,8 @@
 package be.xplore.cookbook.core.domain.weekschedule;
 
 import be.xplore.cookbook.core.domain.recipe.Recipe;
+import be.xplore.cookbook.core.domain.recipe.RecipeId;
+import be.xplore.cookbook.core.domain.user.UserId;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -71,5 +73,21 @@ public record WeekSchedule(
                 throw new IllegalArgumentException("Duplicate day found: " + daySchedule.day());
             }
         }
+    }
+
+    public WeekSchedule removeByRecipeId(RecipeId recipeId) {
+        List<DaySchedule> updated = dailyRecipes.stream()
+                .filter(day -> !day.recipe().getId().equals(recipeId))
+                .toList();
+
+        return new WeekSchedule(id, owner, weekStartDate, updated);
+    }
+
+    public WeekSchedule removeByUserId(UserId userId) {
+        List<DaySchedule> updated = dailyRecipes.stream()
+                .filter(day -> !day.recipe().getUser().id().equals(userId))
+                .toList();
+
+        return new WeekSchedule(id, owner, weekStartDate, updated);
     }
 }

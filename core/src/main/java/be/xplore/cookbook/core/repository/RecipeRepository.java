@@ -33,5 +33,5 @@ public interface RecipeRepository {
 
     void delete(Recipe recipe);
 
-    void removeIngredient(IngredientId ingredientId);
+    List<Recipe> findRecipesContainingIngredient(IngredientId ingredientId);
 }

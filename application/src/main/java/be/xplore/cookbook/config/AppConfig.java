@@ -41,7 +41,7 @@ public class AppConfig {
     }
 
     @Bean
-    @Transactional(readOnly = true)
+    @Transactional
     public RecipeCommandService recipeCommandService(
             RecipeRepository recipeRepository,
             IngredientRepository ingredientRepository,

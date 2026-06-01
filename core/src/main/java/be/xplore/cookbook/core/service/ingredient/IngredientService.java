@@ -9,11 +9,14 @@ import be.xplore.cookbook.core.domain.ingredient.command.CreateIngredientCommand
 import be.xplore.cookbook.core.domain.ingredient.command.DeleteIngredientCommand;
 import be.xplore.cookbook.core.domain.ingredient.command.SearchIngredientsQuery;
 import be.xplore.cookbook.core.domain.ingredient.command.UpdateIngredientCommand;
+import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.repository.IngredientRepository;
 import be.xplore.cookbook.core.repository.RecipeRepository;
 import be.xplore.cookbook.core.repository.UserRepository;
+
+import java.util.List;
 
 public class IngredientService {
     private final IngredientRepository ingredientRepository;
@@ -73,7 +76,14 @@ public class IngredientService {
     public void deleteIngredient(DeleteIngredientCommand command) {
         Ingredient ingredient = getOwnedIngredient(command.userId(), command.ingredientId());
 
-        recipeRepository.removeIngredient(ingredient.id());
+        List<Recipe> recipes = recipeRepository.findRecipesContainingIngredient(ingredient.id());
+
+        for (Recipe recipe : recipes) {
+            recipe.removeIngredient(ingredient.id());
+            recipe.setMacros(List.of());
+
+            recipeRepository.save(recipe);
+        }
 
         ingredientRepository.delete(ingredient);
     }
