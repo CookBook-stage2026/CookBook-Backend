@@ -2,10 +2,12 @@ package be.xplore.cookbook.jpa.repository.recipe;
 
 import be.xplore.cookbook.core.common.PagedResult;
 import be.xplore.cookbook.core.common.Paging;
+import be.xplore.cookbook.core.common.SortDirection;
 import be.xplore.cookbook.core.domain.ingredient.Category;
 import be.xplore.cookbook.core.domain.ingredient.IngredientId;
 import be.xplore.cookbook.core.domain.recipe.Recipe;
 import be.xplore.cookbook.core.domain.recipe.RecipeId;
+import be.xplore.cookbook.core.domain.recipe.RecipeSortingOptions;
 import be.xplore.cookbook.core.domain.recipe.RecipeSummary;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserId;
@@ -16,6 +18,7 @@ import be.xplore.cookbook.jpa.repository.user.entity.JpaUserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -56,8 +59,14 @@ public class RecipeRepositoryImpl implements RecipeRepository {
             UserPreferences preferences,
             boolean includeAccessibleRecipes,
             User user,
-            Paging paging
+            Paging paging,
+            RecipeSortingOptions sortBy,
+            SortDirection sortDirection
     ) {
+        Sort.Direction direction = "descending".equalsIgnoreCase(sortDirection.name())
+                ?
+                Sort.Direction.DESC : Sort.Direction.ASC;
+
         List<UUID> ingredientUuids = ingredientIds.stream()
                 .map(IngredientId::id)
                 .toList();
@@ -67,7 +76,8 @@ public class RecipeRepositoryImpl implements RecipeRepository {
                 .toList();
 
         List<Category> excludedCategories = preferences.excludedCategories();
-        Pageable pageable = PageRequest.of(paging.page(), paging.size());
+        Pageable pageable = PageRequest.of(paging.page(), paging.size(),
+                Sort.by(direction, sortBy.getFieldName()));
 
         JpaUserEntity jpaUser = JpaUserEntity.fromDomain(user);
 

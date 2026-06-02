@@ -191,6 +191,13 @@ public abstract class BaseIntegrationTest {
                 List.of(ingredient), DEFAULT_IS_PUBLIC, user);
     }
 
+    protected Recipe createAndSaveRecipe(String name, int duration, User user) {
+        Ingredient ingredient = createAndSaveIngredient("Ingredient");
+        return createAndSaveRecipe(new RecipeDetails(name, DEFAULT_RECIPE_DESCRIPTION,
+                        duration, DEFAULT_SERVINGS, DEFAULT_STEPS),
+                List.of(ingredient), DEFAULT_IS_PUBLIC, user);
+    }
+
     protected Recipe createAndSaveRecipe(User user, Ingredient ingredient) {
         return createAndSaveRecipe(new RecipeDetails(DEFAULT_RECIPE_NAME, DEFAULT_RECIPE_DESCRIPTION,
                         DEFAULT_DURATION_IN_MINUTES, DEFAULT_SERVINGS, DEFAULT_STEPS),

@@ -1,5 +1,7 @@
 package be.xplore.cookbook.config;
 
+import be.xplore.cookbook.core.common.SortDirection;
+import be.xplore.cookbook.core.domain.recipe.RecipeSortingOptions;
 import be.xplore.cookbook.core.domain.user.User;
 import be.xplore.cookbook.core.domain.user.UserPreferences;
 import be.xplore.cookbook.core.domain.user.command.FindUserBySocialConnectionQuery;
@@ -179,7 +181,8 @@ class OAuth2LoginEndToEndTest {
         var requestBuilder = post("/api/recipes/filter")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(
-                        new RecipeSearchRequest(List.of(), true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE)))
+                        new RecipeSearchRequest(List.of(), true, true, DEFAULT_PAGE, DEFAULT_PAGE_SIZE,
+                                RecipeSortingOptions.NAME, SortDirection.ASCENDING)))
                 .cookie(accessTokenCookie);
 
         mockMvc.perform(requestBuilder)

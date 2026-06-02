@@ -50,7 +50,7 @@ public class PersonalWeekScheduleController {
         UserId userId = getUserIdFromJwt(jwt);
         return WeekScheduleDto.fromDomain(scheduleService.savePersonalWeekSchedule(
                 new CreatePersonalWeekScheduleCommand(dto.weekStartDate(), toDayEntries(dto.days()), userId)
-        ));
+        ), userId);
     }
 
     @GetMapping
@@ -62,7 +62,7 @@ public class PersonalWeekScheduleController {
         UserId userId = getUserIdFromJwt(jwt);
         return scheduleService.findPersonalSchedules(new FindPersonalWeekSchedulesQuery(from, to, userId))
                 .stream()
-                .map(WeekScheduleDto::fromDomain)
+                .map(weekSchedule -> WeekScheduleDto.fromDomain(weekSchedule, userId))
                 .toList();
     }
 
@@ -74,7 +74,7 @@ public class PersonalWeekScheduleController {
         UserId userId = getUserIdFromJwt(jwt);
         WeekSchedule schedule = scheduleService.suggestPersonalRecipeForDay(
                 new SuggestPersonalRecipeForDayQuery(date, userId));
-        return WeekScheduleDto.fromDomain(schedule);
+        return WeekScheduleDto.fromDomain(schedule, userId);
     }
 
     @GetMapping("/suggest/week/{weekStartDate}")
@@ -85,7 +85,7 @@ public class PersonalWeekScheduleController {
         UserId userId = getUserIdFromJwt(jwt);
         WeekSchedule schedule = scheduleService.suggestPersonalWeekSchedule(
                 new SuggestPersonalWeekScheduleQuery(weekStartDate, userId));
-        return WeekScheduleDto.fromDomain(schedule);
+        return WeekScheduleDto.fromDomain(schedule, userId);
     }
 
     private UserId getUserIdFromJwt(Jwt jwt) {

@@ -1,5 +1,7 @@
 package be.xplore.cookbook.rest.dto.recipe.request;
 
+import be.xplore.cookbook.core.common.SortDirection;
+import be.xplore.cookbook.core.domain.recipe.RecipeSortingOptions;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -10,6 +12,8 @@ public record RecipeSearchRequest(
         boolean shouldApplyPreferences,
         boolean includeAccessibleRecipes,
         int page,
-        int size
+        int size,
+        @NotNull RecipeSortingOptions sortBy,
+        @NotNull SortDirection sortDirection
 ) {
 }

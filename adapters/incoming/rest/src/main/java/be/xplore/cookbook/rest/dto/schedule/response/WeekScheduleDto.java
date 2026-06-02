@@ -1,5 +1,6 @@
 package be.xplore.cookbook.rest.dto.schedule.response;
 
+import be.xplore.cookbook.core.domain.user.UserId;
 import be.xplore.cookbook.core.domain.weekschedule.WeekSchedule;
 
 import java.time.LocalDate;
@@ -12,13 +13,13 @@ public record WeekScheduleDto(
         LocalDate weekEndDate,
         List<DayScheduleDto> days
 ) {
-    public static WeekScheduleDto fromDomain(WeekSchedule schedule) {
+    public static WeekScheduleDto fromDomain(WeekSchedule schedule, UserId loggedInUserId) {
         return new WeekScheduleDto(
                 schedule.id().id(),
                 schedule.weekStartDate(),
                 schedule.weekEndDate(),
                 schedule.dailyRecipes().stream()
-                        .map(DayScheduleDto::fromDomain)
+                        .map(daySchedule -> DayScheduleDto.fromDomain(daySchedule, loggedInUserId))
                         .toList()
         );
     }
