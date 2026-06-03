@@ -10,12 +10,14 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AiConfig {
+    private static final int MAXIMUM_TOOL_INVOCATIONS = 5;
+
     @Bean
     public RecipeAiService recipeAiService(ChatModel chatModel, ToolProvider toolProvider) {
         return AiServices.builder(RecipeAiService.class)
                 .chatModel(chatModel)
                 .toolProvider(toolProvider)
-                .maxSequentialToolsInvocations(2)
+                .maxSequentialToolsInvocations(MAXIMUM_TOOL_INVOCATIONS)
                 .build();
     }
 
