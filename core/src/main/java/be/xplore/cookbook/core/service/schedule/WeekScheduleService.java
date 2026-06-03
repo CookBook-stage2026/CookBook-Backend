@@ -106,7 +106,17 @@ public class WeekScheduleService {
 
         assertUserCanModifySchedule(existingSchedule, command.userId());
 
-        List<DaySchedule> daySchedules = extractDaySchedulesFromDayEntries(command.days(), user);
+        Map<DayOfWeek, DayScheduleId> existingIdsByDay = existingSchedule.dailyRecipes().stream()
+                .collect(Collectors.toMap(DaySchedule::day, DaySchedule::id));
+
+        List<DaySchedule> daySchedules = command.days().stream()
+                .map(entry -> {
+                    Recipe recipe = recipeRepository.findById(entry.recipeId(), user)
+                            .orElseThrow(entry.recipeId()::notFound);
+                    DayScheduleId id = existingIdsByDay.getOrDefault(entry.day(), DayScheduleId.create());
+                    return new DaySchedule(id, recipe, entry.day());
+                })
+                .toList();
 
         weekScheduleRepository.save(new WeekSchedule(
                 existingSchedule.id(),
