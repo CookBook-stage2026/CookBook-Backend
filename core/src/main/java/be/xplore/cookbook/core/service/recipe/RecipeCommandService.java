@@ -245,7 +245,8 @@ public class RecipeCommandService {
                     unmerged.add(mergeResult.getFirst());
                     merged = true;
                 } else {
-                    unmerged.add(existing);
+                    unmerged.addAll(mergeResult);
+                    merged = true;
                 }
             }
             if (!merged) {

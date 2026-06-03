@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Configuration
@@ -20,6 +21,7 @@ public class McpConfig {
     public McpClient firecrawlMcpClient(FirecrawlProperties properties) {
         StreamableHttpMcpTransport transport = new StreamableHttpMcpTransport.Builder()
                 .url(properties.mcpUrl())
+                .customHeaders(Map.of("Authorization", "Bearer " + properties.apiKey()))
                 .build();
 
         return new DefaultMcpClient.Builder()
