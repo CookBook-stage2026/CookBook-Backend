@@ -39,7 +39,8 @@ class FilterRecipesTests extends BaseIntegrationTest {
 
     @Override
     protected String[] getTablesToClear() {
-        return new String[]{"recipe_ingredients", "recipe_steps", "recipes", "ingredients", "users"};
+        return new String[]{"recipe_ingredients", "recipe_steps", "recipes", "ingredients", "users",
+                "user_excluded_ingredients", "user_excluded_categories"};
     }
 
     @Test

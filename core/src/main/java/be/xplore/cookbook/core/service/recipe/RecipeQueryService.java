@@ -69,7 +69,7 @@ public class RecipeQueryService {
 
         if (query.shouldApplyPreferences()) {
             preferences = preferenceRepository.findPreferences(user)
-                    .orElseThrow(query.userId()::notFound);
+                    .orElse(UserPreferences.empty(user));
         }
 
         return recipeRepository.findAllSummariesWithFilter(query.ingredientIds(), preferences,
