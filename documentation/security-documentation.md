@@ -7,9 +7,12 @@ Handling the lifecycle of JSON Web Tokens is split between token generation and 
 - Issuance (JwtService): Generates JWTs upon successful login. It encodes the internal User UUID as the subclaim and includes the user's email and name to minimize database lookups on the frontend. It uses Keys.hmacShaKeyFor with a Base64-decoded secret.- Cryptographic Implementation: Uses Keys.hmacShaKeyFor with a Base64-decoded secret.
 - Validation (NimbusJwtDecoder): Defined as a bean in SecurityConfig, this native Spring Security component automatically intercepts incoming API requests, validates the HmacSHA512 signature, and enforces expiration dates.
 
+#### Note
+The JwtDecoder also uses a custom validator that confirms the token's subject corresponds to an existing internal user; tokens for deleted/nonexistent users will be rejected.
+
 ### CookieAuthorizationRequestRepository
 A crucial component for maintaining statelessness during the initial OAuth2 redirect hop.
-- State Management: Temporarily stores the OAuth2AuthorizationRequest in an encrypted, signed HTTP-only cookie (oauth2_auth_request) instead of an HTTP Session.
+- State Management: Temporarily stores the OAuth2AuthorizationRequest in a signed (but not encrypted) HTTP-only cookie; the payload is base64-url-encoded JSON and protected by an HMAC-SHA512 signature.
 - Tamper Resistance: Serializes the request and appends an HmacSHA512 signature to the cookie payload. Upon deserialization, it verifies the signature to prevent tampering.
 
 ### OAuth2UserInfo
@@ -64,5 +67,7 @@ For this to work correctly, the following environment variables must be set:
 - spring.security.oauth2.client.registration.microsoft.client-secret
 - app.jwt.secret (Base64-encoded secret for signing JWTs)
 - app.cors.allowed-origins (Comma-separated list of allowed origins for CORS)
+- app.jwt.expiration-ms (Set the token lifetime and cookie max age)
+- frontend.url
 
 If any questions arise about the security implementation or if you need to add support for additional providers, you can contact me through [mail](mailto:r.vanmele2005@gmail.com).
