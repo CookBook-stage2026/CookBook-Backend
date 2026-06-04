@@ -1,4 +1,4 @@
-# CookBook — Backend
+# CookBook - Backend
 
 A recipe management application that lets users save and share recipes, plan weekly meal schedules, and get AI-powered suggestions for recipe enhancements and meal planning.
 
@@ -277,7 +277,7 @@ ghcr.io/cookbook-stage2026/cookbook-backend:latest   # main branch only
 
 ### Docker → AWS (Elastic Beanstalk)
 
-Runs on push to development only. Builds and pushes the image to Amazon ECR, zips the `deploy-files/` directory, uploads it to S3, creates a new Elastic Beanstalk application version, and updates `CookBook-env` with the new version.
+Runs on push to `development` only. Builds and pushes the image to Amazon ECR, zips the `deploy-files/` directory, uploads it to S3, creates a new Elastic Beanstalk application version, and updates `CookBook-env` with the new version.
 
 **Required GitHub secrets:**
 
