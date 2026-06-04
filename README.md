@@ -2,7 +2,7 @@
 
 A recipe management application that lets users save and share recipes, plan weekly meal schedules, and get AI-powered suggestions for recipe enhancements and meal planning.
 
-Built with Java 25, Spring Boot 4, PostgreSQL (production) / SQLite (development), and LangChain4j with Ollama / AWS Bedrock for AI features.
+Built with Java 25, Spring Boot 4, PostgreSQL (production) / SQLite (development), and LangChain4j with Ollama / AWS Bedrock for AI features. Firecrawl is used for scraping recipes and login providers are Google, Microsoft and GitHub.
 
 > **Frontend repository:** [https://github.com/CookBook-stage2026/CookBook-Frontend](https://github.com/CookBook-stage2026/CookBook-Frontend)  
 > **Security documentation:** [documentation/security-documentation.md](documentation/security-documentation.md)  
@@ -277,7 +277,7 @@ ghcr.io/cookbook-stage2026/cookbook-backend:latest   # main branch only
 
 ### Docker → AWS (Elastic Beanstalk)
 
-Runs on push only. Builds and pushes the image to Amazon ECR, zips the `deploy-files/` directory, uploads it to S3, creates a new Elastic Beanstalk application version, and updates `CookBook-env` with the new version.
+Runs on push to development only. Builds and pushes the image to Amazon ECR, zips the `deploy-files/` directory, uploads it to S3, creates a new Elastic Beanstalk application version, and updates `CookBook-env` with the new version.
 
 **Required GitHub secrets:**
 
@@ -293,7 +293,7 @@ Runs on push only. Builds and pushes the image to Amazon ECR, zips the `deploy-f
 
 ## Architecture Overview
 
-The project follows a **Hexagonal (Ports & Adapters)** architecture:
+The project follows a Hexagonal architecture:
 
 - **`core`** — Pure Java domain model and business logic. Zero framework dependencies. Defines repository and service ports (interfaces) that outer layers implement.
 - **`application`** — Spring Boot wiring: security configuration (OAuth2 + JWT), global exception handling, and bean definitions.
