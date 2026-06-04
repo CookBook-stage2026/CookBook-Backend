@@ -42,6 +42,14 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
+    public void update(Recipe recipe) {
+        JpaRecipeEntity entity = jpaRecipeRepository.findById(recipe.getId().id())
+                .orElseGet(JpaRecipeEntity::new);
+
+        entity.updateFromDomain(recipe);
+    }
+
+    @Override
     public Optional<Recipe> findById(RecipeId id, User user) {
         return jpaRecipeRepository.findByIdAndAccessibleByUser(id.id(), JpaUserEntity.fromDomain(user))
                 .map(JpaRecipeEntity::toDomain);

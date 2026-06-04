@@ -73,7 +73,7 @@ public class JpaRecipeEntity {
     @ManyToOne
     private JpaUserEntity user;
 
-    protected JpaRecipeEntity() {
+    public JpaRecipeEntity() {
     }
 
     public static JpaRecipeEntity fromDomain(Recipe recipe) {
@@ -113,6 +113,21 @@ public class JpaRecipeEntity {
                 user.toDomain(),
                 macros != null ? macros.stream().map(JpaMacroEmbeddable::toDomain).toList() : List.of()
         );
+    }
+
+    public void updateFromDomain(Recipe recipe) {
+        this.name = recipe.getName();
+        this.description = recipe.getDescription();
+        this.durationInMinutes = recipe.getDurationInMinutes();
+        this.steps = recipe.getSteps();
+        this.servings = recipe.getServings();
+        this.isPublic = recipe.isPublic();
+        this.macros = recipe.getMacros().stream()
+                .map(JpaMacroEmbeddable::fromDomain)
+                .toList();
+
+        this.ingredients.clear();
+        recipe.getIngredients().forEach(this::addIngredient);
     }
 
     public RecipeSummary toSummary() {

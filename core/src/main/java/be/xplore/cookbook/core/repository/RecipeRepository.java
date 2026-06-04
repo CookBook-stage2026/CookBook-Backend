@@ -18,6 +18,8 @@ import java.util.Optional;
 public interface RecipeRepository {
     Recipe save(Recipe recipe);
 
+    void update(Recipe recipe);
+
     Optional<Recipe> findById(RecipeId id, User user);
 
     PagedResult<RecipeSummary> findAllSummariesWithFilter(List<IngredientId> ingredientIds, UserPreferences preferences,

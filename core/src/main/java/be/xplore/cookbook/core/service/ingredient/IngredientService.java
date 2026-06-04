@@ -82,7 +82,7 @@ public class IngredientService {
             recipe.removeIngredient(ingredient.id());
             recipe.setMacros(List.of());
 
-            recipeRepository.save(recipe);
+            recipeRepository.update(recipe);
         }
 
         ingredientRepository.delete(ingredient);
