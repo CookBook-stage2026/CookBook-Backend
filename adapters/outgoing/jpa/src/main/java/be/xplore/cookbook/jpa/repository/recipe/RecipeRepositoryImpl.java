@@ -64,8 +64,8 @@ public class RecipeRepositoryImpl implements RecipeRepository {
             SortDirection sortDirection
     ) {
         Sort.Direction direction = "descending".equalsIgnoreCase(sortDirection.name())
-                ?
-                Sort.Direction.DESC : Sort.Direction.ASC;
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
 
         List<UUID> ingredientUuids = ingredientIds.stream()
                 .map(IngredientId::id)
