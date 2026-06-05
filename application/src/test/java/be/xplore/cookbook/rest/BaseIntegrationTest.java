@@ -41,6 +41,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
@@ -67,6 +68,9 @@ public abstract class BaseIntegrationTest {
     private static final List<String> DEFAULT_STEPS = List.of("This is step 1", "This is step 2");
     private static final boolean DEFAULT_IS_PUBLIC = true;
     private static final double DEFAULT_QUANTITY = 1.0;
+
+    @Autowired
+    private Clock clock;
 
     @Autowired
     private MockMvc mockMvc;
@@ -256,9 +260,10 @@ public abstract class BaseIntegrationTest {
     protected HouseholdInviteToken createExpiredHouseholdInvite(HouseholdId householdId, UserId createdBy) {
         String plainToken = InviteTokenGenerator.generate();
         String tokenHash = InviteTokenGenerator.hash(plainToken);
+        Instant now = Instant.now(clock);
         HouseholdInvite expired = new HouseholdInvite(
                 HouseholdInviteId.create(), householdId, tokenHash,
-                Instant.now().minus(Duration.ofMinutes(1)), Instant.now(), false, createdBy
+                now.minus(Duration.ofMinutes(1)), now, false, createdBy
         );
         return new HouseholdInviteToken(householdInviteRepository.save(expired), plainToken);
     }

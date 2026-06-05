@@ -204,7 +204,7 @@ public class WeekScheduleService {
     }
 
     private WeekSchedule suggestWeekSchedule(ScheduleOwner owner, LocalDate weekStartDate, UserId userId) {
-        if (weekStartDate.getDayOfWeek() != FIRST_DAY_OF_WEEK) {
+        if (!weekStartDate.getDayOfWeek().equals(FIRST_DAY_OF_WEEK)) {
             throw new IllegalArgumentException("Week start date must be a Monday");
         }
 
